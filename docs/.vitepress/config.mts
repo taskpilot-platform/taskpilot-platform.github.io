@@ -226,6 +226,15 @@ export default defineConfig({
 								items: [
 									{ text: "Sign In", link: "/docs/sequence/auth/sign-in" },
 									{ text: "Sign Up", link: "/docs/sequence/auth/sign-up" },
+									{
+										text: "Forgot Password",
+										link: "/docs/sequence/auth/forgot-password",
+									},
+									{
+										text: "Manage Profile",
+										link: "/docs/sequence/auth/manage-profile",
+									},
+									{ text: "UCS-Auth", link: "/docs/sequence/auth/UCS-auth" },
 								],
 							},
 							{
@@ -391,6 +400,10 @@ export default defineConfig({
 									{
 										text: "Edit Itinerary",
 										link: "/docs/sequence/manage-route-schedule/edit-itinerary",
+									},
+									{
+										text: "View Route Schedule",
+										link: "/docs/sequence/manage-route-schedule/view-route-schedule",
 									},
 									{
 										text: "UCS-Manage-Route-Schedule",
@@ -606,6 +619,40 @@ export default defineConfig({
 									},
 								],
 							},
+							{
+								text: "View Reports",
+								collapsed: true,
+								items: [
+									{
+										text: "View Reports",
+										link: "/docs/sequence/view-reports/view-reports",
+									},
+									{
+										text: "Revenue Report",
+										link: "/docs/sequence/view-reports/revenue-report",
+									},
+									{
+										text: "Booking Report",
+										link: "/docs/sequence/view-reports/booking-report",
+									},
+									{
+										text: "Popular Routes Report",
+										link: "/docs/sequence/view-reports/popular-routes-report",
+									},
+									{
+										text: "Customer Report",
+										link: "/docs/sequence/view-reports/customer-report",
+									},
+									{
+										text: "Export Report",
+										link: "/docs/sequence/view-reports/export-report",
+									},
+									{
+										text: "UCS-View-Reports",
+										link: "/docs/sequence/view-reports/UCS-view-reports",
+									},
+								],
+							},
 						],
 					},
 					{
@@ -815,6 +862,10 @@ export default defineConfig({
 									{
 										text: "Edit Itinerary",
 										link: "/docs/activity/manage-route-schedule/edit-itinerary",
+									},
+									{
+										text: "View Route Schedule",
+										link: "/docs/activity/manage-route-schedule/view-route-schedule",
 									},
 									{
 										text: "UCS-Manage-Route-Schedule",
@@ -1117,6 +1168,16 @@ export default defineConfig({
 									{
 										text: "View System Monitoring",
 										link: "/docs/activity/view-system-monitoring/view-system-monitoring",
+									},
+								],
+							},
+							{
+								text: "View Reports",
+								collapsed: true,
+								items: [
+									{
+										text: "View Reports",
+										link: "/docs/activity/view-reports/view-reports",
 									},
 								],
 							},
