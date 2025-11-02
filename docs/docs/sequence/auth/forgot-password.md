@@ -31,7 +31,6 @@ end
 
 FPV -> AC: Send password reset request
 activate AC
-activate AC
 AC -> US: Check user exists by email
 activate US
 US -> US: Query user and check is_lock
@@ -108,7 +107,6 @@ break Invalid password
 end
 
 RPV -> AC: Submit new password
-activate AC
 activate AC
 AC -> AC: Hash new password
 activate AC

@@ -15,7 +15,6 @@ U -> PV: Access profile settings
 activate PV
 PV -> UC: Request user profile
 activate UC
-activate UC
 UC -> UC: Verify JWT token
 activate UC
 deactivate UC
@@ -49,7 +48,6 @@ opt Update Personal Information
   U -> PV: Edit info and click "Save"
   activate PV
   PV -> UC: Submit updated data
-  activate UC
   activate UC
   UC -> UC: Validate data
   activate UC
@@ -127,7 +125,6 @@ opt Change Password
   end
 
   PV -> UC: Submit password change
-  activate UC
   activate UC
   UC -> US: Verify current password
   activate US
