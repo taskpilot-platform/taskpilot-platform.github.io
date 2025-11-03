@@ -2,39 +2,37 @@
 outline: [1, 5]
 ---
 
-# SOFTWARE REQUIREMENTS SPECIFICATION
-
-**Electricilies - Website for Selling Electronic Products**
+**TMS - Tourist Management System**
 
 ## Revision and Signoff Sheet
 
 ### Change Record
 
-| Author         | Version | Change reference         | Date       |
-| -------------- | ------- | ------------------------ | ---------- |
-| Buggilies Team | 0.1.0   | Initial project creation | 19/09/2025 |
+| Author   | Version | Change reference         | Date       |
+| -------- | ------- | ------------------------ | ---------- |
+| TMS Team | 0.1.0   | Initial project creation | 03/11/2025 |
 
 ### Reviewers
 
-| Name        | Company       | Version | Position        | Date       |
-| ----------- | ------------- | ------- | --------------- | ---------- |
-| Kevin Nitro | Electricilies | 0.1.0   | Project Manager | 20/09/2025 |
+| Name           | Company | Version | Position        | Date       |
+| -------------- | ------- | ------- | --------------- | ---------- |
+| Đặng Phú Thiện | TMS     | 0.1.0   | Project Manager | 03/11/2025 |
 
 ## 1. Introduction
 
 ### 1.1 Purpose
 
-This Software Requirements Specification document outlines the comprehensive requirements for the "Electricilies" e-commerce platform. This document serves as a detailed technical foundation for the development, deployment, and maintenance of the website across various platforms. It provides developers with clear guidelines for planning, task assignment, and implementation. Additionally, quality assurance teams will utilize this document to design test cases that align with specified requirements, ensuring the final product meets both quality standards and user expectations for an electronic products marketplace.
+This Software Requirements Specification document outlines the comprehensive requirements for the "TMS" (Tourist Management System) platform. This document serves as a detailed technical foundation for the development, deployment, and maintenance of the web application. It provides developers with clear guidelines for planning, task assignment, and implementation. Additionally, quality assurance teams will utilize this document to design test cases that align with specified requirements, ensuring the final product meets both quality standards and user expectations for an online tourism management system.
 
 ### 1.2 Scope
 
-This document encompasses the Electricilies e-commerce platform, which is designed to provide a comprehensive online marketplace for electronic products. The system supports multiple user roles including customers, staff, and administrators, each with distinct functionalities for browsing products, managing inventory, processing orders, and administering the platform.
+This document encompasses the TMS platform, which is designed to provide a comprehensive online tourism management system for booking trips, managing routes and attractions, and handling customer bookings. The system supports multiple user roles including customers, staff, and administrators, each with distinct functionalities for browsing trips, managing bookings, managing routes and attractions, and administering the platform.
 
 ### 1.3 Intended Audiences and Document Organization
 
 This document is intended for:
 
-- **Development Team**: Responsible for creating detailed designs, implementing features, and performing unit testing, integration testing, and system testing for the application.
+- **Development Team**: Responsible for creating detailed designs, implementing features, and performing unit testing, integration testing, and system testing for the application using ReactJS frontend and Java Spring Boot backend.
 - **Quality Assurance Team**: Responsible for conducting user acceptance testing sessions and validating system requirements.
 - **Documentation Team**: Responsible for creating user guides and help documentation for the application.
 - **Project Stakeholders**: Business owners and managers who need to understand system capabilities and requirements.
@@ -60,857 +58,2829 @@ Below are the main sections of this document:
 
 ### 2.1 Use Case Description
 
-#### 2.1.1 Authentication Use Cases
+#### 2.1.1 Authentication Use Case
 
-##### 2.1.1.1 Sign In Use Case
+##### 2.1.1.1 Sign In
 
 ###### Use Case Description
 
-| Name               | Sign In                                                                                   |
-| ------------------ | ----------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows users to authenticate and access the system using their credentials. |
-| **Actor**          | Customer, Staff, Admin                                                                    |
-| **Trigger**        | When the user clicks on the "Sign In" button on the login page.                           |
-| **Pre-condition**  | User's device must be connected to the internet. User account must exist in the system.   |
-| **Post-condition** | User is authenticated and redirected to the appropriate dashboard based on their role.    |
+| Name               | Sign In                                                                                                                                        |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows users to authenticate and access the TMS system using their credentials (username/email and password).                    |
+| **Actor**          | Customer, Staff, Administrator                                                                                                                 |
+| **Trigger**        | User navigates to TMS login page and clicks "Sign In" button after entering credentials.                                                       |
+| **Pre-condition**  | User's device must be connected to the internet. User must have an existing account with status "active" in the system. System is operational. |
+| **Post-condition** | User is successfully authenticated with valid JWT token, user session is created, and user is redirected to role-appropriate dashboard.        |
 
 ###### Sequence Flow
 
-[sequence-auth-sign-in](../sequence/auth/sign-in.html)
+[sequence-auth-sign-in](../sequence/auth/sign-in)
 
 ###### Activities Flow
 
-[activity-auth-sign-in](../activity/auth/sign-in.html)
+[activity-auth-sign-in](../activity/auth/sign-in)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                |
-| -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (1)      | BR1     | **Displaying Rules:** The system displays a "Sign In" screen with fields for username/email and password, along with options for "Remember Me" and "Forgot Password".                                                                                                                                                                                                                      |
-| (2)      | BR2     | **Validation Rules:** When user enters credentials, the system validates the input format using validateInput(username, password) method. The system checks: <br>- Username/email is not empty<br>- Password is not empty<br>- Email format is valid (if email is used)<br>If validation fails, display error message (Refer to MSG 1).                                                    |
-| (3)      | BR3     | **Authentication Rules:** System queries the ACCOUNT table in the database to verify credentials. Password is hashed and compared with stored hash. If authentication fails, increment failed login attempts counter. After 3 failed attempts, temporarily lock the account for 15 minutes (Refer to MSG 2).                                                                               |
-| (4)      | BR4     | **Session Management:** Upon successful authentication:<br>- Create user session with unique session ID<br>- Store session data including user ID, role, and login timestamp<br>- Generate JWT token for API authentication<br>- Redirect user to role-appropriate home page (Customer → Home, Staff → Product Management, Admin → Dashboard)<br>Display success message (Refer to MSG 3). |
+| Activity        | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| :-------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)             | BR1     | **Displaying Rules:** The system displays a "Sign In" screen with fields: [txtBoxUsername] for username/email input, [txtBoxPassword] for password input with password masking, [btnSignIn] button for form submission, [linkForgotPassword] hyperlink to password recovery, and [linkSignUp] hyperlink to registration. (Refer to "Sign In" view in "View Description" file)                                                                                                                                                                                                                                                                          |
+| (5)             | BR2     | **Validation Rules:** When user enters credentials and clicks [btnSignIn], system uses Text_change() method to validate input. System checks: If [txtBoxUsername].Text.isEmpty() = true OR [txtBoxPassword].Text.isEmpty() = true: System moves to step (4.1) to call displayErrorMessage("Username and password are required.") (Refer to MSG 1). Else: System proceeds to step (5) to send credentials to backend via signIn([txtBoxUsername].Text, [txtBoxPassword].Text) method.                                                                                                                                                                   |
+| (7), (8), (8.1) | BR3     | **Querying Rules:** System queries user account from table "User" (Refer to "User" table in "DB Sheet" file) with SQL: "SELECT user_id, username, email, password_hash, role, status, failed_login_attempts, last_failed_login FROM User WHERE (username = [txtBoxUsername].Text OR email = [txtBoxUsername].Text) AND status = 'active'". If COUNT = 0: System moves to step (8.1) to call displayErrorMessage("Invalid username/email or password.") (Refer to MSG 2), increment retry counter, and use case ends at step (5.2). Else: System moves to step (9) to verify password.                                                                  |
+| (9), (9.1)      | BR4     | **Validation Rules:** System verifies password by calling bcryptCompare([txtBoxPassword].Text, User.password_hash) method. If bcryptCompare() returns false: System moves to step (9.1) to execute SQL UPDATE: "UPDATE User SET failed_login_attempts = failed_login_attempts + 1, last_failed_login = CURRENT_TIMESTAMP WHERE user_id = [User.user_id]", call displayErrorMessage("Invalid username/email or password.") (Refer to MSG 2), and use case ends at step (5.2). Else: System resets failed_login_attempts to 0 and proceeds to step (10).                                                                                                 |
+| (10), (10.1)    | BR5     | **Validation Rules:** System checks account lock status by evaluating condition: If User.failed_login_attempts >= 5 AND (CURRENT_TIMESTAMP - User.last_failed_login) < INTERVAL '15 minutes': System moves to step (10.1) to call displayErrorMessage("Account temporarily locked due to multiple failed login attempts. Please try again after 15 minutes or contact support.") (Refer to MSG 3) and use case ends at step (5.2). Else: System proceeds to step (11) to generate JWT token.                                                                                                                                                           |
+| (14)            | BR6     | **Displaying Rules:** System generates JWT token with payload {user_id, username, role, exp: 24h} and stores in browser localStorage by calling localStorage.setItem('authToken', jwt_token). System redirects user to home page using redirectToHomePage(User.role) method. System displays "Home" view corresponding to user role: If User.role = 'CUSTOMER' → display "Customer Home" view; If User.role = 'STAFF' → display "Staff Dashboard" view; If User.role = 'ADMIN' → display "Admin Dashboard" view. (Refer to "Home" view in "View Description" file). System displays success message "Welcome back, [User.username]!" (Refer to MSG 4). |
 
-##### 2.1.1.2 Sign Up Use Case
+##### 2.1.1.2 Sign Up
 
 ###### Use Case Description
 
-| Name               | Sign Up for Customer                                                       |
-| ------------------ | -------------------------------------------------------------------------- |
-| **Description**    | This use case allows new users to create a customer account in the system. |
-| **Actor**          | Customer (Guest)                                                           |
-| **Trigger**        | When the user clicks on the "Sign Up" button on the login page.            |
-| **Pre-condition**  | User's device must be connected to the internet.                           |
-| **Post-condition** | New customer account is created and user is signed in to the system.       |
+| Name               | Sign Up                                                                                                                 |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows new users to create a Customer account in the TMS system by providing registration information.    |
+| **Actor**          | New User (becomes Customer after successful registration)                                                               |
+| **Trigger**        | User navigates to TMS registration page and clicks "Sign Up" button after filling in all required fields.               |
+| **Pre-condition**  | User's device must be connected to the internet. User does not have an existing account. System is operational.         |
+| **Post-condition** | New Customer account is created with status "active", and user is redirected to Sign In page with confirmation message. |
 
 ###### Sequence Flow
 
-[sequence-auth-sign-up](../sequence/auth/sign-up.html)
+[sequence-auth-sign-up](../sequence/auth/sign-up)
 
 ###### Activities Flow
 
-[activity-auth-sign-up](../activity/auth/sign-up.html)
+[activity-auth-sign-up](../activity/auth/sign-up)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                |
-| -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Displaying Rules:** The system displays a "Sign Up" screen with required fields: username, email, password, confirm password, full name, phone number, and optional fields for address details.                                                                                                                                                                                                          |
-| (2)      | BR2     | **Validation Rules:** System validates all input fields:<br>- Username: 4-20 characters, alphanumeric only<br>- Email: valid email format<br>- Password: minimum 8 characters, must contain uppercase, lowercase, number, and special character<br>- Confirm Password: must match password<br>- Phone: valid phone number format<br>If validation fails, display specific error messages (Refer to MSG 4). |
-| (3)      | BR3     | **Uniqueness Check:** System checks ACCOUNT table for existing username and email. If either exists, display error message (Refer to MSG 5 or MSG 6).                                                                                                                                                                                                                                                      |
-| (4)      | BR4     | **Account Creation:** System creates new account record:<br>- Hash password using bcrypt<br>- Generate unique customer ID<br>- Set account status to "Active"<br>- Set role to "Customer"<br>- Store creation timestamp<br>- Send verification email (optional)<br>Display success message and auto-login user (Refer to MSG 7).                                                                           |
+| Activity   | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| :--------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)        | BR7     | **Displaying Rules:** The system displays a "Sign Up" screen with registration form fields: [txtBoxUsername] for username (4-20 characters), [txtBoxEmail] for email address, [txtBoxFullName] for full name, [txtBoxPassword] for password with password strength indicator, [txtBoxConfirmPassword] for password confirmation, [chkBoxAgreeTerms] checkbox for terms acceptance, and [btnSignUp] button. (Refer to "Sign Up" view in "View Description" file)                                                                                                                                                                                          |
+| (5)        | BR8     | **Validation Rules:** When user enters registration data, system uses Text_change() method to validate in repeat loop: If [txtBoxUsername].Text.length < 4 OR > 20 OR invalid format → displayFieldError() (Refer to MSG 4). If [txtBoxEmail].Text.matches("[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}") = false → displayFieldError() (Refer to MSG 4). If [txtBoxFullName].Text.length < 2 OR > 100 → displayFieldError() (Refer to MSG 4). If [txtBoxPassword].Text.length < 8 OR missing uppercase/lowercase/digit → displayFieldError() (Refer to MSG 4). If [txtBoxConfirmPassword].Text != [txtBoxPassword].Text → displayFieldError() (Refer to MSG 4). |
+| (8), (8.1) | BR9     | **Querying Rules:** System queries table "User" (Refer to "User" table in "DB Sheet" file) with SQL: "SELECT COUNT(\*) FROM User WHERE username = [txtBoxUsername].Text OR email = [txtBoxEmail].Text". If COUNT > 0: System moves to step (8.1) to call displayErrorMessage("Username or email already exists.") (Refer to MSG 5) and use case ends. Else: System calls bcryptHash([txtBoxPassword].Text, saltRounds=10), generates user_id via generateUUID(), executes SQL INSERT to create new user with role='CUSTOMER' and cart record.                                                                                                            |
+| (17)       | BR10    | **Displaying Rules:** System calls redirectToSignInPage() to navigate to Sign In page and displays success message "Registration successful!" via displaySuccessMessage() (Refer to MSG 6). System sends welcome email to [txtBoxEmail].Text in background.                                                                                                                                                                                                                                                                                                                                                                                              |
 
-#### 2.1.2 Product Management Use Cases
-
-##### 2.1.2.1 Manage Product Use Case
+##### 2.1.1.3 Forgot Password
 
 ###### Use Case Description
 
-| Name               | Manage Product                                                                                                                             |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Description**    | This use case allows staff to choose various functions (Create, Read, Update, Delete, Search) to manage product information in the system. |
-| **Actor**          | Staff                                                                                                                                      |
-| **Trigger**        | When staff clicks on "Product Management" in the navigation menu.                                                                          |
-| **Pre-condition**  | Staff must be authenticated with appropriate permissions.                                                                                  |
-| **Post-condition** | Product information is updated according to the selected operation.                                                                        |
+| Name               | Forgot Password                                                                                                                    |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows users to reset their forgotten password using email verification process.                                     |
+| **Actor**          | Customer, Staff, Administrator (who forgot password)                                                                               |
+| **Trigger**        | User clicks "Forgot Password" link on Sign In page.                                                                                |
+| **Pre-condition**  | User's device must be connected to the internet. User must have registered account with valid email. Email service is operational. |
+| **Post-condition** | User receives password reset email with token, sets new password successfully, and can sign in with new credentials.               |
 
 ###### Sequence Flow
 
-[sequence-manage-product-manage-product](../sequence/manage-product/manage-product.html)
+[sequence-auth-forgot-password](../sequence/auth/forgot-password)
 
 ###### Activities Flow
 
-[activity-manage-product-manage-product](../activity/manage-product/manage-product.html)
+[activity-auth-forgot-password](../activity/auth/forgot-password)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                |
-| -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Displaying Rules:** System displays "Product Management" screen showing a grid/list of products with columns: Product ID, Name, Category, Price, Stock, Status, and Actions (Edit, Delete). Includes search bar and "Add New Product" button at the top. |
-| (2)      | BR2     | **Navigation Rules:** Staff can select one of the following operations:<br>- Add Product<br>- Update Product<br>- Delete Product<br>- Search Product<br>Only one operation can be active at a time.                                                        |
+| Activity             | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| :------------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)                  | BR11    | **Displaying Rules:** System displays "Forgot Password" view containing [txtBoxEmail], [btnSendResetLink], and help text explaining password reset process. (Refer to "Forgot Password" view in "View Description" file)                                                                                                                                                                                                                                                                                                                                                                               |
+| (5)                  | BR12    | **Validation Rules:** When user enters email in repeat loop (steps 3-5), method Text_change() validates [txtBoxEmail].Text matches email regex pattern. If [txtBoxEmail].isEmpty() = true OR format invalid → display error message (Refer to MSG 1), return to step (3). Else proceed to step (6).                                                                                                                                                                                                                                                                                                    |
+| (6) through (12)     | BR13    | **Querying Rules:** When user clicks [btnSendResetLink], system checks user existence with SQL: "SELECT user_id, email FROM User WHERE email = [txtBoxEmail].Text AND status = 'active'". If user not found → logWarningEvent(), display generic success message (Refer to MSG 7) to prevent email enumeration, end process. If user exists → generateResetToken() with 24h expiry, SQL: "INSERT INTO Password_Reset_Token (token, user_id, expires_at) VALUES (...)", sendResetEmail(), display generic success message (Refer to MSG 7).                                                             |
+| (15), (15.1), (15.2) | BR14    | **Querying Rules:** When user clicks reset link from email, system extracts token from URL parameter and validates with SQL: "SELECT token_id, user_id, expires_at, is_used FROM Password_Reset_Token WHERE token = [extractedToken]". System checks: if token not found OR expires_at < NOW() OR is_used = true → display "Invalid or expired token" error (Refer to MSG 8), end process. Else proceed to step (16). (Refer to "Password_Reset_Token" table in "DB Sheet" file)                                                                                                                       |
+| (16)                 | BR15    | **Displaying Rules:** System displays "Set New Password" form containing [txtBoxNewPassword], [txtBoxConfirmPassword], [btnResetPassword], [hiddenToken] field, and password requirements text (min 8 chars, uppercase, lowercase, number). (Refer to "Set New Password" view in "View Description" file)                                                                                                                                                                                                                                                                                              |
+| (19)                 | BR16    | **Validation Rules:** When user enters password in repeat loop (steps 17-19), method Text_change() validates [txtBoxNewPassword].Text and [txtBoxConfirmPassword].Text. Checks: if [txtBoxNewPassword].length < 8 OR not contains uppercase OR not contains lowercase OR not contains number OR [txtBoxNewPassword].Text ≠ [txtBoxConfirmPassword].Text → display error message (Refer to MSG 1), return to step (17). Else proceed to step (20).                                                                                                                                                      |
+| (20), (21), (22)     | BR17    | **Querying Rules:** When user clicks [btnResetPassword], system hashes new password using bcryptHash([txtBoxNewPassword].Text), updates database with SQL: "UPDATE User SET password_hash = [hashedPassword], updated_at = NOW() WHERE user_id = (SELECT user_id FROM Password_Reset_Token WHERE token = [hiddenToken])", marks token as used with SQL: "UPDATE Password_Reset_Token SET is_used = true WHERE token = [hiddenToken]", displays success "Password reset successful" (Refer to MSG 9), waits 3 seconds, then executes redirectToSignInPage(). (Refer to "User" table in "DB Sheet" file) |
 
-##### 2.1.2.2 Add Product Use Case
+##### 2.1.1.4 Manage Profile
 
 ###### Use Case Description
 
-| Name               | Add Product                                                               |
-| ------------------ | ------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to add new product information to the system.  |
-| **Actor**          | Staff                                                                     |
-| **Trigger**        | When staff clicks "Add New Product" button.                               |
-| **Pre-condition**  | Staff must be authenticated. Product categories must exist in the system. |
-| **Post-condition** | New product is created and displayed in the product list.                 |
+| Name               | Manage Profile                                                                                                                                             |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows authenticated users to view and update their personal profile information including full name, email, phone number, and avatar image. |
+| **Actor**          | Customer, Staff, Administrator                                                                                                                             |
+| **Trigger**        | User clicks "Profile" or "My Account" menu item from navigation bar.                                                                                       |
+| **Pre-condition**  | User's device must be connected to the internet. User must be signed in with valid active session.                                                         |
+| **Post-condition** | User's profile information is updated in system, changes are saved to database, and success confirmation is displayed to user.                             |
 
 ###### Sequence Flow
 
-[sequence-manage-product-add-product](../sequence/manage-product/add-product.html)
+[sequence-auth-manage-profile](../sequence/auth/manage-profile)
 
 ###### Activities Flow
 
-[activity-manage-product-add-product](../activity/manage-product/add-product.html)
+[activity-auth-manage-profile](../activity/auth/manage-profile)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                         |
-| -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Displaying Rules:** System displays "Product Detail" form with fields:<br>- Product Name (required)<br>- Category (dropdown, required)<br>- Brand (required)<br>- Price (required, numeric)<br>- Stock Quantity (required, integer)<br>- Description (rich text editor)<br>- Specifications (key-value pairs)<br>- Product Images (multiple upload)<br>- Status (Active/Inactive) |
-| (2)      | BR2     | **Validation Rules:** System validates inputs in real-time:<br>- Product Name: not empty, max 200 characters<br>- Price: positive number, max 2 decimal places<br>- Stock: non-negative integer<br>- Images: max 5 images, each max 5MB, formats: JPG, PNG, WebP<br>If validation fails, display error message (Refer to MSG 1 or MSG 8).                                           |
-| (3)      | BR3     | **Data Storage:** Upon clicking "Save":<br>- Generate unique product ID<br>- Process and optimize product images<br>- Store product data in PRODUCT table<br>- Store specifications in PRODUCTSPECIFICATION table<br>- Create initial inventory record in INVENTORY table<br>- Log creation action in audit trail<br>Display success message (Refer to MSG 7).                      |
+| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| :----------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1)               | BR19    | **Validation Rules:** When user accesses profile settings, system verifies JWT token from localStorage with verifyJWT(). If token invalid OR expired OR not found → display error "Session expired. Please sign in again." (Refer to MSG 10), execute redirectToSignInPage(), end process at step (2.2).                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| (3)                      | BR20    | **Querying Rules:** System queries user data from table "User" with SQL: "SELECT user_id, username, email, full_name, phone_number, avatar_url, created_at FROM User WHERE user_id = [CurrentUser.user_id] AND status = 'active'". Stores result in [CurrentUserData] object. (Refer to "User" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| (4)                      | BR21    | **Displaying Rules:** System displays "Manage Profile" view containing two tabs: [tabUpdateInfo] with [txtBoxFullName], [txtBoxEmail], [txtBoxPhoneNumber], [fileUploadAvatar], [btnSave]; and [tabChangePassword] with [txtBoxCurrentPassword], [txtBoxNewPassword], [txtBoxConfirmPassword], [btnChangePassword]. Fields populated with [CurrentUserData] values. (Refer to "Manage Profile" view in "View Description" file)                                                                                                                                                                                                                                                                                                                           |
+| (8)                      | BR22    | **Validation Rules:** When user edits fields in repeat loop and clicks [btnSave], system validates using Text_change(): if [txtBoxEmail].isEmpty() = true OR not matches email regex → error; if [txtBoxFullName].length < 2 OR [txtBoxFullName].length > 100 → error; if [txtBoxPhoneNumber].length < 10 OR [txtBoxPhoneNumber].length > 15 OR not matches digit regex → error. If any validation fails → display error (Refer to MSG 1), return to step (6). Else proceed to step (9).                                                                                                                                                                                                                                                                  |
+| (9), (9.1), (10), (11)   | BR23    | **Validation Rules:** System checks email uniqueness with SQL: "SELECT COUNT(\*) FROM User WHERE email = [txtBoxEmail].Text AND user_id != [CurrentUser.user_id]". If COUNT > 0 → display error "Email already registered" (Refer to MSG 11), return to step (6). Else system updates with SQL: "UPDATE User SET email = [txtBoxEmail].Text, full_name = [txtBoxFullName].Text, phone_number = [txtBoxPhoneNumber].Text, updated_at = NOW() WHERE user_id = [CurrentUser.user_id]", display success "Profile updated successfully" (Refer to MSG 12). If email changed → sendNotificationEmail(oldEmail, newEmail). (Refer to "User" table in "DB Sheet" file)                                                                                            |
+| (14)                     | BR24    | **Validation Rules:** When user enters passwords in repeat loop and clicks [btnChangePassword], system validates using Text_change(): if [txtBoxCurrentPassword].isEmpty() = true → error; if [txtBoxNewPassword].length < 8 OR not contains uppercase OR not contains lowercase OR not contains number → error; if [txtBoxNewPassword].Text ≠ [txtBoxConfirmPassword].Text → error. If any validation fails → display error (Refer to MSG 1), return to step (12). Else proceed to step (15).                                                                                                                                                                                                                                                            |
+| (15), (15.1), (16), (17) | BR25    | **Validation Rules:** System verifies current password with bcryptCompare([txtBoxCurrentPassword].Text, [CurrentUserData.password_hash]). If comparison returns false → display error "Incorrect current password" (Refer to MSG 13), return to step (12). Else system hashes new password with bcryptHash([txtBoxNewPassword].Text), then updates database with SQL: "UPDATE User SET password_hash = [hashedPassword], updated_at = NOW() WHERE user_id = [CurrentUser.user_id]", sends confirmation email sendPasswordChangeEmail([CurrentUserData.email]), displays success "Password changed successfully. Please sign in again." (Refer to MSG 14), executes clearJWTToken() and redirectToSignInPage(). (Refer to "User" table in "DB Sheet" file) |
 
-##### 2.1.2.3 Update Product Use Case
+#### 2.1.2 Browse Trips Use Case
+
+##### 2.1.2.1 View and Filter Available Trips
 
 ###### Use Case Description
 
-| Name               | Update Product                                                     |
-| ------------------ | ------------------------------------------------------------------ |
-| **Description**    | This use case allows staff to modify existing product information. |
-| **Actor**          | Staff                                                              |
-| **Trigger**        | When staff clicks the "Edit" icon next to a product.               |
-| **Pre-condition**  | Staff must be authenticated. Product must exist in the system.     |
-| **Post-condition** | Product information is updated in the system.                      |
+| Name               | View and Filter Available Trips                                                                                                                  |
+| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows users to browse and filter available trips in TMS system using various criteria such as destination, date range, and price. |
+| **Actor**          | Customer (primary), Staff, Administrator (viewing only)                                                                                          |
+| **Trigger**        | User navigates to "Browse Trips" page from navigation bar or after successful sign in (for Customer role).                                       |
+| **Pre-condition**  | User's device must be connected to the internet. System has at least one active trip in database. System is operational.                         |
+| **Post-condition** | User can view list of available trips matching filter criteria, with pagination, and can select trip to view details or add to cart/favorites.   |
 
 ###### Sequence Flow
 
-[sequence-manage-product-update-product](../sequence/manage-product/update-product.html)
+[sequence-browse-trips-view-and-filter](../sequence/browse-trips/view-and-filter-trips)
 
 ###### Activities Flow
 
-[activity-manage-product-update-product](../activity/manage-product/update-product.html)
+[activity-browse-trips-view-and-filter](../activity/browse-trips/view-and-filter-trips)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                       |
-| -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Data Retrieval:** System queries PRODUCT table with productID and retrieves:<br>- Basic product information<br>- Associated specifications<br>- Product images<br>- Current inventory levels<br>- Review statistics                                                                                                                                             |
-| (2)      | BR2     | **Displaying Rules:** System displays "Product Detail" form pre-filled with current product data. All fields are editable except Product ID and creation date.                                                                                                                                                                                                    |
-| (3)      | BR3     | **Validation Rules:** Same validation rules as Add Product (BR2 from 2.1.2.2).<br>Additionally:<br>- Cannot set stock to 0 if there are pending orders<br>- Cannot change category if product has active reviews                                                                                                                                                  |
-| (4)      | BR4     | **Update Processing:** Upon clicking "Save":<br>- Compare changes with original data<br>- Update modified fields in PRODUCT table<br>- Update specifications if changed<br>- Process new images and remove deleted ones<br>- Log update action with change history<br>- Notify affected systems (inventory, pricing)<br>Display success message (Refer to MSG 7). |
+| Activity   | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| :--------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)        | BR26    | **Displaying Rules:** System displays "Browse Trips" view containing [txtBoxKeyword], [datePickerStartDate], [datePickerEndDate], [sliderPriceRange], [dropdownDestination], [btnSearch], and list of available trips with pagination showing 12 trips per page. (Refer to "Browse Trips" view in "View Description" file)                                                                                                                                                                                                                                                                                                                               |
+| (5)        | BR27    | **Validation Rules:** When user submits search in repeat loop (steps 3-5), system validates search criteria using method Text_change(): if [txtBoxKeyword].Text.length > 0 AND [txtBoxKeyword].Text.length < 3 → error; if [datePickerStartDate].Value > [datePickerEndDate].Value → error; if [sliderPriceRange].Min > [sliderPriceRange].Max → error. If validation fails → display error message (Refer to MSG 15, MSG 16), return to step (3). Else proceed to query.                                                                                                                                                                                |
+| (5), (5.1) | BR28    | **Querying Rules:** System queries trips from table "Trip" with SQL: "SELECT trip_id, trip_name, destination, departure_date, return_date, price, available_slots, image_url FROM Trip WHERE status = 'active' AND ([txtBoxKeyword].Text = '' OR trip_name LIKE '%[txtBoxKeyword]%' OR destination LIKE '%[txtBoxKeyword]%') AND departure_date BETWEEN [datePickerStartDate] AND [datePickerEndDate] AND price BETWEEN [sliderPriceRange].Min AND [sliderPriceRange].Max ORDER BY departure_date ASC". If COUNT = 0 → display "No trips found matching your criteria" (Refer to MSG 17), return to step (3). (Refer to "Trip" table in "DB Sheet" file) |
+| (6)        | BR29    | **Displaying Rules:** System displays search results in grid layout with trip cards. Each card shows: [imgTripThumbnail], [lblTripName], [lblDestination], [lblDepartureDate], [lblPrice], [lblAvailableSlots], [btnViewDetails], [iconAddToFavorites], [btnAddToCart]. Results paginated with 12 items per page. (Refer to "Trip Card" component in "View Description" file)                                                                                                                                                                                                                                                                            |
 
-##### 2.1.2.4 Delete Product Use Case
+##### 2.1.2.2 View Trip Details
 
 ###### Use Case Description
 
-| Name               | Delete Product                                                              |
-| ------------------ | --------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to remove a product from the system.             |
-| **Actor**          | Staff                                                                       |
-| **Trigger**        | When staff clicks the "Delete" icon next to a product.                      |
-| **Pre-condition**  | Staff must be authenticated. Product must exist and have no pending orders. |
-| **Post-condition** | Product is removed from active listings (soft delete).                      |
+| Name               | View Trip Details                                                                                                                                                      |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows users to view comprehensive details of a specific trip including itinerary, route attractions, pricing, available slots, and booking information. |
+| **Actor**          | Customer (primary), Staff, Administrator                                                                                                                               |
+| **Trigger**        | User clicks "View Details" button on a trip card from Browse Trips page, or navigates directly via trip URL.                                                           |
+| **Pre-condition**  | User's device must be connected to the internet. Trip ID must exist in database. Trip status must be "active".                                                         |
+| **Post-condition** | User can view complete trip information and perform actions: add to cart, add to favorites, share trip, or proceed to booking.                                         |
 
 ###### Sequence Flow
 
-[sequence-manage-product-delete-product](../sequence/manage-product/delete-product.html)
+[sequence-browse-trips-view-trip-details](../sequence/browse-trips/view-trip-details)
 
 ###### Activities Flow
 
-[activity-manage-product-delete-product](../activity/manage-product/delete-product.html)
+[activity-browse-trips-view-trip-details](../activity/browse-trips/view-trip-details)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                            |
-| -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Confirmation Display:** System displays confirmation dialog with:<br>- Product name and ID<br>- Warning message about deletion<br>- Current stock and order information<br>- "Confirm" and "Cancel" buttons<br>(Refer to MSG 11)                                                                                     |
-| (2)      | BR2     | **Validation Rules:** Before deletion, system checks:<br>- No pending orders containing this product<br>- No active shopping carts containing this product<br>- Product is not part of active promotions<br>If constraints exist, display error (Refer to MSG 9).                                                      |
-| (3)      | BR3     | **Soft Delete Process:** Instead of physical deletion:<br>- Set product status to "Deleted"<br>- Set deletedAt timestamp<br>- Keep all related data (reviews, specifications)<br>- Remove from active search indexes<br>- Archive product images<br>- Log deletion action<br>Display success message (Refer to MSG 7). |
+| Activity   | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| :--------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3), (3.1) | BR30    | **Validation Rules:** When user selects trip in repeat loop (steps 2-3), system verifies trip exists and is active with SQL: "SELECT trip_id, status FROM Trip WHERE trip_id = [trip_id]". If COUNT = 0 OR status != 'active' → display error "Trip not found or no longer available" (Refer to MSG 18), return to step (2). Else proceed to step (4).                                                                                                                                                                                                                                                                                                                                                                                  |
+| (4)        | BR31    | **Querying Rules:** System queries full trip details from table "Trip" with SQL: "SELECT t.\*, r.route_name, r.description as route_description, GROUP_CONCAT(a.attraction_name) as attractions FROM Trip t JOIN Route r ON t.route_id = r.route_id LEFT JOIN Route_Attraction ra ON r.route_id = ra.route_id LEFT JOIN Attraction a ON ra.attraction_id = a.attraction_id WHERE t.trip_id = [trip_id] GROUP BY t.trip_id". System displays "Trip Details" view showing: [imgTripGallery], [lblTripName], [lblDestination], [lblDepartureDate], [lblReturnDate], [lblPrice], [lblAvailableSlots], [txtRouteDescription], [listAttractions], [btnAddToCart], [btnAddToFavorites], [btnShare]. (Refer to "Trip" table in "DB Sheet" file) |
 
-##### 2.1.2.5 Search Product Use Case
+#### 2.1.3 Adjust Cart Use Case
+
+##### 2.1.3.1 Add Trip to Cart
 
 ###### Use Case Description
 
-| Name               | Search Product                                                            |
-| ------------------ | ------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to search for products using various criteria. |
-| **Actor**          | Staff                                                                     |
-| **Trigger**        | When staff enters text in the search box or applies filters.              |
-| **Pre-condition**  | Staff must be authenticated.                                              |
-| **Post-condition** | Product list is filtered according to search criteria.                    |
+| Name               | Add Trip to Cart                                                                                                                               |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows authenticated users to add a selected trip to their shopping cart for future booking.                                     |
+| **Actor**          | Customer (must be signed in)                                                                                                                   |
+| **Trigger**        | User clicks "Add to Cart" button on trip card (Browse Trips page) or trip details page.                                                        |
+| **Pre-condition**  | User must be signed in with active session. Trip must exist and have status "active". Trip must have available_slots > 0.                      |
+| **Post-condition** | Trip is added to user's cart, cart item count is updated, success message is displayed, and user can continue browsing or proceed to checkout. |
 
 ###### Sequence Flow
 
-[sequence-manage-product-search-product](../sequence/manage-product/search-product.html)
+[sequence-adjust-cart-add-trip-to-cart](../sequence/adjust-cart/add-trip-to-cart)
 
 ###### Activities Flow
 
-[activity-manage-product-search-product](../activity/manage-product/search-product.html)
+[activity-adjust-cart-add-trip-to-cart](../activity/adjust-cart/add-trip-to-cart)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                            |
-| -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (1)      | BR1     | **Search Interface:** System provides search capabilities including:<br>- Text search box (searches name, description, SKU)<br>- Category filter (dropdown)<br>- Price range filter (min-max)<br>- Stock status filter (In Stock, Low Stock, Out of Stock)<br>- Status filter (Active, Inactive, Deleted)<br>- Sort options (Name, Price, Stock, Date) |
-| (2)      | BR2     | **Search Processing:** System executes search query:<br>- Combines all active filters with AND logic<br>- Uses LIKE operator for text search<br>- Searches across PRODUCT table and related tables<br>- Returns results sorted by relevance or selected sort order<br>- Implements pagination (20 items per page)                                      |
-| (3)      | BR3     | **Result Display:** System updates product list showing:<br>- Matching products with highlighting of search terms<br>- Total result count<br>- Active filters displayed as removable chips<br>- Option to clear all filters<br>- Message if no results found                                                                                           |
+| Activity         | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| :--------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3), (3.1)       | BR33    | **Validation Rules:** When user clicks [btnAddToCart] at step (2), system verifies JWT token from localStorage with verifyJWT(). If token invalid OR not found → display error "Please sign in to add trips to cart" (Refer to MSG 19), execute redirectToSignInPage() at step (3.1), user performs login at step (3.2). Else proceed to step (4).                                                                                                                                                                                                                                                                 |
+| (5)              | BR34    | **Displaying Rules:** System calls getOrCreateCart([user_id]) to retrieve or initialize cart, then displays "Add to Cart" modal containing [lblTripName], [lblPrice], [numericUpDownQuantity] with default value 1, [lblAvailableSeats], [btnConfirm], [btnCancel]. (Refer to "Add to Cart Form" view in "View Description" file)                                                                                                                                                                                                                                                                                  |
+| (8), (9), (10)   | BR35    | **Validation Rules:** When user enters quantity in repeat loop (steps 6-10) and clicks [btnConfirm], system validates: if [numericUpDownQuantity].Value < 1 OR [numericUpDownQuantity].Value > 20 → display error "Quantity must be between 1 and 20" (Refer to MSG 20), return to step (6). System queries available seats with SQL: "SELECT available_slots FROM Trip WHERE trip_id = [trip_id]". If [numericUpDownQuantity].Value > available_slots → display error "Insufficient seats available" (Refer to MSG 21), return to step (6). Else proceed to step (11). (Refer to "Trip" table in "DB Sheet" file) |
+| (11), (12), (13) | BR36    | **Querying Rules:** System checks if trip exists in cart with SQL: "SELECT cart_item_id, quantity FROM Cart_Item WHERE cart_id = [cart_id] AND trip_id = [trip_id]". If COUNT > 0 → update with SQL: "UPDATE Cart_Item SET quantity = quantity + [numericUpDownQuantity].Value, updated_at = NOW() WHERE cart_item_id = [cart_item_id]" at step (12). Else insert with SQL: "INSERT INTO Cart_Item (cart_id, trip_id, quantity, price, created_at) VALUES ([cart_id], [trip_id], [numericUpDownQuantity].Value, [trip_price], NOW())" at step (13). (Refer to "Cart_Item" table in "DB Sheet" file)                |
+| (14), (15)       | BR37    | **Displaying Rules:** System displays success notification showing trip name and quantity "Added [numericUpDownQuantity].Value x [lblTripName] to cart" (Refer to MSG 22), closes modal, updates [badgeCartCount] icon with new cart item count using getCartItemCount([cart_id]).                                                                                                                                                                                                                                                                                                                                 |
 
-#### 2.1.3 User Management Use Cases
-
-##### 2.1.3.1 Manage User Use Case
+##### 2.1.3.2 Remove Trip from Cart
 
 ###### Use Case Description
 
-| Name               | Manage User                                                             |
-| ------------------ | ----------------------------------------------------------------------- |
-| **Description**    | This use case allows staff/admin to manage user accounts in the system. |
-| **Actor**          | Staff, Admin                                                            |
-| **Trigger**        | When staff/admin clicks on "User Management" in the admin panel.        |
-| **Pre-condition**  | User must be authenticated with appropriate administrative permissions. |
-| **Post-condition** | User information is updated according to the selected operation.        |
+| Name               | Remove Trip from Cart                                                                                                     |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------ |
+| **Description**    | This use case allows authenticated users to remove a trip from their shopping cart.                                       |
+| **Actor**          | Customer (must be signed in)                                                                                              |
+| **Trigger**        | User clicks "Remove" or trash icon button on a trip item in cart view.                                                    |
+| **Pre-condition**  | User must be signed in. Trip must exist in user's cart. Cart item must have valid cart_item_id.                           |
+| **Post-condition** | Trip is removed from cart, cart item count is updated, cart total is recalculated, and confirmation message is displayed. |
 
 ###### Sequence Flow
 
-[sequence-manage-user-manage-user](../sequence/manage-user/manage-user.html)
+[sequence-adjust-cart-remove-trip-from-cart](../sequence/adjust-cart/remove-trip-from-cart)
 
 ###### Activities Flow
 
-[activity-manage-user-manage-user](../activity/manage-user/manage-user.html)
+[activity-adjust-cart-remove-trip-from-cart](../activity/adjust-cart/remove-trip-from-cart)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                            |
-| -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Displaying Rules:** System displays "User Management" screen with:<br>- List of users showing: ID, Username, Email, Role, Status, Registration Date<br>- Search and filter options<br>- Action buttons based on permissions:<br> _ Staff can: View Customer details, Delete Customer, View Reports<br> _ Admin can: All Staff actions plus Promote Customer, Promote Staff, Demote Staff, Demote Admin, Delete Staff |
-| (2)      | BR2     | **Permission Rules:** System enforces role-based access:<br>- Admin has full access to all operations<br>- Staff has limited access (cannot modify other staff/admin accounts)<br>- Operations are disabled/hidden based on current user's role                                                                                                                                                                        |
+| Activity                         | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| :------------------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)                              | BR38    | **Querying Rules:** When user clicks [btnRemove] at step (1), system queries cart item details with SQL: "SELECT ci.cart_item_id, ci.quantity, t.trip_name, t.price, t.departure_date FROM Cart_Item ci JOIN Trip t ON ci.trip_id = t.trip_id WHERE ci.cart_item_id = [cart_item_id]". Stores in [selectedCartItem]. (Refer to "Cart_Item" and "Trip" tables in "DB Sheet" file)                                                 |
+| (3)                              | BR39    | **Displaying Rules:** System displays confirmation modal containing [lblConfirmMessage] "Remove [selectedCartItem.trip_name] from cart?", [lblTripDetails] showing quantity and price, [btnConfirmDelete], [btnCancel]. (Refer to "Remove Confirmation Dialog" in "View Description" file)                                                                                                                                       |
+| (4), (4.1), (4.2)                | BR40    | **Selecting Rules:** User clicks button in dialog. If user clicks [btnCancel] → close modal at step (4.1), end use case at step (4.2). If user clicks [btnConfirmDelete] → proceed to step (5).                                                                                                                                                                                                                                  |
+| (5)                              | BR41    | **Querying Rules:** System deletes cart item with SQL: "DELETE FROM Cart_Item WHERE cart_item_id = [cart_item_id]". (Refer to "Cart_Item" table in "DB Sheet" file)                                                                                                                                                                                                                                                              |
+| (6), (7), (8), (9), (9.1), (9.2) | BR42    | **Displaying Rules:** System displays success notification "Removed [selectedCartItem.trip_name] from cart" (Refer to MSG 23), removes item row from [listCartItems] UI, updates [lblTotalPrice] and [badgeCartCount]. System executes getCartItemCount([cart_id]). If COUNT = 0 → display empty cart message "Your cart is empty. Start exploring tours!" (Refer to MSG 24) at step (9.1), disable [btnCheckout] at step (9.2). |
 
-##### 2.1.3.2 Search User Use Case
+##### 2.1.3.3 Edit Trip Details in Cart
 
 ###### Use Case Description
 
-| Name               | Search User                                                            |
-| ------------------ | ---------------------------------------------------------------------- |
-| **Description**    | This use case allows staff/admin to search for user accounts.          |
-| **Actor**          | Staff, Admin                                                           |
-| **Trigger**        | When staff/admin enters search criteria in the user management screen. |
-| **Pre-condition**  | User must be authenticated with appropriate permissions.               |
-| **Post-condition** | User list is filtered according to search criteria.                    |
+| Name               | Edit Trip Details in Cart                                                                            |
+| :----------------- | :--------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows authenticated users to edit quantity of trips in their shopping cart.           |
+| **Actor**          | Customer (must be signed in)                                                                         |
+| **Trigger**        | User clicks "Edit" button on a trip item in cart view.                                               |
+| **Pre-condition**  | User must be signed in. Trip must exist in user's cart. Trip must still be valid and active.         |
+| **Post-condition** | Trip quantity is updated in cart, cart total is recalculated, and confirmation message is displayed. |
 
 ###### Sequence Flow
 
-[sequence-manage-user-search-user](../sequence/manage-user/search-user.html)
+[sequence-adjust-cart-edit-trip-details](../sequence/adjust-cart/edit-trip-details)
 
 ###### Activities Flow
 
-[activity-manage-user-search-user](../activity/manage-user/search-user.html)
+[activity-adjust-cart-edit-trip-details](../activity/adjust-cart/edit-trip-details)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                        |
-| -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Search Interface:** System provides comprehensive search with:<br>- Text search (username, email, full name)<br>- Role filter (Customer, Staff, Admin)<br>- Status filter (Active, Inactive, Suspended)<br>- Registration date range<br>- Sort options (Name, Email, Date, Role) |
-| (2)      | BR2     | **Search Execution:** System queries USER table:<br>- Uses full-text search for name and email fields<br>- Applies filters using WHERE clauses<br>- Returns paginated results (50 users per page)<br>- Highlights matching search terms in results                                 |
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                     |
+| :---------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)               | BR43    | **Querying Rules:** When user clicks [btnEdit] at step (1), system queries cart item with SQL: "SELECT ci.cart_item_id, ci.quantity, t.trip_name, t.available_slots, t.price, t.status FROM Cart_Item ci JOIN Trip t ON ci.trip_id = t.trip_id WHERE ci.cart_item_id = [cart_item_id]". Stores in [editCartItem]. (Refer to "Cart_Item" and "Trip" tables in "DB Sheet" file)                   |
+| (3), (3.1), (3.2) | BR44    | **Validation Rules:** System verifies trip still valid with checks: if [editCartItem.status] != 'active' OR [editCartItem.available_slots] = 0 → display warning "This trip is no longer available. Please remove from cart" (Refer to MSG 25), end use case at step (3.2). Else proceed to step (4).                                                                                           |
+| (4)               | BR45    | **Displaying Rules:** System displays "Edit Quantity" modal containing [lblTripName], [lblCurrentQuantity], [numericUpDownNewQuantity] with current value, [lblAvailableSeats] showing available slots, [lblTotalPrice] with auto-calculated price, [btnSave], [btnCancel]. (Refer to "Edit Trip Quantity Form" in "View Description" file)                                                     |
+| (8)               | BR46    | **Validation Rules:** When user clicks [btnSave] in repeat loop (steps 7-10), system validates at step (8): if [numericUpDownNewQuantity].Value < 1 OR [numericUpDownNewQuantity].Value > 20 → display error "Quantity must be between 1 and 20" (Refer to MSG 20), return to step (5). Else proceed to step (9).                                                                               |
+| (9), (10)         | BR47    | **Validation Rules:** System queries available seats with SQL: "SELECT available_slots FROM Trip WHERE trip_id = [editCartItem.trip_id]" at step (9). At step (10), if [numericUpDownNewQuantity].Value > available_slots → display error "Only [available_slots] seats available" (Refer to MSG 21), return to step (5). Else proceed to step (11). (Refer to "Trip" table in "DB Sheet" file) |
+| (11)              | BR48    | **Querying Rules:** System updates cart item with SQL: "UPDATE Cart_Item SET quantity = [numericUpDownNewQuantity].Value, updated_at = NOW() WHERE cart_item_id = [cart_item_id]". (Refer to "Cart_Item" table in "DB Sheet" file)                                                                                                                                                              |
+| (12), (13)        | BR49    | **Displaying Rules:** System displays success notification "Updated quantity to [numericUpDownNewQuantity].Value" (Refer to MSG 26), closes modal, updates [listCartItems] UI with new quantity, recalculates and updates [lblTotalPrice] on cart page at step (13).                                                                                                                            |
 
-##### 2.1.3.3 Delete Customer Use Case
+##### 2.1.3.4 View and Filter Trips in Cart
 
 ###### Use Case Description
 
-| Name               | Delete Customer                                               |
-| ------------------ | ------------------------------------------------------------- |
-| **Description**    | This use case allows staff/admin to delete customer accounts. |
-| **Actor**          | Staff, Admin                                                  |
-| **Trigger**        | When staff/admin clicks "Delete" next to a customer account.  |
-| **Pre-condition**  | User must be authenticated. Customer account must exist.      |
-| **Post-condition** | Customer account is deactivated or deleted from the system.   |
+| Name               | View and Filter Trips in Cart                                                                                       |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------ |
+| **Description**    | This use case allows authenticated users to view all trips in their cart and filter them by criteria.               |
+| **Actor**          | Customer (must be signed in)                                                                                        |
+| **Trigger**        | User clicks cart icon in navigation bar.                                                                            |
+| **Pre-condition**  | User must be signed in with valid session.                                                                          |
+| **Post-condition** | User views cart with all items, can filter items, and sees updated totals including subtotal, tax, and grand total. |
 
 ###### Sequence Flow
 
-[sequence-manage-user-delete-customer](../sequence/manage-user/delete-customer.html)
+[sequence-adjust-cart-view-and-filter-trips-in-cart](../sequence/adjust-cart/view-and-filter-trips-in-cart)
 
 ###### Activities Flow
 
-[activity-manage-user-delete-customer](../activity/manage-user/delete-customer.html)
+[activity-adjust-cart-view-and-filter-trips-in-cart](../activity/adjust-cart/view-and-filter-trips-in-cart)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                            |
-| -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (1)      | BR1     | **Constraint Check:** System validates:<br>- Customer has no active orders<br>- Customer has no pending payments<br>- Customer has no active disputes<br>If constraints exist, display warning message (Refer to MSG 9).                                                                                                                               |
-| (2)      | BR2     | **Deletion Process:** System performs soft delete:<br>- Set account status to "Deleted"<br>- Anonymize personal data (GDPR compliance)<br>- Retain order history (anonymized)<br>- Remove from active customer lists<br>- Send account deletion confirmation email<br>- Log deletion action with admin ID<br>Display success message (Refer to MSG 7). |
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR50    | **Querying Rules:** When user clicks [iconCart] at step (1), system queries cart items with SQL: "SELECT ci.cart_item_id, ci.quantity, t.trip_id, t.trip_name, t.destination, t.departure_date, t.price, t.image_url FROM Cart c JOIN Cart_Item ci ON c.cart_id = ci.cart_id JOIN Trip t ON ci.trip_id = t.trip_id WHERE c.user_id = [user_id]". If COUNT = 0 → display empty cart message "Your cart is empty. Start exploring tours!" (Refer to MSG 24) with [btnExploreTours] at step (2.1), end use case at step (2.2). (Refer to "Cart", "Cart_Item", "Trip" tables in "DB Sheet" file) |
+| (3)               | BR51    | **Displaying Rules:** System displays "Cart" view containing [listCartItems] with each item showing: [imgTripThumbnail], [lblTripName], [lblDestination], [lblDepartureDate], [lblQuantity], [lblPrice], [btnEdit], [btnRemove]; and [panelCartSummary] showing [lblSubtotal], [lblTax], [lblGrandTotal], [btnCheckout]. (Refer to "Cart" view in "View Description" file)                                                                                                                                                                                                                   |
+| (6), (6.1)        | BR52    | **Validation Rules:** When user submits filter in repeat loop (steps 4-6), system validates filter criteria: if [datePickerDepartureDateFrom].Value > [datePickerDepartureDateTo].Value → error. System filters [listCartItems] by destination, date range, price range. If filtered COUNT = 0 → display "No trips match your filters" (Refer to MSG 31) at step (6.1), return to step (4). Else proceed to step (7).                                                                                                                                                                        |
+| (7)               | BR53    | **Displaying Rules:** System updates [listCartItems] with filtered results, recalculates [lblSubtotal] = SUM(quantity × price), [lblTax] = subtotal × 0.1, [lblGrandTotal] = subtotal + tax, displays count "[filtered_count] of [total_count] trips in cart".                                                                                                                                                                                                                                                                                                                               |
 
-##### 2.1.3.4 View Customer Report Use Case
+#### 2.1.4 Adjust Favorite Trips Use Case
+
+##### 2.1.4.1 Toggle Favorite Trip
 
 ###### Use Case Description
 
-| Name               | View Customer Report                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------ |
-| **Description**    | This use case allows staff/admin to view detailed reports about customer activities. |
-| **Actor**          | Staff, Admin                                                                         |
-| **Trigger**        | When staff/admin selects a customer and chooses "View Report".                       |
-| **Pre-condition**  | User must be authenticated. Customer data must exist.                                |
-| **Post-condition** | Customer activity report is displayed.                                               |
+| Name               | Toggle Favorite Trip                                                                                           |
+| :----------------- | :------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows authenticated users to add or remove a trip from their favorites list.                    |
+| **Actor**          | Customer (must be signed in)                                                                                   |
+| **Trigger**        | User clicks heart icon on trip card or trip details page.                                                      |
+| **Pre-condition**  | User must be signed in with valid session. Trip must exist and be active.                                      |
+| **Post-condition** | Trip is added to or removed from favorites, heart icon is updated, and confirmation notification is displayed. |
 
 ###### Sequence Flow
 
-[sequence-manage-user-view-customer-report](../sequence/manage-user/view-customer-report.html)
+[sequence-adjust-favorite-trips-toggle-favorite-trip](../sequence/adjust-favorite-trips/toggle-favorite-trip)
 
 ###### Activities Flow
 
-[activity-manage-user-view-customer-report](../activity/manage-user/view-customer-report.html)
+[activity-adjust-favorite-trips-toggle-favorite-trip](../activity/adjust-favorite-trips/toggle-favorite-trip)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                 |
-| -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Report Options:** System displays report type selection:<br>- Purchase History (all orders, amounts, dates)<br>- Product Preferences (most viewed, purchased categories)<br>- Review Activity (all reviews, ratings)<br>- Cart Activity (abandoned carts, saved items)<br>- Time period selection (last 30 days, 90 days, year, all time) |
-| (2)      | BR2     | **Data Aggregation:** System queries multiple tables:<br>- CUSTOMER_REPORT for pre-aggregated data<br>- ORDER table for purchase history<br>- REVIEW table for review metrics<br>- CART table for shopping behavior<br>Calculates metrics: total spent, average order value, purchase frequency                                             |
-| (3)      | BR3     | **Report Display:** System presents report with:<br>- Summary statistics (charts and graphs)<br>- Detailed transaction list<br>- Export options (PDF, Excel)<br>- Date range filters<br>- Comparison with previous periods                                                                                                                  |
+| Activity            | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                    |
+| :------------------ | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2)   | BR54    | **Validation Rules:** When user clicks [iconHeart] at step (1), system verifies JWT token from localStorage with verifyJWT(). If token invalid OR not found → display "Please sign in to save favorites" (Refer to MSG 27), execute redirectToSignInPage() at step (2.1), user performs login at step (2.2). Else proceed to step (3).                                         |
+| (3)                 | BR55    | **Querying Rules:** System checks favorite status with SQL: "SELECT favorite_id FROM Favorite_Tour WHERE user_id = [user_id] AND trip_id = [trip_id]". If COUNT > 0 → proceed to step (4.1) for unfavorite. If COUNT = 0 → proceed to step (3.1) for favorite. (Refer to "Favorite_Tour" table in "DB Sheet" file)                                                             |
+| (3.1), (3.2), (3.3) | BR56    | **Querying Rules:** If trip not favorited, system inserts with SQL: "INSERT INTO Favorite_Tour (user_id, trip_id, created_at) VALUES ([user_id], [trip_id], NOW())" at step (3.1), updates [iconHeart] to filled state at step (3.2), displays success notification "Added to favorites!" (Refer to MSG 28) at step (3.3). (Refer to "Favorite_Tour" table in "DB Sheet" file) |
+| (4.1), (4.2), (4.3) | BR57    | **Querying Rules:** If trip already favorited, system deletes with SQL: "DELETE FROM Favorite_Tour WHERE user_id = [user_id] AND trip_id = [trip_id]" at step (4.1), updates [iconHeart] to empty state at step (4.2), displays notification "Removed from favorites" (Refer to MSG 29) at step (4.3). (Refer to "Favorite_Tour" table in "DB Sheet" file)                     |
 
-#### 2.1.5 Order Management Use Cases
-
-##### 2.1.5.1 View Order Use Case
+##### 2.1.4.2 View and Filter Favorite Trips
 
 ###### Use Case Description
 
-| Name               | View Order                                                              |
-| ------------------ | ----------------------------------------------------------------------- |
-| **Description**    | This use case allows customers to view their order history and details. |
-| **Actor**          | Customer                                                                |
-| **Trigger**        | When customer navigates to "My Orders" page.                            |
-| **Pre-condition**  | Customer must be signed in.                                             |
-| **Post-condition** | List of customer's orders is displayed.                                 |
+| Name               | View and Filter Favorite Trips                                                                                          |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows authenticated users to view their list of favorite trips and filter them by various criteria.      |
+| **Actor**          | Customer (must be signed in)                                                                                            |
+| **Trigger**        | User navigates to "My Favorites" page from navigation menu.                                                             |
+| **Pre-condition**  | User must be signed in with valid session.                                                                              |
+| **Post-condition** | User can view their favorite trips list with optional filters applied, and can access trip details or remove favorites. |
 
 ###### Sequence Flow
 
-[sequence-view-order-view-order](../sequence/view-order/view-order.html)
+[sequence-adjust-favorite-trips-view-and-filter-favorite-trips](../sequence/adjust-favorite-trips/view-and-filter-favorite-trips)
 
 ###### Activities Flow
 
-[activity-view-order-view-order](../activity/view-order/view-order.html)
+[activity-adjust-favorite-trips-view-and-filter-favorite-trips](../activity/adjust-favorite-trips/view-and-filter-favorite-trips)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                  |
-| -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Order List Display:** System shows orders with:<br>- Order number and date<br>- Order status (Pending, Processing, Shipped, Delivered, Cancelled)<br>- Total amount<br>- Number of items<br>- Thumbnail images of products<br>- Quick action buttons (View Details, Track, Review, Return)<br>- Default sort: newest first |
-| (2)      | BR2     | **Filtering Options:** System provides filters:<br>- Date range<br>- Order status<br>- Price range<br>- Search by product name or order number<br>- Time period (Last 30 days, 3 months, 6 months, Year, All)                                                                                                                |
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| :---------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR58    | **Querying Rules:** When user navigates to "My Favorites" at step (1), system queries favorite trips with SQL: "SELECT ft.favorite_id, t.trip_id, t.trip_name, t.destination, t.departure_date, t.price, t.available_slots, t.image_url FROM Favorite_Tour ft JOIN Trip t ON ft.trip_id = t.trip_id WHERE ft.user_id = [user_id] AND t.status = 'active' ORDER BY ft.created_at DESC". If COUNT = 0 → display "No favorite trips yet. Start exploring!" (Refer to MSG 30) with [btnExploreTours] at step (2.1), end use case at step (2.2). (Refer to "Favorite_Tour" and "Trip" tables in "DB Sheet" file) |
+| (3)               | BR59    | **Displaying Rules:** System displays "Favorite Trips" view containing [listFavoriteTrips] with each trip showing: [imgTripThumbnail], [lblTripName], [lblDestination], [lblDepartureDate], [lblPrice], [lblAvailableSlots], [iconHeartFilled], [btnViewDetails], [btnAddToCart]. Displays total count "[COUNT] favorite trips". (Refer to "Favorite Trips" view in "View Description" file)                                                                                                                                                                                                                |
+| (6), (6.1)        | BR60    | **Validation Rules:** When user submits filter in repeat loop (steps 4-6), system validates filter criteria: if [datePickerDepartureDateFrom].Value > [datePickerDepartureDateTo].Value → error. System filters [listFavoriteTrips] by [dropdownDestination], date range, [sliderPriceRange]. If filtered COUNT = 0 → display "No trips match your filters" (Refer to MSG 31) at step (6.1), return to step (4). Else proceed to step (7).                                                                                                                                                                  |
+| (7)               | BR61    | **Displaying Rules:** System updates [listFavoriteTrips] with filtered results, displays count "[filtered_count] of [total_count] favorite trips matching filters".                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
-##### 2.1.5.2 View Order Detail Use Case
+#### 2.1.5 Manage Personal Booking Use Case
+
+##### 2.1.5.1 View and Filter Personal Bookings
 
 ###### Use Case Description
 
-| Name               | View Order Detail                                                                   |
-| ------------------ | ----------------------------------------------------------------------------------- |
-| **Description**    | This use case allows customers to view detailed information about a specific order. |
+| Name               | View and Filter Personal Bookings                                                                                         |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------ |
+| **Description**    | This use case allows authenticated customers to view their booking history and filter bookings by various criteria.       |
+| **Actor**          | Customer (must be signed in)                                                                                              |
+| **Trigger**        | User clicks "My Bookings" in navigation menu.                                                                             |
+| **Pre-condition**  | User must be signed in with valid session.                                                                                |
+| **Post-condition** | User can view their bookings list with tabs (Upcoming/Past) and optional filters applied, and can access booking details. |
+
+###### Sequence Flow
+
+[sequence-manage-personal-booking-view-and-filter-personal-bookings](../sequence/manage-personal-booking/view-and-filter-personal-bookings)
+
+###### Activities Flow
+
+[activity-manage-personal-booking-view-and-filter-personal-bookings](../activity/manage-personal-booking/view-and-filter-personal-bookings)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| :---------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR62    | **Querying Rules:** When user clicks "My Bookings" at step (1), system queries bookings with SQL: "SELECT tb.booking_id, tb.booking_status, tb.total_amount, tb.created_at, t.trip_name, t.destination, t.departure_date FROM Tour_Booking tb JOIN Trip t ON tb.trip_id = t.trip_id WHERE tb.user_id = [user_id] ORDER BY tb.created_at DESC". If COUNT = 0 → display "No bookings yet. Start exploring tours!" (Refer to MSG 32) with [btnExploreTours] at step (2.1), end use case at step (2.2). (Refer to "Tour_Booking" and "Trip" tables in "DB Sheet" file) |
+| (3)               | BR63    | **Displaying Rules:** System displays "My Bookings" view containing [tabUpcoming], [tabPast], [tabCancelled] with bookings list; and filter panel with [dropdownStatus], [datePickerFrom], [datePickerTo], [txtBoxTripName], [btnApplyFilter]. Each booking shows: [lblBookingId], [lblTripName], [lblDestination], [lblDepartureDate], [lblStatus], [lblAmount], [btnViewDetails]. (Refer to "My Bookings" view in "View Description" file)                                                                                                                       |
+| (6), (6.1)        | BR64    | **Querying Rules:** When user clicks [btnApplyFilter] at step (5), system queries with SQL: "SELECT tb._, t._ FROM Tour_Booking tb JOIN Trip t ON tb.trip_id = t.trip_id WHERE tb.user_id = [user_id] AND ([dropdownStatus].Value = 'All' OR tb.booking_status = [dropdownStatus].Value) AND t.departure_date BETWEEN [datePickerFrom] AND [datePickerTo] AND ([txtBoxTripName].Text = '' OR t.trip_name LIKE '%[txtBoxTripName]%')". If COUNT = 0 → display "No bookings match your filters" (Refer to MSG 33) at step (6.1). Else proceed to step (7).           |
+| (7)               | BR65    | **Displaying Rules:** System updates booking list with filtered results, displays count "[COUNT] bookings found".                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+
+##### 2.1.5.2 Checkout Cart
+
+###### Use Case Description
+
+| Name               | Checkout Cart                                                                                                                      |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows authenticated customers to proceed from cart to create bookings by entering passenger details and confirming. |
+| **Actor**          | Customer (must be signed in)                                                                                                       |
+| **Trigger**        | User clicks "Checkout" button in cart page.                                                                                        |
+| **Pre-condition**  | User must be signed in. Cart must contain valid trip items. Trips must have available seats.                                       |
+| **Post-condition** | Bookings are created, invoices are generated, cart is cleared, and confirmation email is sent.                                     |
+
+###### Sequence Flow
+
+[sequence-manage-personal-booking-checkout-cart](../sequence/manage-personal-booking/checkout-cart)
+
+###### Activities Flow
+
+[activity-manage-personal-booking-checkout-cart](../activity/manage-personal-booking/checkout-cart)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (3), (3.1), (3.2) | BR66    | **Querying Rules:** When user clicks [btnCheckout] at step (2), system queries cart with SQL: "SELECT ci.\*, t.trip_name, t.available_slots, t.status FROM Cart_Item ci JOIN Trip t ON ci.trip_id = t.trip_id WHERE ci.cart_id = [cart_id]". If COUNT = 0 → display "Your cart is empty" (Refer to MSG 34) at step (3.1), end use case at step (3.2). (Refer to "Cart_Item" and "Trip" tables in "DB Sheet" file)                                                                                                                                                                                                                           |
+| (4), (4.1), (4.2) | BR67    | **Validation Rules:** System verifies all trips at step (4): checks if t.status = 'active' AND t.available_slots >= ci.quantity for each cart item. If any trip invalid → display invalid trips list showing trip names and issues (Refer to MSG 35) at step (4.1), prompt user to remove invalid trips or cancel at step (4.2), end use case. Else proceed to step (5).                                                                                                                                                                                                                                                                    |
+| (5)               | BR68    | **Displaying Rules:** System displays "Checkout" form containing: for each trip in cart [sectionTripDetails] with [lblTripName], [numericUpDownPassengerCount]; and [panelTravelerDetails] with fields [txtBoxFullName], [txtBoxIdNumber], [txtBoxPhoneNumber], [txtBoxEmail] for each passenger; [lblTotalAmount], [btnConfirmBooking], [btnCancel]. (Refer to "Checkout Form" view in "View Description" file)                                                                                                                                                                                                                            |
+| (8)               | BR69    | **Validation Rules:** When user clicks [btnConfirmBooking] in repeat loop (steps 6-8), system validates at step (8): for each traveler if [txtBoxFullName].isEmpty() = true OR [txtBoxFullName].length < 2 → error; if [txtBoxIdNumber].isEmpty() = true OR [txtBoxIdNumber].length < 9 → error; if [txtBoxPhoneNumber].isEmpty() = true OR not matches phone regex → error; if [txtBoxEmail].isEmpty() = true OR not matches email regex → error. If any validation fails → display error (Refer to MSG 36), return to step (6). Else proceed to step (9).                                                                                 |
+| (11), (12), (13)  | BR70    | **Querying Rules:** System starts database transaction: (11) creates bookings with SQL INSERT INTO Tour_Booking, inserts travelers with SQL INSERT INTO Booking_Traveler, generates invoices with SQL INSERT INTO Invoice; (12) updates trip seats with SQL: "UPDATE Trip SET available_slots = available_slots - [quantity]", deletes cart items with SQL: "DELETE FROM Cart_Item WHERE cart_id = [cart_id]"; (13) displays success "Bookings created successfully!" (Refer to MSG 37), sends confirmation email sendBookingConfirmationEmail([email]). (Refer to "Tour_Booking", "Booking_Traveler", "Invoice" tables in "DB Sheet" file) |
+
+##### 2.1.5.3 Edit Upcoming Trip's Passenger Details
+
+###### Use Case Description
+
+| Name               | Edit Upcoming Trip's Passenger Details                                                                                                               |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows authenticated customers to edit passenger information for upcoming trips before departure.                                      |
+| **Actor**          | Customer (must be signed in)                                                                                                                         |
+| **Trigger**        | User clicks "Edit Passengers" button on an upcoming booking details page.                                                                            |
+| **Pre-condition**  | User must be signed in. Booking must be in "Confirmed" or "Pending Payment" status. Departure date must be at least 48 hours in the future.          |
+| **Post-condition** | Passenger details are updated in database, customer receives email confirmation with updated information, and can view the updated traveler details. |
+
+###### Sequence Flow
+
+[sequence-manage-personal-booking-edit-upcoming-trip's-passenger-details](../sequence/manage-personal-booking/edit-upcoming-trip's-passenger-details)
+
+###### Activities Flow
+
+[activity-manage-personal-booking-edit-upcoming-trip's-passenger-details](../activity/manage-personal-booking/edit-upcoming-trip's-passenger-details)
+
+###### Business Rules
+
+| Activity               | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| :--------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (3), (4)               | BR71    | **Querying Rules:** When user clicks [btnEditPassengers] at step (5), system queries travelers with SQL: "SELECT bt.traveler_id, bt.full_name, bt.id_number, bt.phone_number, bt.email FROM Booking_Traveler bt WHERE bt.booking_id = [booking_id] ORDER BY bt.traveler_id ASC". Displays travelers in [listTravelers] showing: [lblTravelerName], [lblIdNumber], [lblPhone], [lblEmail], [btnEdit] for each traveler. (Refer to "Booking_Traveler" table in "DB Sheet" file)                                                                                                                                                         |
+| (6), (7), (7.1), (7.2) | BR72    | **Validation Rules:** System verifies edit conditions at step (7): queries booking with SQL: "SELECT booking_status, tb.departure_date FROM Tour_Booking tb JOIN Trip t ON tb.trip_id = t.trip_id WHERE tb.booking_id = [booking_id]". Checks if booking_status IN ('Confirmed', 'Pending Payment') AND DATEDIFF(hour, NOW(), departure_date) >= 48. If any condition fails → display "Cannot edit: " with reason (booking cancelled/completed OR departure within 48 hours) (Refer to MSG 38) at step (7.1), user confirms at step (7.2), end use case. Else proceed to step (8). (Refer to "Tour_Booking" table in "DB Sheet" file) |
+| (8)                    | BR73    | **Displaying Rules:** System displays "Edit Passenger Details" form containing: for each selected traveler [panelTravelerEdit] with fields [txtBoxFullName], [txtBoxIdNumber], [txtBoxPhoneNumber], [txtBoxEmail] pre-filled with current data; [btnSaveChanges], [btnCancel]. (Refer to "Edit Passenger Details" form in "View Description" file)                                                                                                                                                                                                                                                                                    |
+| (11)                   | BR74    | **Validation Rules:** When user clicks [btnSaveChanges] in repeat loop (steps 9-11), system validates at step (11): for each edited traveler if [txtBoxFullName].isEmpty() = true OR [txtBoxFullName].length < 2 → error; if [txtBoxIdNumber].isEmpty() = true OR [txtBoxIdNumber].length < 9 → error; if [txtBoxPhoneNumber].isEmpty() = true OR not matches phone regex → error; if [txtBoxEmail].isEmpty() = true OR not matches email regex → error. If any validation fails → display error (Refer to MSG 39), return to step (9). Else proceed to step (12).                                                                    |
+| (12), (13), (14), (15) | BR75    | **Querying Rules:** System starts database transaction at step (12): updates travelers with SQL: "UPDATE Booking_Traveler SET full_name = [new_name], id_number = [new_id], phone_number = [new_phone], email = [new_email], updated_at = NOW() WHERE traveler_id = [traveler_id]" for each edited traveler; (13) commits transaction; (14) displays "Passenger details updated successfully!" (Refer to MSG 40); (15) sends email sendPassengerUpdateConfirmation([email], [booking_id], [updated_travelers]). Customer views updated information at step (16). (Refer to "Booking_Traveler" table in "DB Sheet" file)               |
+
+##### 2.1.5.4 View and Pay Booking Invoice Details
+
+###### Use Case Description
+
+| Name               | View and Pay Booking Invoice Details                                                                                                                                      |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Description**    | This use case allows authenticated customers to view invoice details for their bookings and process payment for unpaid invoices through integrated payment gateway.       |
+| **Actor**          | Customer (must be signed in)                                                                                                                                              |
+| **Trigger**        | User clicks "View Invoice" or "Pay Now" button on a booking in their bookings list.                                                                                       |
+| **Pre-condition**  | User must be signed in. Booking must exist and belong to the user. Invoice must be generated for the booking.                                                             |
+| **Post-condition** | If payment is made: invoice status is updated to "Paid", booking status is updated to "Confirmed", customer receives payment confirmation email with e-ticket attachment. |
+
+###### Sequence Flow
+
+[sequence-manage-personal-booking-view-and-pay-booking-invoice-details](../sequence/manage-personal-booking/view-and-pay-booking-invoice-details)
+
+###### Activities Flow
+
+[activity-manage-personal-booking-view-and-pay-booking-invoice-details](../activity/manage-personal-booking/view-and-pay-booking-invoice-details)
+
+###### Business Rules
+
+| Activity                     | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| :--------------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2)            | BR76    | **Querying Rules:** When user clicks [btnViewInvoice] at step (1), system queries booking with SQL: "SELECT tb.\* FROM Tour_Booking tb WHERE tb.booking_id = [booking_id] AND tb.user_id = [user_id]". If COUNT = 0 OR user_id mismatch → display "Booking not found or access denied" (Refer to MSG 41) at step (2.1), user confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Tour_Booking" table in "DB Sheet" file)                                                                                                                                                                                                                 |
+| (3), (4)                     | BR77    | **Querying Rules:** System queries invoice with SQL: "SELECT i.invoice_id, i.payment_status, i.invoice_amount, i.tax_amount, i.total_amount, i.due_date, i.created_at, tb.booking_id, tb.booking_status, t.trip_name, t.destination, t.departure_date FROM Invoice i JOIN Tour_Booking tb ON i.booking_id = tb.booking_id JOIN Trip t ON tb.trip_id = t.trip_id WHERE i.booking_id = [booking_id]". Displays invoice in [panelInvoiceDetails] showing: [lblInvoiceId], [lblAmount], [lblTax], [lblTotal], [lblPaymentStatus], trip details, [btnPayNow]. (Refer to "Invoice", "Tour_Booking", "Trip" tables in "DB Sheet" file)                                 |
+| (7), (7.1), (7.2)            | BR78    | **Validation Rules:** When user clicks [btnPayNow] at step (6), system verifies at step (7): checks if i.payment_status != 'Paid' AND tb.booking_status NOT IN ('Cancelled', 'Completed') AND i.due_date >= NOW(). If any condition fails → display "Cannot process payment: " with reason (already paid OR booking cancelled/completed OR invoice overdue) (Refer to MSG 42) at step (7.1), user confirms at step (7.2), end use case. Else proceed to step (8).                                                                                                                                                                                               |
+| (8)                          | BR79    | **Displaying Rules:** System displays "Payment Gateway" page containing: [dropdownPaymentMethod] with options (Credit Card, Debit Card, E-Wallet, Bank Transfer); conditional fields based on selection - for cards: [txtBoxCardNumber], [txtBoxCardholderName], [datePickerExpiry], [txtBoxCVV]; for e-wallet: [txtBoxWalletPhone]; for bank transfer: [dropdownBank]. Displays [lblTotalToPay], [btnConfirmPayment], [btnCancel]. (Refer to "Payment Gateway" view in "View Description" file)                                                                                                                                                                |
+| (12), (13), (13.1), (13.2)   | BR80    | **Querying Rules:** When user clicks [btnConfirmPayment] at step (11), system processes payment at step (12): calls processPaymentGateway([payment_method], [payment_details], [total_amount]) with payment gateway API. Receives payment result at step (13). If payment_result.status = 'failed' OR payment_result.error != null → display "Payment failed: " with gateway error message (Refer to MSG 43) at step (13.1), user clicks [btnRetry] or [btnChangeMethod] at step (13.2), return to step (8) or (9). Else if payment_result.status = 'success' → proceed to step (14).                                                                           |
+| (14), (15), (16), (17), (18) | BR81    | **Querying Rules:** System starts database transaction: (14) updates invoice with SQL: "UPDATE Invoice SET payment_status = 'Paid', payment_method = [method], transaction_id = [gateway_transaction_id], paid_at = NOW() WHERE invoice_id = [invoice_id]"; (15) updates booking status with SQL: "UPDATE Tour_Booking SET booking_status = 'Confirmed' WHERE booking_id = [booking_id]"; (16) commits transaction; (17) displays "Payment successful! Your booking is confirmed." (Refer to MSG 44); (18) sends email sendPaymentConfirmationWithTicket([email], [invoice_id], [e_ticket_pdf]). (Refer to "Invoice", "Tour_Booking" tables in "DB Sheet" file) |
+| (19), (20)                   | BR82    | **Displaying Rules:** Customer views success message at step (19) with: [iconCheckmark], [lblSuccessMessage] "Payment successful!", [lblBookingStatus] "Confirmed", [lblTransactionId], [btnDownloadTicket], [btnViewBookingDetails]. User confirms at step (20) to end use case. (Refer to "Payment Success" view in "View Description" file)                                                                                                                                                                                                                                                                                                                  |
+
+#### 2.1.6 Manage Routes Use Case
+
+##### 2.1.6.1 Add New Route
+
+###### Use Case Description
+
+| Name               | Add New Route                                                                                                                        |
+| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to create new travel routes by entering route information including name, start/end points, and duration. |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                            |
+| **Trigger**        | Staff selects "Add New Route" function in routes management page.                                                                    |
+| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to routes management module.                                     |
+| **Post-condition** | New route is saved to database with all provided information. Staff is redirected to routes list showing the newly created route.    |
+
+###### Sequence Flow
+
+[sequence-manage-routes-add-new-route](../sequence/manage-routes/add-new-route)
+
+###### Activities Flow
+
+[activity-manage-routes-add-new-route](../activity/manage-routes/add-new-route)
+
+###### Business Rules
+
+| Activity      | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| :------------ | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)           | BR83    | **Displaying Rules:** When staff selects "Add New Route" at step (1), system displays "Add Route" form containing: [txtBoxRouteName], [txtBoxStartLocation], [txtBoxEndLocation], [numericUpDownDurationDays] with range 1-30, [fileUploadRouteImage] accepting .jpg/.png max 5MB, [dropdownStatus] with options (Active, Inactive), [btnSave], [btnCancel]. (Refer to "Add Route Form" view in "View Description" file)                                                                                                                                                          |
+| (5)           | BR84    | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 3-5), system validates at step (5): if [txtBoxRouteName].isEmpty() = true OR [txtBoxRouteName].length < 3 → error; if [txtBoxStartLocation].isEmpty() = true → error; if [txtBoxEndLocation].isEmpty() = true → error; if [numericUpDownDurationDays].Value < 1 OR > 30 → error; if [fileUploadRouteImage] provided, check if file.size > 5MB OR file extension not in (".jpg", ".png") → error. If any validation fails → display error (Refer to MSG 45), return to step (3). Else proceed to step (6). |
+| (6)           | BR85    | **Querying Rules:** System inserts new route with SQL: "INSERT INTO Route (route_name, start_location, end_location, duration_days, image_url, status, created_at, created_by) VALUES ([route_name], [start_location], [end_location], [duration_days], [uploaded_image_path], [status], NOW(), [staff_id])". (Refer to "Route" table in "DB Sheet" file)                                                                                                                                                                                                                         |
+| (7), (8), (9) | BR86    | **Displaying Rules:** System displays success notification "Route created successfully!" (Refer to MSG 46) at step (7), redirects to routes list view showing all routes with new route highlighted. Staff views new route in [listRoutes] at step (8), confirms at step (9) to end use case.                                                                                                                                                                                                                                                                                     |
+
+##### 2.1.6.2 View Route Detail
+
+###### Use Case Description
+
+| Name               | View Route Detail                                                                                                                                                            |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to view detailed information of a specific route including route data, total trips count, and schedule summary by day.                            |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                    |
+| **Trigger**        | Staff clicks on a route from the routes list.                                                                                                                                |
+| **Pre-condition**  | Staff must be authenticated with staff role. Route must exist in database.                                                                                                   |
+| **Post-condition** | Staff views complete route details including basic information, associated trips count, and schedule summary organized by day showing attractions for each day of the route. |
+
+###### Sequence Flow
+
+[sequence-manage-routes-view-route-detail](../sequence/manage-routes/view-route-detail)
+
+###### Activities Flow
+
+[activity-manage-routes-view-route-detail](../activity/manage-routes/view-route-detail)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| :---------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR87    | **Querying Rules:** When staff clicks route at step (1), system queries with SQL: "SELECT r.route_id, r.route_name, r.start_location, r.end_location, r.duration_days, r.image_url, r.status, r.created_at FROM Route r WHERE r.route_id = [route_id]". If COUNT = 0 → display "Route not found" (Refer to MSG 47) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Route" table in "DB Sheet" file)                                                                                                    |
+| (3)               | BR88    | **Querying Rules:** System queries trips count and schedule with SQL: "SELECT COUNT(DISTINCT t.trip_id) as total_trips, ra.day_number, a.attraction_name, a.description FROM Route r LEFT JOIN Trip t ON r.route_id = t.route_id LEFT JOIN Route_Attraction ra ON r.route_id = ra.route_id LEFT JOIN Attraction a ON ra.attraction_id = a.attraction_id WHERE r.route_id = [route_id] GROUP BY ra.day_number, a.attraction_name ORDER BY ra.day_number, ra.visit_order". (Refer to "Trip", "Route_Attraction", "Attraction" tables in "DB Sheet" file) |
+| (4), (5), (6)     | BR89    | **Displaying Rules:** System displays "Route Details" view at step (4) containing: [lblRouteName], [lblStartLocation], [lblEndLocation], [lblDurationDays], [imgRouteImage], [lblStatus], [lblTotalTrips] showing trip count; and [panelScheduleSummary] with [listDaySchedule] showing for each day: [lblDayNumber], [listAttractions] with attraction names. Staff views details at step (5), confirms at step (6). (Refer to "Route Details" view in "View Description" file)                                                                       |
+
+##### 2.1.6.3 Edit Route Detail
+
+###### Use Case Description
+
+| Name               | Edit Route Detail                                                                                                                         |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to modify existing route information including name, locations, duration, image, and status.                   |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                 |
+| **Trigger**        | Staff selects "Edit Route" function on a route from routes list.                                                                          |
+| **Pre-condition**  | Staff must be authenticated with staff role. Route must exist and be in editable state (not archived or locked).                          |
+| **Post-condition** | Route information is updated in database with new values. Staff views updated route details in the routes list with success confirmation. |
+
+###### Sequence Flow
+
+[sequence-manage-routes-edit-route-details](../sequence/manage-routes/edit-route-details)
+
+###### Activities Flow
+
+[activity-manage-routes-edit-route-details](../activity/manage-routes/edit-route-details)
+
+###### Business Rules
+
+| Activity            | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| :------------------ | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2)   | BR90    | **Querying Rules:** When staff selects "Edit Route" at step (1), system queries route with SQL: "SELECT r.\*, COUNT(t.trip_id) as active_trips FROM Route r LEFT JOIN Trip t ON r.route_id = t.route_id AND t.status = 'active' WHERE r.route_id = [route_id] GROUP BY r.route_id". Checks if COUNT = 0 OR r.status = 'Archived'. If route not found OR not editable → display "Cannot edit route: " with reason (not found OR archived OR has active trips) (Refer to MSG 48) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Route" and "Trip" tables in "DB Sheet" file)                                        |
+| (3)                 | BR91    | **Displaying Rules:** System displays "Edit Route" form at step (3) containing: [txtBoxRouteName], [txtBoxStartLocation], [txtBoxEndLocation], [numericUpDownDurationDays] with range 1-30, [fileUploadRouteImage] accepting .jpg/.png max 5MB (showing current image thumbnail), [dropdownStatus] with options (Active, Inactive), [btnSave], [btnCancel]. All fields pre-filled with current route data. (Refer to "Edit Route Form" view in "View Description" file)                                                                                                                                                                                            |
+| (6)                 | BR92    | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 4-6), system validates at step (6): if [txtBoxRouteName].isEmpty() = true OR [txtBoxRouteName].length < 3 → error; if [txtBoxStartLocation].isEmpty() = true → error; if [txtBoxEndLocation].isEmpty() = true → error; if [numericUpDownDurationDays].Value < 1 OR > 30 → error; if [fileUploadRouteImage] changed, check if file.size > 5MB OR file extension not in (".jpg", ".png") → error. Checks constraints: if changing status to Inactive, verify no active trips exist. If any validation fails → display error (Refer to MSG 49), return to step (4). Else proceed to step (7). |
+| (7), (8), (9), (10) | BR93    | **Querying Rules:** System updates route with SQL: "UPDATE Route SET route_name = [new_name], start_location = [new_start], end_location = [new_end], duration_days = [new_duration], image_url = [new_image_path], status = [new_status], updated_at = NOW(), updated_by = [staff_id] WHERE route_id = [route_id]" at step (7). Displays success "Route updated successfully!" (Refer to MSG 50) at step (8), reloads routes list. Staff views updated route at step (9), confirms at step (10). (Refer to "Route" table in "DB Sheet" file)                                                                                                                      |
+
+##### 2.1.6.4 Delete Route
+
+###### Use Case Description
+
+| Name               | Delete Route                                                                                                                                                                  |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to permanently delete a route from the system after verifying it has no related trips or attraction schedules.                                     |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                     |
+| **Trigger**        | Staff clicks "Delete" button on a route in routes list.                                                                                                                       |
+| **Pre-condition**  | Staff must be authenticated with staff role. Route must exist. Route must have no related trips or attraction schedules (foreign key constraints satisfied).                  |
+| **Post-condition** | Route is permanently removed from database if no dependencies exist. Staff views updated routes list without the deleted route. If dependencies exist, deletion is prevented. |
+
+###### Sequence Flow
+
+[sequence-manage-routes-delete-route](../sequence/manage-routes/delete-route)
+
+###### Activities Flow
+
+[activity-manage-routes-delete-route](../activity/manage-routes/delete-route)
+
+###### Business Rules
+
+| Activity           | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| :----------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3), (3.1), (3.2)  | BR94    | **Querying Rules:** When staff clicks [btnDelete] at step (2), system queries related data at step (3) with SQL: "SELECT COUNT(t.trip_id) as trip_count, COUNT(ra.attraction_id) as attraction_count FROM Route r LEFT JOIN Trip t ON r.route_id = t.route_id LEFT JOIN Route_Attraction ra ON r.route_id = ra.route_id WHERE r.route_id = [route_id] GROUP BY r.route_id". If trip_count > 0 OR attraction_count > 0 → display "Cannot delete route: Route has [X] trips and [Y] attractions. Remove them first." (Refer to MSG 51) at step (3.1), staff confirms at step (3.2), end use case. Else proceed to step (4). (Refer to "Trip", "Route_Attraction" tables in "DB Sheet" file) |
+| (4)                | BR95    | **Displaying Rules:** System displays confirmation dialog at step (4) with [lblConfirmMessage] "Are you sure you want to delete route '[route_name]'? This action cannot be undone.", [btnConfirm], [btnCancel]. (Refer to "Delete Confirmation Dialog" in "View Description" file)                                                                                                                                                                                                                                                                                                                                                                                                       |
+| (5), (5.1), (5.2)  | BR96    | **Choosing Rules:** Staff clicks [btnConfirm] or [btnCancel] at step (5). If staff clicks [btnCancel] → close dialog at step (5.1), staff confirms at step (5.2), end use case. Else if [btnConfirm] clicked → proceed to step (6).                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| (6), (7), (8), (9) | BR97    | **Querying Rules:** System deletes route in transaction at step (6) with SQL: "DELETE FROM Route WHERE route_id = [route_id]". Displays success "Route deleted successfully!" (Refer to MSG 52) at step (7), reloads routes list view without deleted route. Staff views updated list at step (8), confirms at step (9). (Refer to "Route" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                      |
+
+##### 2.1.6.5 View and Filter Routes
+
+###### Use Case Description
+
+| Name               | View and Filter Routes                                                                                                                                               |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to view all routes in the system and filter them by various criteria such as status, name, location, and duration.                        |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                            |
+| **Trigger**        | Staff selects "View Routes" function in routes management module.                                                                                                    |
+| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to routes management module.                                                                     |
+| **Post-condition** | Staff views routes list with optional filters applied. Can repeat filter operation multiple times. List shows route cards with basic information and action buttons. |
+
+###### Sequence Flow
+
+[sequence-manage-routes-view-and-filter-routes](../sequence/manage-routes/view-and-filter-routes)
+
+###### Activities Flow
+
+[activity-manage-routes-view-and-filter-routes](../activity/manage-routes/view-and-filter-routes)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| :---------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR98    | **Querying Rules:** When staff selects "View Routes" at step (1), system queries routes with SQL: "SELECT r.route_id, r.route_name, r.start_location, r.end_location, r.duration_days, r.status, r.image_url, COUNT(t.trip_id) as trips_count FROM Route r LEFT JOIN Trip t ON r.route_id = t.route_id GROUP BY r.route_id ORDER BY r.created_at DESC". If COUNT = 0 → display "No routes found. Add a new route to get started." (Refer to MSG 53) with [btnAddRoute] at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Route" and "Trip" tables in "DB Sheet" file)         |
+| (3)               | BR99    | **Displaying Rules:** System displays "Routes List" view at step (3) containing: filter panel with [txtBoxSearchName], [dropdownFilterStatus] with options (All, Active, Inactive), [numericUpDownMinDays], [numericUpDownMaxDays], [btnApplyFilter], [btnClearFilter]; and [listRoutes] showing for each route: [cardRoute] with [imgRouteThumbnail], [lblRouteName], [lblLocations], [lblDuration], [lblStatus], [lblTripsCount], [btnView], [btnEdit], [btnDelete]. Displays total "[COUNT] routes". (Refer to "Routes List" view in "View Description" file)                                                            |
+| (6), (6.1)        | BR100   | **Querying Rules:** When staff clicks [btnApplyFilter] at step (5) in repeat loop (steps 4-8), system queries filtered routes at step (6) with SQL: "SELECT r.\_, COUNT(t.trip_id) as trips_count FROM Route r LEFT JOIN Trip t ON r.route_id = t.route_id WHERE ([txtBoxSearchName].Text = '' OR r.route_name LIKE '%[search]%') AND ([dropdownFilterStatus].Value = 'All' OR r.status = [status]) AND r.duration_days BETWEEN [min_days] AND [max_days] GROUP BY r.route_id ORDER BY r.created_at DESC". If COUNT = 0 → display "No routes match your filters" (Refer to MSG 54) at step (6.1). Else proceed to step (7). |
+| (7), (8)          | BR101   | **Displaying Rules:** System updates [listRoutes] with filtered results at step (7), displays count "[filtered_count] of [total_count] routes". Staff can repeat filter at step (8) or confirm end. When staff confirms No at step (8), proceed to confirm end.                                                                                                                                                                                                                                                                                                                                                             |
+
+#### 2.1.7 Manage Route Schedule Use Case
+
+##### 2.1.7.1 Add New Itinerary
+
+###### Use Case Description
+
+| Name               | Add New Itinerary                                                                                                                                                       |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to add attractions to a route schedule by specifying day number, visit order, and activity description for each attraction.                  |
+| **Actor**          | Admin (must be signed in with admin role)                                                                                                                               |
+| **Trigger**        | Admin clicks "Add Attraction" button while viewing a route schedule.                                                                                                    |
+| **Pre-condition**  | Admin must be authenticated with admin role. Route must exist and be editable (not closed/archived). At least one attraction must exist in the system.                  |
+| **Post-condition** | New itinerary item is added to route schedule with specified day, order, and description. System adjusts visit orders if conflicts exist. Admin views updated schedule. |
+
+###### Sequence Flow
+
+[sequence-manage-route-schedule-add-itinerary](../sequence/manage-route-schedule/add-itinerary)
+
+###### Activities Flow
+
+[activity-manage-route-schedule-add-itinerary](../activity/manage-route-schedule/add-itinerary)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| :---------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3), (3.1), (3.2) | BR102   | **Querying Rules:** When admin clicks [btnAddAttraction] at step (2), system queries at step (3) with SQL: "SELECT r.status, COUNT(a.attraction_id) as available_attractions FROM Route r, Attraction a WHERE r.route_id = [route_id] AND a.status = 'active' GROUP BY r.route_id". Checks if r.status IN ('Closed', 'Archived') OR available_attractions = 0. If route not editable OR no attractions → display "Cannot add: " with reason (route closed/archived OR no active attractions available) (Refer to MSG 55) at step (3.1), admin confirms at step (3.2), end use case. Else proceed to step (4). (Refer to "Route" and "Attraction" tables in "DB Sheet" file) |
+| (4)               | BR103   | **Displaying Rules:** System displays "Add Itinerary" form at step (4) containing: [dropdownAttraction] with available attractions list showing attraction names, [numericUpDownDayNumber] with range 1 to route.duration_days, [numericUpDownVisitOrder] with range 1-20, [txtAreaActivityDescription] for description text, [btnSave], [btnCancel]. (Refer to "Add Itinerary Form" view in "View Description" file)                                                                                                                                                                                                                                                       |
+| (7)               | BR104   | **Validation Rules:** When admin clicks [btnSave] in repeat loop (steps 5-7), system validates at step (7): if [dropdownAttraction].SelectedValue = null → error; if [numericUpDownDayNumber].Value < 1 OR > route.duration_days → error; if [numericUpDownVisitOrder].Value < 1 OR > 20 → error; if [txtAreaActivityDescription].isEmpty() = true OR [txtAreaActivityDescription].length < 10 → error. Checks duplicate: query if attraction already exists in same route. If duplicate → error. If any validation fails → display error (Refer to MSG 56), return to step (5). Else proceed to step (8).                                                                  |
+| (8)               | BR105   | **Querying Rules:** System checks order conflicts at step (8): queries "SELECT order_in_day FROM Route_Attraction WHERE route_id = [route_id] AND day_number = [day] AND order_in_day >= [order]". If conflicts found → updates with SQL: "UPDATE Route_Attraction SET order_in_day = order_in_day + 1 WHERE route_id = [route_id] AND day_number = [day] AND order_in_day >= [order]". Then inserts with SQL: "INSERT INTO Route_Attraction (route_id, attraction_id, day_number, order_in_day, activity_description) VALUES ([route_id], [attraction_id], [day], [order], [description])". (Refer to "Route_Attraction" table in "DB Sheet" file)                         |
+| (9), (10), (11)   | BR106   | **Displaying Rules:** System displays success "Attraction added to schedule!" (Refer to MSG 57) at step (9), reloads schedule view showing updated itinerary grouped by days. Admin views updated schedule at step (10), confirms at step (11).                                                                                                                                                                                                                                                                                                                                                                                                                             |
+
+##### 2.1.7.2 View Route Schedule
+
+###### Use Case Description
+
+| Name               | View Route Schedule                                                                                                                                                                                 |
+| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff and admin to view the complete schedule of a route showing all attractions organized by day number with visit order and activity descriptions.                           |
+| **Actor**          | Staff or Admin (must be signed in with staff/admin role)                                                                                                                                            |
+| **Trigger**        | User selects "View Route Schedule" function or clicks on a route to view its schedule.                                                                                                              |
+| **Pre-condition**  | User must be authenticated with staff or admin role. Route must exist in database.                                                                                                                  |
+| **Post-condition** | User views route information and complete schedule grouped by days. If user is admin, action buttons (Add/Edit/Delete) are displayed. If schedule is empty, suggestion to add attractions is shown. |
+
+###### Sequence Flow
+
+[sequence-manage-route-schedule-view-route-schedule](../sequence/manage-route-schedule/view-route-schedule)
+
+###### Activities Flow
+
+[activity-manage-route-schedule-view-route-schedule](../activity/manage-route-schedule/view-route-schedule)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR107   | **Querying Rules:** When user selects "View Route Schedule" at step (1), system queries route with SQL: "SELECT r.route_id, r.route_name, r.start_location, r.end_location, r.duration_days, r.status, r.image_url FROM Route r WHERE r.route_id = [route_id]". If COUNT = 0 → display "Route not found" (Refer to MSG 58) at step (2.1), user confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Route" table in "DB Sheet" file)                                                                                                                                                                                                     |
+| (3), (3.1), (3.2) | BR108   | **Querying Rules:** System queries schedule at step (3) with SQL: "SELECT ra.day_number, ra.order_in_day, ra.activity_description, a.attraction_id, a.attraction_name, a.location, a.description FROM Route_Attraction ra JOIN Attraction a ON ra.attraction_id = a.attraction_id WHERE ra.route_id = [route_id] ORDER BY ra.day_number ASC, ra.order_in_day ASC". If COUNT = 0 → display "No schedule available. Add attractions to create itinerary." (Refer to MSG 59) with [btnAddAttraction] at step (3.1), user confirms at step (3.2), end use case. Else proceed to step (4). (Refer to "Route_Attraction" and "Attraction" tables in "DB Sheet" file) |
+| (4), (5), (6)     | BR109   | **Displaying Rules:** System groups attractions by day_number at step (4). Displays "Route Schedule" view at steps (5-6) containing: route info panel with [imgRouteImage], [lblRouteName], [lblStartEnd], [lblDuration], [lblStatus]; and schedule panel with [listDaySchedule] showing for each day: [lblDayNumber] "Day X", [listAttractions] with [cardAttraction] containing [lblAttractionName], [lblOrder], [lblActivityDescription], [lblLocation]. (Refer to "Route Schedule" view in "View Description" file)                                                                                                                                        |
+| (6.1), (7), (8)   | BR110   | **Displaying Rules:** At step (6.1), if user role = 'Admin' → display action buttons [btnAddAttraction], [btnEdit], [btnDelete] for each attraction. Else if role = 'Staff' → hide action buttons. User views schedule at step (7), confirms at step (8).                                                                                                                                                                                                                                                                                                                                                                                                      |
+
+##### 2.1.7.3 Edit Itinerary
+
+###### Use Case Description
+
+| Name               | Edit Itinerary                                                                                                                                                                                  |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to modify itinerary details including day number, visit order, and activity description for an attraction in the route schedule.                                     |
+| **Actor**          | Admin (must be signed in with admin role)                                                                                                                                                       |
+| **Trigger**        | Admin clicks "Edit" button on an attraction in the route schedule view.                                                                                                                         |
+| **Pre-condition**  | Admin must be authenticated with admin role. Route must not be closed. Route_Attraction record must exist.                                                                                      |
+| **Post-condition** | Itinerary details are updated. If day or order changed, system adjusts visit orders for affected attractions in old and new day positions. Admin views updated schedule with changes reflected. |
+
+###### Sequence Flow
+
+[sequence-manage-route-schedule-edit-itinerary](../sequence/manage-route-schedule/edit-itinerary)
+
+###### Activities Flow
+
+[activity-manage-route-schedule-edit-itinerary](../activity/manage-route-schedule/edit-itinerary)
+
+###### Business Rules
+
+| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| :----------------------- | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3), (3.1), (3.2)        | BR111   | **Querying Rules:** When admin clicks [btnEdit] at step (2), system queries route status at step (3) with SQL: "SELECT r.status FROM Route r WHERE r.route_id = [route_id]". If r.status = 'Closed' → display "Cannot edit: Route is closed" (Refer to MSG 60) at step (3.1), admin confirms at step (3.2), end use case. Else proceed to step (4). (Refer to "Route" table in "DB Sheet" file)                                                                                                                                                                                                                        |
+| (4), (4.1), (4.2), (4.3) | BR112   | **Querying Rules:** System queries itinerary at step (4) with SQL: "SELECT ra.route_id, ra.attraction_id, ra.day_number, ra.order_in_day, ra.activity_description, a.attraction_name FROM Route_Attraction ra JOIN Attraction a ON ra.attraction_id = a.attraction_id WHERE ra.route_id = [route_id] AND ra.attraction_id = [attraction_id]". If COUNT = 0 → display "Attraction not found in schedule" (Refer to MSG 61) at step (4.1), reload schedule at step (4.2), admin confirms at step (4.3), end use case. Else proceed to step (5). (Refer to "Route_Attraction" and "Attraction" tables in "DB Sheet" file) |
+| (5)                      | BR113   | **Displaying Rules:** System displays "Edit Itinerary" form at step (5) containing: [lblAttractionName] (read-only) showing current attraction, [numericUpDownDayNumber] with range 1 to route.duration_days pre-filled, [numericUpDownVisitOrder] with range 1-20 pre-filled, [txtAreaActivityDescription] pre-filled with current description, [btnSave], [btnCancel]. (Refer to "Edit Itinerary Form" view in "View Description" file)                                                                                                                                                                              |
+| (8)                      | BR114   | **Validation Rules:** When admin clicks [btnSave] in repeat loop (steps 6-8), system validates at step (8): if [numericUpDownDayNumber].Value < 1 OR > route.duration_days → error; if [numericUpDownVisitOrder].Value < 1 OR > 20 → error; if [txtAreaActivityDescription].isEmpty() = true OR [txtAreaActivityDescription].length < 10 → error. If any validation fails → display error (Refer to MSG 62), return to step (6). Else proceed to step (9).                                                                                                                                                             |
+| (9), (9.1), (9.2), (9.3) | BR115   | **Querying Rules:** System checks if day or order changed at step (9). If changed: (9.1) stores old values; (9.2) updates with SQL: "UPDATE Route_Attraction SET order_in_day = order_in_day - 1 WHERE route_id = [route_id] AND day_number = [old_day] AND order_in_day > [old_order]"; (9.3) updates with SQL: "UPDATE Route_Attraction SET order_in_day = order_in_day + 1 WHERE route_id = [route_id] AND day_number = [new_day] AND order_in_day >= [new_order] AND attraction_id != [current_attraction]". Else skip to step (10). (Refer to "Route_Attraction" table in "DB Sheet" file)                        |
+| (10), (11)               | BR116   | **Querying Rules:** System updates itinerary at step (10) with SQL: "UPDATE Route_Attraction SET day_number = [new_day], order_in_day = [new_order], activity_description = [new_description], updated_at = NOW() WHERE route_id = [route_id] AND attraction_id = [attraction_id]". Commits transaction at step (11). (Refer to "Route_Attraction" table in "DB Sheet" file)                                                                                                                                                                                                                                           |
+| (12), (13), (14), (15)   | BR117   | **Displaying Rules:** System displays success "Itinerary updated successfully!" (Refer to MSG 63) at step (12), reloads schedule at step (13) showing updated order and data. Admin views updated schedule at step (14), confirms at step (15).                                                                                                                                                                                                                                                                                                                                                                        |
+
+##### 2.1.7.4 Delete Itinerary
+
+###### Use Case Description
+
+| Name               | Delete Itinerary                                                                                                                                                     |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to remove an attraction from the route schedule after verification that it's not the last remaining attraction.                           |
+| **Actor**          | Admin (must be signed in with admin role)                                                                                                                            |
+| **Trigger**        | Admin clicks "Delete" button on an attraction in the route schedule view.                                                                                            |
+| **Pre-condition**  | Admin must be authenticated with admin role. Route must not be closed. Route_Attraction record must exist. Route must have more than one attraction in schedule.     |
+| **Post-condition** | Attraction is removed from route schedule. Visit orders for remaining attractions in same day are adjusted. Admin views updated schedule without deleted attraction. |
+
+###### Sequence Flow
+
+[sequence-manage-route-schedule-delete-itinerary](../sequence/manage-route-schedule/delete-itinerary)
+
+###### Activities Flow
+
+[activity-manage-route-schedule-delete-itinerary](../activity/manage-route-schedule/delete-itinerary)
+
+###### Business Rules
+
+| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| :----------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3), (3.1), (3.2)        | BR118   | **Querying Rules:** When admin clicks [btnDelete] at step (2), system queries route status at step (3) with SQL: "SELECT r.status FROM Route r WHERE r.route_id = [route_id]". If r.status = 'Closed' → display "Cannot delete: Route is closed" (Refer to MSG 64) at step (3.1), admin confirms at step (3.2), end use case. Else proceed to step (4). (Refer to "Route" table in "DB Sheet" file)                                                                                                                                                            |
+| (4), (4.1), (4.2), (4.3) | BR119   | **Querying Rules:** System queries itinerary at step (4) with SQL: "SELECT ra.day_number, ra.order_in_day, a.attraction_name FROM Route_Attraction ra JOIN Attraction a ON ra.attraction_id = a.attraction_id WHERE ra.route_id = [route_id] AND ra.attraction_id = [attraction_id]". If COUNT = 0 → display "Attraction not found in schedule" (Refer to MSG 65) at step (4.1), reload schedule at step (4.2), admin confirms at step (4.3), end use case. Else proceed to step (5). (Refer to "Route_Attraction" and "Attraction" tables in "DB Sheet" file) |
+| (5), (5.1), (5.2)        | BR120   | **Querying Rules:** System queries total attractions at step (5) with SQL: "SELECT COUNT(\*) as total FROM Route_Attraction WHERE route_id = [route_id]". If total <= 1 → display "Cannot delete: This is the last attraction in schedule. Route must have at least one attraction." (Refer to MSG 66) at step (5.1), admin confirms at step (5.2), end use case. Else proceed to step (6). (Refer to "Route_Attraction" table in "DB Sheet" file)                                                                                                             |
+| (6)                      | BR121   | **Displaying Rules:** System displays confirmation dialog at step (6) with [lblConfirmMessage] "Are you sure you want to remove '[attraction_name]' from Day [day_number]? This action cannot be undone.", [btnConfirm], [btnCancel]. (Refer to "Delete Itinerary Confirmation Dialog" in "View Description" file)                                                                                                                                                                                                                                             |
+| (7), (7.1), (7.2)        | BR122   | **Choosing Rules:** Admin clicks [btnConfirm] or [btnCancel] at step (7). If admin clicks [btnCancel] → close dialog at step (7.1), admin confirms at step (7.2), end use case. Else if [btnConfirm] clicked → proceed to step (8).                                                                                                                                                                                                                                                                                                                            |
+| (8), (9), (10), (11)     | BR123   | **Querying Rules:** System stores day and order at step (8). Deletes itinerary at step (9) in transaction with SQL: "DELETE FROM Route_Attraction WHERE route_id = [route_id] AND attraction_id = [attraction_id]". Updates remaining orders at step (10) with SQL: "UPDATE Route_Attraction SET order_in_day = order_in_day - 1 WHERE route_id = [route_id] AND day_number = [day] AND order_in_day > [deleted_order]". Commits transaction at step (11). (Refer to "Route_Attraction" table in "DB Sheet" file)                                              |
+| (12), (13), (14), (15)   | BR124   | **Displaying Rules:** System displays success "Attraction removed from schedule!" (Refer to MSG 67) at step (12), reloads schedule at step (13) showing updated itinerary. Admin views updated schedule at step (14), confirms at step (15).                                                                                                                                                                                                                                                                                                                   |
+
+#### 2.1.8 Manage Attraction Use Case
+
+##### 2.1.8.1 Add New Attraction
+
+###### Use Case Description
+
+| Name               | Add New Attraction                                                                                                                                              |
+| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to create new attraction records by entering attraction information including name, description, location, category, and status.     |
+| **Actor**          | Admin (must be signed in with admin role)                                                                                                                       |
+| **Trigger**        | Admin selects "Add New Attraction" function in attractions management page.                                                                                     |
+| **Pre-condition**  | Admin must be authenticated with admin role. Admin must have access to attractions management module. At least one category must exist in the system.           |
+| **Post-condition** | New attraction is saved to database with status ACTIVE by default. Admin is redirected to attractions list or detail view showing the newly created attraction. |
+
+###### Sequence Flow
+
+[sequence-manage-attraction-add-new-attraction](../sequence/manage-attraction/add-new-attraction)
+
+###### Activities Flow
+
+[activity-manage-attraction-add-new-attraction](../activity/manage-attraction/add-new-attraction)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| :------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)      | BR125   | **Displaying Rules:** System displays "Add New Attraction" form at step (2) containing: [txtBoxAttractionName] for attraction name input, [txtAreaDescription] for multiline description text, [txtBoxLocation] for location input, [dropdownCategory] populated with available categories, [dropdownStatus] with default value 'Active', [btnSave], [btnCancel]. (Refer to "Add Attraction Form" view in "View Description" file)                                                                                                                                                                    |
+| (4), (5) | BR126   | **Validation Rules:** When admin clicks [btnSave] in repeat loop (steps 3-5), system validates at step (4): if [txtBoxAttractionName].length < 3 → error; if [txtAreaDescription].length < 20 → error; if [txtBoxLocation].isEmpty() = true → error; if [dropdownCategory].SelectedValue = null OR [dropdownStatus].SelectedValue = null → error. Checks duplicate with SQL: "SELECT COUNT(\*) FROM Attraction WHERE attraction_name = [name] AND location = [location]". If duplicate found OR any validation fails → display error (Refer to MSG 68), return to step (3). Else proceed to step (6). |
+| (6)      | BR127   | **Querying Rules:** System inserts new attraction at step (6) with SQL: "INSERT INTO Attraction (attraction_name, description, location, category_id, status, created_at, created_by) VALUES ([name], [description], [location], [category_id], [status], NOW(), [admin_id])". (Refer to "Attraction" table in "DB Sheet" file)                                                                                                                                                                                                                                                                       |
+| (7), (8) | BR128   | **Displaying Rules:** System displays success message "Attraction created successfully!" (Refer to MSG 69) at step (7), redirects to attractions list view at step (8). Admin views updated list and confirms end.                                                                                                                                                                                                                                                                                                                                                                                    |
+
+##### 2.1.8.2 View Attraction Detail
+
+###### Use Case Description
+
+| Name               | View Attraction Detail                                                                                                                                             |
+| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to view detailed information of a specific attraction including basic data, category information, and usage summary in route schedules. |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                          |
+| **Trigger**        | Staff clicks on an attraction from the attractions list.                                                                                                           |
+| **Pre-condition**  | Staff must be authenticated with staff role. Attraction must exist in database.                                                                                    |
+| **Post-condition** | Staff views complete attraction details including name, description, location, category, status, and summary of how many routes reference this attraction.         |
+
+###### Sequence Flow
+
+[sequence-manage-attraction-view-attraction-detail](../sequence/manage-attraction/view-attraction-detail)
+
+###### Activities Flow
+
+[activity-manage-attraction-view-attraction-detail](../activity/manage-attraction/view-attraction-detail)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| :---------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR129   | **Querying Rules:** When staff selects attraction at step (1), system queries attraction data at step (2) with SQL: "SELECT attraction_id, attraction_name, description, location, category_id, status, created_at, updated_at FROM Attraction WHERE attraction_id = [id]". If COUNT = 0 → display "Attraction not found" (Refer to MSG 70) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Attraction" table in "DB Sheet" file)                                                    |
+| (3)               | BR130   | **Querying Rules:** System queries category and usage information at step (3) with SQL: "SELECT c.category_name, COUNT(DISTINCT ra.route_id) as routes_count FROM Attraction a JOIN Category c ON a.category_id = c.category_id LEFT JOIN Route_Attraction ra ON a.attraction_id = ra.attraction_id WHERE a.attraction_id = [id] GROUP BY c.category_name". (Refer to "Category" and "Route_Attraction" tables in "DB Sheet" file)                                                                                                   |
+| (4), (5), (6)     | BR131   | **Displaying Rules:** System displays "Attraction Detail" view at steps (4-6) containing: [lblAttractionName] showing attraction name, [txtDescription] displaying description text (read-only), [lblLocation] showing location, [lblCategory] showing category name, [lblStatus] showing current status; usage summary panel displaying "Used in [X] routes" with [btnViewRoutes] button if routes_count > 0. Staff views details at step (5), confirms at step (6). (Refer to "Attraction Detail" view in "View Description" file) |
+
+##### 2.1.8.3 Edit Attraction Detail
+
+###### Use Case Description
+
+| Name               | Edit Attraction Detail                                                                                                                                                  |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to modify existing attraction information including name, description, location, category, and status.                                       |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                               |
+| **Trigger**        | Staff selects "Edit Attraction" function on an attraction from attractions list.                                                                                        |
+| **Pre-condition**  | Staff must be authenticated with staff role. Attraction must exist and be in editable state (not deleted).                                                              |
+| **Post-condition** | Attraction information is updated in database with new values. Staff views updated attraction details in the attractions list or detail view with success confirmation. |
+
+###### Sequence Flow
+
+[sequence-manage-attraction-edit-attraction-detail](../sequence/manage-attraction/edit-attraction-detail)
+
+###### Activities Flow
+
+[activity-manage-attraction-edit-attraction-detail](../activity/manage-attraction/edit-attraction-detail)
+
+###### Business Rules
+
+| Activity            | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| :------------------ | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2)   | BR132   | **Querying Rules:** When staff selects "Edit Attraction" at step (1), system queries attraction data at step (2) with SQL: "SELECT attraction_id, attraction_name, description, location, category_id, status FROM Attraction WHERE attraction_id = [id]". If COUNT = 0 → display "Attraction not found" (Refer to MSG 71), end use case. If status = 'Deleted' → display "Cannot edit: Attraction has been deleted" (Refer to MSG 71) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Attraction" table in "DB Sheet" file)                                                            |
+| (3)                 | BR133   | **Displaying Rules:** System displays "Edit Attraction" form at step (3) containing: [txtBoxAttractionName], [txtAreaDescription], [txtBoxLocation], [dropdownCategory], [dropdownStatus], [btnSave], [btnCancel]. All fields are pre-filled with existing attraction data queried at step (2). (Refer to "Edit Attraction Form" view in "View Description" file)                                                                                                                                                                                                                                                                       |
+| (6)                 | BR134   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 4-6), system validates at step (6): if [txtBoxAttractionName].length < 3 → error; if [txtAreaDescription].length < 20 → error; if [txtBoxLocation].isEmpty() = true → error; if [dropdownCategory].SelectedValue = null OR [dropdownStatus].SelectedValue = null → error. Checks duplicate with SQL: "SELECT COUNT(\*) FROM Attraction WHERE attraction_name = [name] AND location = [location] AND attraction_id != [current_id]". If duplicate found OR any validation fails → display error (Refer to MSG 72), return to step (4). Else proceed to step (7). |
+| (7), (8), (9), (10) | BR135   | **Querying Rules:** System updates attraction at step (7) with SQL: "UPDATE Attraction SET attraction_name = [name], description = [description], location = [location], category_id = [category_id], status = [status], updated_at = NOW() WHERE attraction_id = [id]". Displays success message "Attraction updated successfully!" (Refer to MSG 73) at step (8), reloads attractions list at step (9). Staff views updated list at step (10), confirms end. (Refer to "Attraction" table in "DB Sheet" file)                                                                                                                         |
+
+##### 2.1.8.4 Delete Attraction
+
+###### Use Case Description
+
+| Name               | Delete Attraction                                                                                                                                                                                                                     |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Description**    | This use case allows staff to remove an attraction from the system. If attraction is referenced in route schedules, system suggests setting status to INACTIVE instead. Otherwise, performs soft delete by setting status to DELETED. |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                                                             |
+| **Trigger**        | Staff clicks "Delete" button on an attraction in attractions list.                                                                                                                                                                    |
+| **Pre-condition**  | Staff must be authenticated with staff role. Attraction must exist.                                                                                                                                                                   |
+| **Post-condition** | If no references: attraction status is set to DELETED (soft delete). If has references: attraction status is set to INACTIVE. Staff views updated attractions list with modified or removed attraction.                               |
+
+###### Sequence Flow
+
+[sequence-manage-attraction-delete-attraction](../sequence/manage-attraction/delete-attraction)
+
+###### Activities Flow
+
+[activity-manage-attraction-delete-attraction](../activity/manage-attraction/delete-attraction)
+
+###### Business Rules
+
+| Activity                              | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| :------------------------------------ | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3), (3.1)                            | BR136   | **Querying Rules:** When staff clicks [btnDelete] at step (2), system checks references at step (3) with SQL: "SELECT COUNT(\*) FROM Route_Attraction WHERE attraction_id = [id]". If count > 0 → display "This attraction is used in [X] routes. Set status to INACTIVE instead?" (Refer to MSG 74) at step (3.1) with [btnSetInactive], [btnCancel]. Else proceed to step (4). (Refer to "Route_Attraction" table in "DB Sheet" file)                                                                                  |
+| (3.2), (3.2.1), (3.2.2)               | BR137   | **Choosing Rules:** At step (3.2), if staff clicks [btnCancel] at step (3.2.1) → close dialog, end use case. If staff clicks [btnSetInactive] at step (3.2.2) → proceed to step (3.3).                                                                                                                                                                                                                                                                                                                                   |
+| (3.3)                                 | BR138   | **Querying Rules:** System updates attraction status at step (3.3) with SQL: "UPDATE Attraction SET status = 'Inactive', updated_at = NOW() WHERE attraction_id = [id]". (Refer to "Attraction" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                |
+| (3.4), (3.5), (3.6)                   | BR139   | **Displaying Rules:** System displays success message "Attraction status set to INACTIVE!" (Refer to MSG 75) at step (3.4), reloads attractions list at step (3.5). Staff views updated list with status changed at step (3.6), confirms end use case.                                                                                                                                                                                                                                                                   |
+| (4)                                   | BR140   | **Displaying Rules:** System displays confirmation dialog at step (4): "Delete '[attraction_name]'? Status will be set to DELETED." with [btnConfirm], [btnCancel].                                                                                                                                                                                                                                                                                                                                                      |
+| (5), (5.1), (5.2), (6), (7), (8), (9) | BR141   | **Choosing/Querying Rules:** At step (5), if staff clicks [btnCancel] at step (5.1) → close dialog at step (5.2), end use case. If staff clicks [btnConfirm] → system updates at step (6) with SQL: "UPDATE Attraction SET status = 'Deleted', updated_at = NOW() WHERE attraction_id = [id]". Displays success message "Attraction deleted successfully!" (Refer to MSG 76) at step (7), reloads list at step (8). Staff views updated list at step (9), confirms end. (Refer to "Attraction" table in "DB Sheet" file) |
+
+##### 2.1.8.5 View and Filter Attractions
+
+###### Use Case Description
+
+| Name               | View and Filter Attractions                                                                                                                                                    |
+| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to view all attractions in the system and filter them by various criteria such as name, location, category, and status.                             |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                      |
+| **Trigger**        | Staff selects "View Attractions" function in attractions management module.                                                                                                    |
+| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to attractions management module.                                                                          |
+| **Post-condition** | Staff views attractions list with optional filters applied. Can repeat filter operation multiple times. List shows attraction cards with basic information and action buttons. |
+
+###### Sequence Flow
+
+[sequence-manage-attraction-view-and-filter-attractions](../sequence/manage-attraction/view-and-filter-attractions)
+
+###### Activities Flow
+
+[activity-manage-attraction-view-and-filter-attractions](../activity/manage-attraction/view-and-filter-attractions)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| :---------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR142   | **Querying Rules:** When staff selects "View Attractions" at step (1), system queries all attractions at step (2) with SQL: "SELECT a.attraction_id, a.attraction_name, a.description, a.location, a.status, c.category_name, COUNT(ra.route_id) as routes_count FROM Attraction a JOIN Category c ON a.category_id = c.category_id LEFT JOIN Route_Attraction ra ON a.attraction_id = ra.attraction_id WHERE a.status != 'Deleted' GROUP BY a.attraction_id ORDER BY a.created_at DESC". If COUNT = 0 → display "No attractions found" (Refer to MSG 77) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Attraction", "Category", "Route_Attraction" tables in "DB Sheet" file)                                                                                  |
+| (3)               | BR143   | **Displaying Rules:** System displays "Attractions List" view at step (3) containing: filter panel with [txtBoxSearchName] for name search, [txtBoxSearchLocation] for location search, [dropdownFilterCategory] populated with all categories, [dropdownFilterStatus] with status options, [btnApplyFilter]; and attractions grid displaying [cardAttraction] for each attraction showing [lblAttractionName], [lblLocation], [lblCategory], [lblStatus], usage indicator "Used in [X] routes", and action buttons [btnView], [btnEdit], [btnDelete]. (Refer to "Attractions List" view in "View Description" file)                                                                                                                                                                                              |
+| (6), (6.1)        | BR144   | **Querying Rules:** When staff clicks [btnApplyFilter] in repeat loop (steps 4-6), system applies filters at step (6) with SQL: "SELECT a.attraction_id, a.attraction_name, a.description, a.location, a.status, c.category_name, COUNT(ra.route_id) as routes_count FROM Attraction a JOIN Category c ON a.category_id = c.category_id LEFT JOIN Route_Attraction ra ON a.attraction_id = ra.attraction_id WHERE a.status != 'Deleted' AND (a.attraction_name LIKE '%[name]%' OR [name] = '') AND (a.location LIKE '%[location]%' OR [location] = '') AND (a.category_id = [category] OR [category] = null) AND (a.status = [status] OR [status] = null) GROUP BY a.attraction_id". If COUNT = 0 → display "No attractions match the filter criteria" (Refer to MSG 78) at step (6.1). Else proceed to step (7). |
+| (7), (8)          | BR145   | **Displaying Rules:** System updates attractions grid at step (7) with filtered results, displays result count "[filtered_count] of [total_count] attractions" below filter panel. Staff views filtered list at step (8), can repeat filter operation or confirm end use case.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+
+#### 2.1.9 Manage Trips Use Case
+
+##### 2.1.9.1 Add New Trip
+
+###### Use Case Description
+
+| Name               | Add New Trip                                                                                                                                                                     |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to create new trip records by entering trip information including route, departure/return dates, price, available seats, pickup location, and status. |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                        |
+| **Trigger**        | Staff selects "Add New Trip" function in trips management page.                                                                                                                  |
+| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to trips management module. At least one route must exist in the system.                                     |
+| **Post-condition** | New trip is saved to database with specified departure and return dates. Staff is redirected to trips list or detail view showing the newly created trip.                        |
+
+###### Sequence Flow
+
+[sequence-manage-trips-add-new-trip](../sequence/manage-trips/add-new-trip)
+
+###### Activities Flow
+
+[activity-manage-trips-add-new-trip](../activity/manage-trips/add-new-trip)
+
+###### Business Rules
+
+| Activity       | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| :------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)            | BR146   | **Displaying Rules:** System displays "Add New Trip" form at step (2) containing: [dropdownRoute] populated with available routes showing route names, [datePickerDeparture] for departure date selection, [datePickerReturn] for return date selection, [numericUpDownPrice] for trip price, [numericUpDownSeats] for total available seats, [txtBoxPickupLocation] for pickup location, [dropdownStatus] with default value 'Scheduled', [btnSave], [btnCancel]. (Refer to "Add Trip Form" view in "View Description" file)                                                                                                                                                                                                                                        |
+| (5), (6)       | BR147   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 3-5), system validates at step (5): if [dropdownRoute].SelectedValue = null → error; if [datePickerDeparture].Value <= NOW() → error "Departure date must be in future"; if [datePickerReturn].Value <= [datePickerDeparture].Value → error "Return date must be after departure"; if [numericUpDownPrice].Value <= 0 OR [numericUpDownSeats].Value <= 0 → error; if [txtBoxPickupLocation].isEmpty() = true → error. At step (6), checks duplicate schedule with SQL: "SELECT COUNT(\*) FROM Trip WHERE route_id = [route_id] AND departure_date = [dep_date]". If duplicate found OR any validation fails → display error (Refer to MSG 79), return to step (3). Else proceed to step (7). |
+| (7)            | BR148   | **Querying Rules:** System inserts new trip at step (7) with SQL: "INSERT INTO Trip (route_id, departure_date, return_date, price, total_seats, booked_seats, pickup_location, status, created_at, created_by) VALUES ([route_id], [dep_date], [ret_date], [price], [seats], 0, [pickup], [status], NOW(), [staff_id])". (Refer to "Trip" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                                                  |
+| (8), (9), (10) | BR149   | **Displaying Rules:** System displays success message "Trip created successfully!" (Refer to MSG 80) at step (8), redirects to trips list view at step (9). Staff views new trip in list at step (10), confirms end.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+
+##### 2.1.9.2 View Trip Details
+
+###### Use Case Description
+
+| Name               | View Trip Details                                                                                                                                                                |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to view detailed information of a specific trip including route info, dates, pricing, seat availability, and booking summary.                         |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                        |
+| **Trigger**        | Staff clicks on a trip from the trips list.                                                                                                                                      |
+| **Pre-condition**  | Staff must be authenticated with staff role. Trip must exist in database.                                                                                                        |
+| **Post-condition** | Staff views complete trip details including route information, departure/return dates, pricing, available/booked seats ratio, and summary of bookings associated with this trip. |
+
+###### Sequence Flow
+
+[sequence-manage-trips-view-trip-details](../sequence/manage-trips/view-trip-details)
+
+###### Activities Flow
+
+[activity-manage-trips-view-trip-details](../activity/manage-trips/view-trip-details)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR150   | **Querying Rules:** When staff selects trip at step (1), system queries trip data at step (2) with SQL: "SELECT t.trip_id, t.departure_date, t.return_date, t.price, t.total_seats, t.booked_seats, t.pickup_location, t.status, r.route_id, r.route_name, r.start_location, r.end_location, r.duration_days FROM Trip t JOIN Route r ON t.route_id = r.route_id WHERE t.trip_id = [id]". If COUNT = 0 → display "Trip not found" (Refer to MSG 81) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Trip" and "Route" tables in "DB Sheet" file)         |
+| (3)               | BR151   | **Querying Rules:** System queries booking summary at step (3) with SQL: "SELECT COUNT(\*) as total_bookings, SUM(no_adults + no_children) as total_travelers, SUM(CASE WHEN status = 'CONFIRMED' THEN 1 ELSE 0 END) as confirmed_count FROM Tour_Booking WHERE trip_id = [id]". (Refer to "Tour_Booking" table in "DB Sheet" file)                                                                                                                                                                                                                                                                      |
+| (4), (5), (6)     | BR152   | **Displaying Rules:** System displays "Trip Detail" view at steps (4-6) containing: trip info panel with [lblRouteName], [lblStartEnd], [lblDuration], [lblDepartureDate], [lblReturnDate], [lblPrice], [lblPickupLocation], [lblStatus]; seats panel showing [progressBarSeats] with "[booked] / [total] seats booked" and available seats count; booking summary panel displaying total bookings count, total travelers count, confirmed bookings count with [btnViewBookings] button. Staff views details at step (5), confirms at step (6). (Refer to "Trip Detail" view in "View Description" file) |
+
+##### 2.1.9.3 Edit Trip
+
+###### Use Case Description
+
+| Name               | Edit Trip                                                                                                                                                         |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to modify existing trip information including dates, price, seats, pickup location, and status.                                        |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                         |
+| **Trigger**        | Staff selects "Edit Trip" function on a trip from trips list.                                                                                                     |
+| **Pre-condition**  | Staff must be authenticated with staff role. Trip must exist and be in editable state (not canceled or completed). Trip must not have departure date in the past. |
+| **Post-condition** | Trip information is updated in database with new values. Staff views updated trip details in the trips list or detail view with success confirmation.             |
+
+###### Sequence Flow
+
+[sequence-manage-trips-edit-trip](../sequence/manage-trips/edit-trip)
+
+###### Activities Flow
+
+[activity-manage-trips-edit-trip](../activity/manage-trips/edit-trip)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| :---------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR153   | **Querying Rules:** When staff selects "Edit Trip" at step (1), system queries trip data at step (2) with SQL: "SELECT t.\*, r.route_name FROM Trip t JOIN Route r ON t.route_id = r.route_id WHERE t.trip_id = [id]". If COUNT = 0 → display "Trip not found" (Refer to MSG 82), end use case. If t.status IN ('Canceled', 'Completed') OR t.departure_date < NOW() → display "Cannot edit: Trip is not editable" (Refer to MSG 82) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Trip" and "Route" tables in "DB Sheet" file) |
+| (3)               | BR154   | **Displaying Rules:** System displays "Edit Trip" form at step (3) containing: [lblRoute] showing route name (read-only), [datePickerDeparture], [datePickerReturn], [numericUpDownPrice], [numericUpDownSeats], [txtBoxPickupLocation], [dropdownStatus], [btnSave], [btnCancel]. All fields are pre-filled with existing trip data queried at step (2). (Refer to "Edit Trip Form" view in "View Description" file)                                                                                                                                                             |
+| (6)               | BR155   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 4-6), system validates at step (6): if [datePickerDeparture].Value <= NOW() → error; if [datePickerReturn].Value <= [datePickerDeparture].Value → error; if [numericUpDownPrice].Value <= 0 → error; if [numericUpDownSeats].Value < [current_booked_seats] → error "Cannot reduce seats below booked seats count"; if [txtBoxPickupLocation].isEmpty() = true → error. If any validation fails → display error (Refer to MSG 83), return to step (4). Else proceed to step (7).                          |
+| (7)               | BR156   | **Querying Rules:** System updates trip at step (7) with SQL: "UPDATE Trip SET departure_date = [dep_date], return_date = [ret_date], price = [price], total_seats = [seats], pickup_location = [pickup], status = [status], updated_at = NOW() WHERE trip_id = [id]". (Refer to "Trip" table in "DB Sheet" file)                                                                                                                                                                                                                                                                 |
+| (8), (9), (10)    | BR157   | **Displaying Rules:** System displays success message "Trip updated successfully!" (Refer to MSG 84) at step (8), reloads trips list at step (9). Staff views updated trip at step (10), confirms end.                                                                                                                                                                                                                                                                                                                                                                            |
+
+##### 2.1.9.4 Delete Trip
+
+###### Use Case Description
+
+| Name               | Delete Trip                                                                                                                                                                                                            |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to remove a trip from the system. If trip has pending/confirmed bookings, system suggests canceling the trip instead. Otherwise, performs hard delete of the trip record.                   |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                                              |
+| **Trigger**        | Staff clicks "Delete" button on a trip in trips list.                                                                                                                                                                  |
+| **Pre-condition**  | Staff must be authenticated with staff role. Trip must exist.                                                                                                                                                          |
+| **Post-condition** | If no bookings: trip record is permanently deleted from database. If has bookings: trip status is set to CANCELED and all related bookings are canceled. Staff views updated trips list without deleted/canceled trip. |
+
+###### Sequence Flow
+
+[sequence-manage-trips-delete-trip](../sequence/manage-trips/delete-trip)
+
+###### Activities Flow
+
+[activity-manage-trips-delete-trip](../activity/manage-trips/delete-trip)
+
+###### Business Rules
+
+| Activity                              | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| :------------------------------------ | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3), (3.1)                            | BR158   | **Querying Rules:** When staff clicks [btnDelete] at step (2), system checks related bookings at step (3) with SQL: "SELECT COUNT(\*) as bookings_count, t.route_name FROM Tour_Booking tb JOIN Trip t ON tb.trip_id = t.trip_id WHERE tb.trip_id = [id] AND tb.status IN ('PENDING', 'CONFIRMED') GROUP BY t.route_name". If bookings_count > 0 → display "Cannot delete: Trip has [X] pending/confirmed bookings. Cancel trip instead?" (Refer to MSG 85) at step (3.1) with [btnCancelTrip], [btnClose]. Else proceed to step (4). (Refer to "Tour_Booking" and "Trip" tables in "DB Sheet" file) |
+| (3.2), (3.2.1), (3.2.2)               | BR159   | **Choosing Rules:** At step (3.2), if staff clicks [btnClose] at step (3.2.1) → close dialog at step (3.2.2), end use case. If staff clicks [btnCancelTrip] → proceed to step (3.3).                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| (3.3)                                 | BR160   | **Querying Rules:** System updates trip status at step (3.3) with SQL: "UPDATE Trip SET status = 'Canceled', updated_at = NOW() WHERE trip_id = [id]". (Refer to "Trip" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                                                    |
+| (3.4), (3.5), (3.6)                   | BR161   | **Displaying Rules:** System displays success message "Trip has been canceled!" (Refer to MSG 86) at step (3.4), reloads trips list at step (3.5). Staff views updated list with trip canceled at step (3.6), confirms end use case.                                                                                                                                                                                                                                                                                                                                                                 |
+| (4)                                   | BR162   | **Displaying Rules:** System displays confirmation dialog at step (4): "Delete trip to '[route_name]' on [departure_date]? This action cannot be undone." with [btnConfirm], [btnCancel].                                                                                                                                                                                                                                                                                                                                                                                                            |
+| (5), (5.1), (5.2), (6), (7), (8), (9) | BR163   | **Choosing/Querying Rules:** At step (5), if staff clicks [btnCancel] at step (5.1) → close dialog at step (5.2), end use case. If staff clicks [btnConfirm] → system deletes in transaction at step (6) with SQL: "DELETE FROM Trip WHERE trip_id = [id]". Displays success message "Trip deleted successfully!" (Refer to MSG 87) at step (7), reloads list at step (8). Staff views updated list at step (9), confirms end. (Refer to "Trip" table in "DB Sheet" file)                                                                                                                            |
+
+##### 2.1.9.5 Add New Booking for Trip
+
+###### Use Case Description
+
+| Name               | Add New Booking for Trip                                                                                                                                                                    |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Description**    | This use case allows staff to create a new booking for a specific trip on behalf of a customer, including customer selection, traveler details entry, and invoice generation.               |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                   |
+| **Trigger**        | Staff clicks "Add Booking" button on a trip detail page.                                                                                                                                    |
+| **Pre-condition**  | Staff must be authenticated with staff role. Trip must exist and be in valid state (Scheduled status, future departure date). Trip must have available seats.                               |
+| **Post-condition** | New booking is created with status CONFIRMED. Invoice is generated. Trip's booked_seats count is updated. Staff views booking details or returns to trip details with success confirmation. |
+
+###### Sequence Flow
+
+[sequence-manage-trips-add-new-booking-for-trip](../sequence/manage-trips/add-new-booking-for-trip)
+
+###### Activities Flow
+
+[activity-manage-trips-add-new-booking-for-trip](../activity/manage-trips/add-new-booking-for-trip)
+
+###### Business Rules
+
+| Activity      | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| :------------ | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3)           | BR164   | **Displaying Rules:** System displays "Add Booking" form at step (3) containing: [txtBoxSearchCustomer] with autocomplete for customer search, [lblSelectedCustomer] showing selected customer info, [numericUpDownAdults] for number of adults (default 1), [numericUpDownChildren] for number of children (default 0), [txtAreaTravelers] for traveler names (one per line), [dropdownPaymentMethod] with payment options, [btnSave], [btnCancel]. (Refer to "Add Booking Form" view in "View Description" file)                                                                                                                                                                                                                                  |
+| (7), (8), (9) | BR165   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 4-9), system validates at step (7): checks trip status with SQL "SELECT status, departure_date, total_seats, booked_seats FROM Trip WHERE trip_id = [id]". If status != 'Scheduled' OR departure_date <= NOW() → error "Trip is not available for booking" (Refer to MSG 88). At step (8), validates customer with SQL "SELECT status FROM User WHERE user_id = [customer_id]". If status = 'Locked' → error "Customer account is locked". At step (9), if ([adults] + [children]) > (total_seats - booked_seats) → error "Not enough seats available". If any validation fails → return to step (4). Else proceed to step (10).                                            |
+| (10)          | BR166   | **Displaying Rules:** System calculates and displays booking confirmation dialog at step (10): "Confirm booking for [customer_name]? Total: [adults] adults + [children] children = [total_price] VND. Payment: [method]" with [btnConfirm], [btnCancel].                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| (12)          | BR167   | **Querying Rules:** System begins transaction and locks trip row at step (12) with SQL: "SELECT trip_id, total_seats, booked_seats FROM Trip WHERE trip_id = [id] FOR UPDATE". This prevents concurrent booking conflicts. (Refer to "Trip" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| (13)          | BR168   | **Querying Rules:** System creates booking records at step (13) with SQL: "INSERT INTO Tour_Booking (trip_id, customer_id, no_adults, no_children, total_amount, status, booking_date, created_by) VALUES ([trip_id], [customer_id], [adults], [children], [total_price], 'CONFIRMED', NOW(), [staff_id])". Creates traveler details with SQL: "INSERT INTO Tour_Booking_Detail (booking_id, traveler_name, traveler_age, traveler_type) VALUES ..." for each traveler line. Creates invoice with SQL: "INSERT INTO Invoice (booking_id, total_amount, payment_method, payment_status, issued_date) VALUES ([booking_id], [total], [method], 'PAID', NOW())". (Refer to "Tour_Booking", "Tour_Booking_Detail", "Invoice" tables in "DB Sheet" file) |
+| (14)          | BR169   | **Querying Rules:** System updates trip seats at step (14) with SQL: "UPDATE Trip SET booked_seats = booked_seats + [adults] + [children], updated_at = NOW() WHERE trip_id = [id]". Commits transaction successfully. (Refer to "Trip" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| (15), (16)    | BR170   | **Displaying Rules:** System displays success message "Booking created successfully! Booking ID: [booking_id]" (Refer to MSG 89) at step (15). Staff views booking details or trip details at step (16), confirms end.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+
+##### 2.1.9.6 View and Filter Trips
+
+###### Use Case Description
+
+| Name               | View and Filter Trips                                                                                                                                                            |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to view all trips in the system and filter them by various criteria such as route, departure date range, status, and available seats.                 |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                        |
+| **Trigger**        | Staff selects "View Trips" function in trips management module.                                                                                                                  |
+| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to trips management module.                                                                                  |
+| **Post-condition** | Staff views trips list with optional filters applied. Can repeat filter operation multiple times. List shows trip cards with route info, dates, pricing, and seats availability. |
+
+###### Sequence Flow
+
+[sequence-manage-trips-view-and-filter-trips](../sequence/manage-trips/view-and-filter-trips)
+
+###### Activities Flow
+
+[activity-manage-trips-view-and-filter-trips](../activity/manage-trips/view-and-filter-trips)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (2), (2.1), (2.2) | BR171   | **Querying Rules:** When staff selects "View Trips" at step (1), system queries all trips at step (2) with SQL: "SELECT t.trip_id, t.departure_date, t.return_date, t.price, t.total_seats, t.booked_seats, t.pickup_location, t.status, r.route_id, r.route_name, r.start_location, r.end_location FROM Trip t JOIN Route r ON t.route_id = r.route_id ORDER BY t.departure_date ASC". If COUNT = 0 → display "No trips found" (Refer to MSG 90) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Trip" and "Route" tables in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                      |
+| (3)               | BR172   | **Displaying Rules:** System displays "Trips List" view at step (3) containing: filter panel with [dropdownFilterRoute] populated with all routes, [datePickerFromDate] for departure date start, [datePickerToDate] for departure date end, [dropdownFilterStatus] with status options, [checkboxAvailableOnly] for filtering trips with available seats, [btnApplyFilter]; and trips grid displaying [cardTrip] for each trip showing [lblRouteName], [lblStartEnd], [lblDepartureDate], [lblReturnDate], [lblPrice], seats indicator "[booked]/[total] seats", [lblStatus], and action buttons [btnView], [btnEdit], [btnDelete], [btnAddBooking]. (Refer to "Trips List" view in "View Description" file)                                                                                                                                                                                                       |
+| (6), (6.1)        | BR173   | **Querying Rules:** When staff clicks [btnApplyFilter] in repeat loop (steps 4-6), system validates and applies filters at step (6). If [datePickerFromDate] > [datePickerToDate] → error "Invalid date range". Builds dynamic SQL: "SELECT t.trip_id, t.departure_date, t.return_date, t.price, t.total_seats, t.booked_seats, t.pickup_location, t.status, r.route_id, r.route_name, r.start_location, r.end_location FROM Trip t JOIN Route r ON t.route_id = r.route_id WHERE (r.route_id = [route] OR [route] = null) AND (t.departure_date >= [from_date] OR [from_date] = null) AND (t.departure_date <= [to_date] OR [to_date] = null) AND (t.status = [status] OR [status] = null) AND ([available_only] = false OR t.booked_seats < t.total_seats) ORDER BY t.departure_date ASC". If COUNT = 0 → display "No trips match the filter criteria" (Refer to MSG 91) at step (6.1). Else proceed to step (7). |
+| (7), (8)          | BR174   | **Displaying Rules:** System updates trips grid at step (7) with filtered results, displays result count "[filtered_count] of [total_count] trips" below filter panel. Staff views filtered list at step (8), can repeat filter operation or confirm end use case.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+
+#### 2.1.10 Adjust and Track Bookings Use Case
+
+##### 2.1.10.1 Add New Booking
+
+###### Use Case Description
+
+| Name               | Add New Booking                                                                                                                                                                          |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to create a new booking by selecting a customer and trip, entering traveler details, and generating an invoice.                                               |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                |
+| **Trigger**        | Staff selects "Add New Booking" function in bookings management page.                                                                                                                    |
+| **Pre-condition**  | Staff must be authenticated with staff role. At least one customer and one scheduled trip must exist in the system.                                                                      |
+| **Post-condition** | New booking is created with status CONFIRMED. Invoice is generated. Trip's booked_seats count is updated. Staff is redirected to booking details view showing the newly created booking. |
+
+###### Sequence Flow
+
+[sequence-adjust-and-track-bookings-add-new-booking](../sequence/adjust-and-track-bookings/add-new-booking)
+
+###### Activities Flow
+
+[activity-adjust-and-track-bookings-add-new-booking](../activity/adjust-and-track-bookings/add-new-booking)
+
+###### Business Rules
+
+| Activity        | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| :-------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (2)             | BR175   | **Displaying Rules:** System displays "Add New Booking" form at step (2) containing: [txtBoxSearchCustomer] with autocomplete, [lblSelectedCustomer], [dropdownSelectTrip] with available trips, [numericUpDownAdults] (default 1), [numericUpDownChildren] (default 0), [txtAreaTravelers], [dropdownPaymentMethod], [btnSave], [btnCancel]. (Refer to "Add Booking Form" view in "View Description" file)                                                                                                                                                                                                                                                                                                                                 |
+| (7)             | BR176   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 3-7), system validates at step (7): if [lblSelectedCustomer] empty OR [dropdownSelectTrip].SelectedValue = null → error. Queries trip: "SELECT status, departure_date, total_seats, booked_seats FROM Trip WHERE trip_id = [id]". If status != 'Scheduled' OR departure_date <= NOW() → error (Refer to MSG 92). Queries customer: "SELECT status FROM User WHERE user_id = [customer_id]". If status = 'Locked' → error (Refer to MSG 93). If ([adults] + [children]) > (total_seats - booked_seats) OR [txtAreaTravelers].lineCount != ([adults] + [children]) → error (Refer to MSG 94). If any validation fails → return to step (3). Else proceed to step (8). |
+| (8)             | BR177   | **Querying Rules:** System begins transaction and locks trip at step (8) with SQL: "SELECT \* FROM Trip WHERE trip_id = [id] FOR UPDATE". (Refer to "Trip" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| (8)             | BR178   | **Querying Rules:** System creates booking at step (8): "INSERT INTO Tour_Booking (...) VALUES (...)". Creates travelers: "INSERT INTO Tour_Booking_Detail (booking_id, traveler_name) VALUES ..." for each line. Creates invoice: "INSERT INTO Invoice (...) VALUES (...)". Updates seats: "UPDATE Trip SET booked_seats = booked_seats + [adults] + [children] WHERE trip_id = [id]". Commits transaction. (Refer to "Tour_Booking", "Tour_Booking_Detail", "Invoice", "Trip" tables in "DB Sheet" file)                                                                                                                                                                                                                                  |
+| (9), (10), (11) | BR179   | **Displaying Rules:** System displays success "Booking created successfully! Booking ID: [booking_id]" (Refer to MSG 95) at step (9), redirects to details at step (10). Staff confirms end at step (11).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+
+##### 2.1.10.2 View and Filter Bookings
+
+###### Use Case Description
+
+| Name               | View and Filter Bookings                                                                                                                                                            |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to view all bookings in the system and filter them by various criteria such as customer name, trip, booking status, and booking date range.              |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                           |
+| **Trigger**        | Staff selects "View Bookings" function in bookings management module.                                                                                                               |
+| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to bookings management module.                                                                                  |
+| **Post-condition** | Staff views bookings list with optional filters applied. Can repeat filter operation multiple times. List shows booking cards with customer info, trip details, and payment status. |
+
+###### Sequence Flow
+
+[sequence-adjust-and-track-bookings-view-and-filter-bookings](../sequence/adjust-and-track-bookings/view-and-filter-bookings)
+
+###### Activities Flow
+
+[activity-adjust-and-track-bookings-view-and-filter-bookings](../activity/adjust-and-track-bookings/view-and-filter-bookings)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR180   | **Querying Rules:** When staff selects "View Bookings" at step (1), system queries at step (2) with SQL: "SELECT tb.\*, u.full_name, u.email, t.departure_date, r.route_name, i.payment_status FROM Tour_Booking tb JOIN User u, Trip t, Route r LEFT JOIN Invoice i ... ORDER BY tb.booking_date DESC". If COUNT = 0 → display "No bookings found" (Refer to MSG 96) at step (2.1), end use case. Else proceed to step (3). (Refer to "Tour_Booking", "User", "Trip", "Route", "Invoice" tables in "DB Sheet" file) |
+| (3)               | BR181   | **Displaying Rules:** System displays "Bookings List" view at step (3) containing: filter panel with [txtBoxSearchCustomer], [dropdownFilterTrip], [dropdownFilterStatus] (PENDING, CONFIRMED, CANCELED, COMPLETED), [datePickerFromDate], [datePickerToDate], [btnApplyFilter]; and bookings grid with [cardBooking] showing booking ID, customer, route, dates, passengers, amount, status, action buttons. (Refer to "Bookings List" view in "View Description" file)                                             |
+| (6), (6.1)        | BR182   | **Querying Rules:** When staff clicks [btnApplyFilter] in repeat loop (steps 4-6), system validates at step (6). If [datePickerFromDate] > [datePickerToDate] → error. Builds dynamic SQL with WHERE (u.full_name LIKE '%[name]%' OR u.email LIKE '%[name]%') AND (t.trip_id = [trip] OR [trip] = null) AND (tb.status = [status] OR [status] = null) AND date range filters. If COUNT = 0 → display "No bookings match the filter criteria" (Refer to MSG 97) at step (6.1). Else proceed to step (7).              |
+| (7), (8)          | BR183   | **Displaying Rules:** System updates grid at step (7) with filtered results, displays "[filtered_count] of [total_count] bookings". Staff can repeat or confirm end at step (8).                                                                                                                                                                                                                                                                                                                                     |
+
+##### 2.1.10.3 View Booking Details
+
+###### Use Case Description
+
+| Name               | View Booking Details                                                                                                                                                                         |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to view detailed information of a specific booking including customer info, trip details, travelers list, and invoice summary.                                    |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                    |
+| **Trigger**        | Staff clicks on a booking from the bookings list.                                                                                                                                            |
+| **Pre-condition**  | Staff must be authenticated with staff role. Booking must exist in database.                                                                                                                 |
+| **Post-condition** | Staff views complete booking details including customer information, trip schedule, list of travelers, payment status, and available action buttons based on booking status and cutoff date. |
+
+###### Sequence Flow
+
+[sequence-adjust-and-track-bookings-view-booking-details](../sequence/adjust-and-track-bookings/view-booking-details)
+
+###### Activities Flow
+
+[activity-adjust-and-track-bookings-view-booking-details](../activity/adjust-and-track-bookings/view-booking-details)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (2), (2.1), (2.2) | BR184   | **Querying Rules:** When staff selects booking at step (1), system queries at step (2) with SQL: "SELECT tb.\*, u.full_name, u.email, u.phone, t.\*, r.\* FROM Tour_Booking tb JOIN User u, Trip t, Route r WHERE tb.booking_id = [id]". If COUNT = 0 → display "Booking not found" (Refer to MSG 98) at step (2.1), end use case. Else proceed to step (3). (Refer to "Tour_Booking", "User", "Trip", "Route" tables in "DB Sheet" file)                                                                                                   |
+| (3)               | BR185   | **Querying Rules:** System queries travelers at step (3) with SQL: "SELECT traveler_name FROM Tour_Booking_Detail WHERE booking_id = [id] ORDER BY detail_id". (Refer to "Tour_Booking_Detail" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                    |
+| (4)               | BR186   | **Querying Rules:** System queries invoice at step (4) with SQL: "SELECT \* FROM Invoice WHERE booking_id = [id]". (Refer to "Invoice" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                            |
+| (5), (6), (7)     | BR187   | **Displaying Rules:** System displays "Booking Detail" view at steps (5-7) with panels: booking info ([lblBookingId], [lblBookingDate], [lblBookingStatus]); customer info ([lblCustomerName], [lblEmail], [lblPhone]); trip info (route, dates, pickup); passengers ([lblAdultsCount], [lblChildrenCount], [listTravelers]); invoice ([lblTotalAmount], [lblPaymentMethod], [lblPaymentStatus], [btnViewInvoice]); action buttons based on status. Staff confirms at step (7). (Refer to "Booking Detail" view in "View Description" file) |
+
+##### 2.1.10.4 View Booking's Invoice
+
+###### Use Case Description
+
+| Name               | View Booking's Invoice                                                                                            |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to view the invoice details associated with a specific booking.                        |
+| **Actor**          | Staff (must be signed in with staff role)                                                                         |
+| **Trigger**        | Staff clicks "View Invoice" button from booking details page.                                                     |
+| **Pre-condition**  | Staff must be authenticated with staff role. Booking must exist. Invoice must be generated for the booking.       |
+| **Post-condition** | Staff views complete invoice information including total amount, payment method, payment status, and issued date. |
+
+###### Sequence Flow
+
+[sequence-adjust-and-track-bookings-view-booking's-invoice](../sequence/adjust-and-track-bookings/view-booking's-invoice)
+
+###### Activities Flow
+
+[activity-adjust-and-track-bookings-view-booking's-invoice](../activity/adjust-and-track-bookings/view-booking's-invoice)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                |
+| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR188   | **Querying Rules:** When staff clicks "View Invoice" at step (1), system queries at step (2) with SQL: "SELECT i.\*, tb.booking_id, u.full_name FROM Invoice i JOIN Tour_Booking tb, User u WHERE i.booking_id = [booking_id]". If COUNT = 0 → display "Invoice not found" (Refer to MSG 99) at step (2.1), end use case. Else proceed to step (3). (Refer to "Invoice", "Tour_Booking", "User" tables in "DB Sheet" file) |
+| (3), (4), (5)     | BR189   | **Displaying Rules:** System displays "Invoice Detail" view at steps (3-5) with [lblInvoiceId], [lblBookingId], [lblCustomerName], [lblTotalAmount], [lblPaymentMethod], [lblPaymentStatus] color-coded (green=PAID, yellow=PENDING, red=FAILED), [btnPrint]. Staff confirms at step (5). (Refer to "Invoice Detail" view in "View Description" file)                                                                      |
+
+##### 2.1.10.5 Edit Pre-departure Booking
+
+###### Use Case Description
+
+| Name               | Edit Pre-departure Booking                                                                                                                                                                                                                              |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Description**    | This use case allows staff to modify booking information including number of passengers and traveler names for bookings that have not yet departed and are within the editable cutoff period.                                                           |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                                                                               |
+| **Trigger**        | Staff selects "Edit Booking" function on a booking from bookings list or booking details.                                                                                                                                                               |
+| **Pre-condition**  | Staff must be authenticated with staff role. Booking must exist and be in PENDING or CONFIRMED status. Trip departure date must be at least 7 days in the future (cutoff period). Invoice payment status must not be PAID (or allow refund processing). |
+| **Post-condition** | Booking information is updated with new passenger counts and traveler names. Trip's booked_seats count is adjusted (increased or decreased). Invoice total amount is recalculated. Staff views updated booking details with success confirmation.       |
+
+###### Sequence Flow
+
+[sequence-adjust-and-track-bookings-edit-pre-departure-booking](../sequence/adjust-and-track-bookings/edit-pre-departure-booking)
+
+###### Activities Flow
+
+[activity-adjust-and-track-bookings-edit-pre-departure-booking](../activity/adjust-and-track-bookings/edit-pre-departure-booking)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| :---------------- | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR190   | **Querying Rules:** When staff selects "Edit Booking" at step (1), system queries at step (2) with SQL: "SELECT tb.\*, t.departure_date, t.total_seats, t.booked_seats FROM Tour_Booking tb JOIN Trip t, Invoice i WHERE tb.booking_id = [id]". If COUNT = 0 → display "Booking not found" (Refer to MSG 100), end. Calculates cutoff as departure_date - 7 days. If tb.status NOT IN ('PENDING', 'CONFIRMED') OR NOW() > cutoff → display "Cannot edit" with reason (Refer to MSG 100) at step (2.1), end use case. Else proceed to step (3). (Refer to "Tour_Booking", "Trip" tables in "DB Sheet" file) |
+| (3)               | BR191   | **Displaying Rules:** System displays "Edit Booking" form at step (3) with [lblBookingId] (read-only), [lblTripInfo] (read-only), [numericUpDownAdults] pre-filled (min 1), [numericUpDownChildren] pre-filled (min 0), [txtAreaTravelers] pre-filled, [lblCurrentTotal], [btnSave], [btnCancel]. (Refer to "Edit Booking Form" view in "View Description" file)                                                                                                                                                                                                                                           |
+| (6)               | BR192   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 4-6), system validates at step (6): if [numericUpDownAdults] < 1 → error. Calculates delta_seats = (new_adults + new_children) - (old_adults + old_children). If delta_seats > 0 AND delta_seats > available_seats → error (Refer to MSG 101). If [txtAreaTravelers].lineCount != (new_adults + new_children) → error. If any fails → return to step (4). Else proceed to step (7).                                                                                                                                                |
+| (7)               | BR193   | **Querying Rules:** System begins transaction and locks at step (7) with SQL: "SELECT \* FROM Tour_Booking WHERE booking_id = [id] FOR UPDATE" and "SELECT \* FROM Trip WHERE trip_id = [trip_id] FOR UPDATE". (Refer to "Tour_Booking", "Trip" tables in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                 |
+| (7)               | BR194   | **Querying Rules:** System updates at step (7): "UPDATE Tour_Booking SET no_adults = [new], no_children = [new], total_amount = [new_total] WHERE booking_id = [id]". Deletes travelers: "DELETE FROM Tour_Booking_Detail WHERE booking_id = [id]". Inserts new: "INSERT INTO Tour_Booking_Detail ..." for each. Updates seats: "UPDATE Trip SET booked_seats = booked_seats + [delta_seats] WHERE trip_id = [trip_id]". Updates invoice: "UPDATE Invoice SET total_amount = [new_total] WHERE booking_id = [id]". Commits. (Refer to tables in "DB Sheet" file)                                           |
+| (8), (9), (10)    | BR195   | **Displaying Rules:** System displays success "Booking updated successfully!" (Refer to MSG 102) at step (8), reloads at step (9). Staff confirms end at step (10).                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+
+##### 2.1.10.6 Delete Booking
+
+###### Use Case Description
+
+| Name               | Delete Booking                                                                                                                                                                                         |
+| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to delete a booking from the system. Booking can only be deleted if it's within the cancellation cutoff period and payment hasn't been processed, or if refund is approved. |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                              |
+| **Trigger**        | Staff clicks "Delete" button on a booking in bookings list or booking details.                                                                                                                         |
+| **Pre-condition**  | Staff must be authenticated with staff role. Booking must exist. Booking status must be PENDING or CONFIRMED. Trip departure date must be at least 7 days in the future (cutoff period).               |
+| **Post-condition** | Booking and related records (travelers, invoice) are permanently deleted from database. Trip's booked_seats count is decreased. Staff views updated bookings list without deleted booking.             |
+
+###### Sequence Flow
+
+[sequence-adjust-and-track-bookings-delete-booking](../sequence/adjust-and-track-bookings/delete-booking)
+
+###### Activities Flow
+
+[activity-adjust-and-track-bookings-delete-booking](../activity/adjust-and-track-bookings/delete-booking)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| :---------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3), (3.1), (3.2) | BR196   | **Querying Rules:** When staff clicks [btnDelete] at step (2), system verifies at step (3) with SQL: "SELECT tb.\*, t.departure_date, r.route_name FROM Tour_Booking tb JOIN Trip t, Route r WHERE tb.booking_id = [id]". Calculates cutoff as departure_date - 7 days. If tb.status NOT IN ('PENDING', 'CONFIRMED') OR NOW() > cutoff → display "Cannot delete" with reason (Refer to MSG 103) at step (3.1), end use case. Else proceed to step (4). (Refer to "Tour_Booking", "Trip", "Route" tables in "DB Sheet" file) |
+| (4)               | BR197   | **Displaying Rules:** System displays confirmation at step (4): "Delete booking #[booking_id] for [route_name] on [departure_date]? This will free [adults + children] seats. Cannot be undone." with [btnConfirm], [btnCancel].                                                                                                                                                                                                                                                                                            |
+| (5), (5.1), (5.2) | BR198   | **Choosing Rules:** At step (5), if [btnCancel] at step (5.1) → close at step (5.2), end. If [btnConfirm] → proceed to step (6).                                                                                                                                                                                                                                                                                                                                                                                            |
+| (6)               | BR199   | **Querying Rules:** System deletes in transaction at step (6): "UPDATE Trip SET booked_seats = booked_seats - [total] WHERE trip_id = [trip_id]". "DELETE FROM Tour_Booking_Detail WHERE booking_id = [id]". "DELETE FROM Invoice WHERE booking_id = [id]". "DELETE FROM Tour_Booking WHERE booking_id = [id]". Commits. (Refer to "Trip", "Tour_Booking_Detail", "Invoice", "Tour_Booking" tables in "DB Sheet" file)                                                                                                      |
+| (7), (8), (9)     | BR200   | **Displaying Rules:** System displays success "Booking deleted successfully!" (Refer to MSG 104) at step (7), redirects to list at step (8). Staff confirms end at step (9).                                                                                                                                                                                                                                                                                                                                                |
+
+#### 2.1.11 Adjust Customers Use Case
+
+##### 2.1.11.1 Add New Customer
+
+###### Use Case Description
+
+| Name               | Add New Customer                                                                                                                                                    |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Description**    | This use case allows staff to create new customer accounts by entering customer information and generating login credentials.                                       |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                           |
+| **Trigger**        | Staff selects "Add New Customer" function in customers management page.                                                                                             |
+| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to customers management module.                                                                 |
+| **Post-condition** | New customer account is created with role CUSTOMER. Empty cart is created for customer. Welcome email is sent with login credentials. Staff views customer details. |
+
+###### Sequence Flow
+
+[sequence-adjust-customers-add-new-customer](../sequence/adjust-customers/add-new-customer)
+
+###### Activities Flow
+
+[activity-adjust-customers-add-new-customer](../activity/adjust-customers/add-new-customer)
+
+###### Business Rules
+
+| Activity      | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| :------------ | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)           | BR201   | **Displaying Rules:** System displays "Add New Customer" form at step (2) with [txtBoxUsername], [txtBoxPassword], [txtBoxFullName], [txtBoxEmail], [txtBoxPhone], [txtAreaAddress], [datePickerBirthday], [dropdownGender], [btnSave], [btnCancel]. (Refer to "Add Customer Form" view in "View Description" file)                                                                                                                                                                  |
+| (5)           | BR202   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 3-5), system validates at step (5): if username.length < 3 OR password.length < 6 OR email invalid format OR phone invalid format → error. Checks unique: "SELECT COUNT(\*) FROM User WHERE username = [username] OR email = [email]". If duplicate found → error (Refer to MSG 105). Else proceed to step (6).                                                                                              |
+| (6)           | BR203   | **Querying Rules:** System creates customer in transaction at step (6): "INSERT INTO User (username, password, full_name, email, phone, address, birthday, gender, role, status, created_at) VALUES ([username], HASH([password]), [full_name], [email], [phone], [address], [birthday], [gender], 'CUSTOMER', 'Active', NOW())". Creates cart: "INSERT INTO Cart (customer_id, created_at) VALUES ([user_id], NOW())". Commits. (Refer to "User", "Cart" tables in "DB Sheet" file) |
+| (7), (8), (9) | BR204   | **Displaying Rules:** System sends welcome email with credentials at step (7), displays success "Customer created successfully!" (Refer to MSG 106), redirects to details at step (8). Staff confirms end at step (9).                                                                                                                                                                                                                                                               |
+
+##### 2.1.11.2 View and Filter Customers
+
+###### Use Case Description
+
+| Name               | View and Filter Customers                                                                                                                                        |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to view all customers with statistics and filter them by various criteria.                                                            |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                        |
+| **Trigger**        | Staff selects "View Customers" function in customers management module.                                                                                          |
+| **Pre-condition**  | Staff must be authenticated with staff role.                                                                                                                     |
+| **Post-condition** | Staff views customers list with booking statistics. Can filter by name, email, status, registration date. List shows customer cards with contact info and stats. |
+
+###### Sequence Flow
+
+[sequence-adjust-customers-view-and-filter-customers](../sequence/adjust-customers/view-and-filter-customers)
+
+###### Activities Flow
+
+[activity-adjust-customers-view-and-filter-customers](../activity/adjust-customers/view-and-filter-customers)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR205   | **Querying Rules:** When staff selects "View Customers" at step (1), system queries at step (2) with SQL: "SELECT u.\*, COUNT(tb.booking_id) as total_bookings, SUM(tb.total_amount) as total_spent FROM User u LEFT JOIN Tour_Booking tb ON u.user_id = tb.customer_id WHERE u.role = 'CUSTOMER' GROUP BY u.user_id ORDER BY u.created_at DESC". If COUNT = 0 → display "No customers found" (Refer to MSG 107) at step (2.1), end. Else proceed to step (3). (Refer to "User", "Tour_Booking" tables in "DB Sheet" file) |
+| (3)               | BR206   | **Displaying Rules:** System displays "Customers List" view at step (3) with filter panel: [txtBoxSearchName], [txtBoxSearchEmail], [dropdownFilterStatus] (Active, Locked), [datePickerFromDate], [datePickerToDate], [btnApplyFilter]; and grid with [cardCustomer] showing customer info, total bookings, total spent, action buttons. (Refer to "Customers List" view in "View Description" file)                                                                                                                      |
+| (6), (6.1)        | BR207   | **Querying Rules:** When staff clicks [btnApplyFilter] in repeat loop (steps 4-6), system validates at step (6). If [datePickerFromDate] > [datePickerToDate] → error. Builds dynamic SQL with WHERE (u.full_name LIKE '%[name]%') AND (u.email LIKE '%[email]%') AND (u.status = [status] OR [status] = null) AND date range. If COUNT = 0 → display "No customers match" (Refer to MSG 108) at step (6.1). Else proceed to step (7).                                                                                     |
+| (7), (8)          | BR208   | **Displaying Rules:** System updates grid at step (7) with filtered results, displays "[filtered] of [total] customers". Staff can repeat or confirm end at step (8).                                                                                                                                                                                                                                                                                                                                                      |
+
+##### 2.1.11.3 View Customer Details
+
+###### Use Case Description
+
+| Name               | View Customer Details                                                                                                                                          |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to view comprehensive customer information including personal details, booking statistics, recent bookings, and favorite routes.    |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                                                      |
+| **Trigger**        | Staff clicks on a customer from customers list.                                                                                                                |
+| **Pre-condition**  | Staff must be authenticated with staff role. Customer must exist.                                                                                              |
+| **Post-condition** | Staff views complete customer profile with statistics, recent bookings history, favorite routes list, and available action buttons for edit/delete operations. |
+
+###### Sequence Flow
+
+[sequence-adjust-customers-view-customer-details](../sequence/adjust-customers/view-customer-details)
+
+###### Activities Flow
+
+[activity-adjust-customers-view-customer-details](../activity/adjust-customers/view-customer-details)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                         |
+| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (2), (2.1), (2.2) | BR209   | **Querying Rules:** When staff selects customer at step (1), system queries at step (2) with SQL: "SELECT \* FROM User WHERE user_id = [id] AND role = 'CUSTOMER'". If COUNT = 0 → display "Customer not found" (Refer to MSG 109) at step (2.1), end. Else proceed to step (3). (Refer to "User" table in "DB Sheet" file)                                                                                         |
+| (3)               | BR210   | **Querying Rules:** System queries booking stats at step (3) with SQL: "SELECT COUNT(\*) as total_bookings, SUM(total_amount) as total_spent, MAX(booking_date) as last_booking FROM Tour_Booking WHERE customer_id = [id]". (Refer to "Tour_Booking" table in "DB Sheet" file)                                                                                                                                     |
+| (4)               | BR211   | **Querying Rules:** System queries recent bookings at step (4) with SQL: "SELECT tb.\*, t.departure_date, r.route_name FROM Tour_Booking tb JOIN Trip t, Route r WHERE tb.customer_id = [id] ORDER BY tb.booking_date DESC LIMIT 5". (Refer to "Tour_Booking", "Trip", "Route" tables in "DB Sheet" file)                                                                                                           |
+| (5)               | BR212   | **Querying Rules:** System queries favorites at step (5) with SQL: "SELECT r.\* FROM Favorite_Tour ft JOIN Route r ON ft.route_id = r.route_id WHERE ft.customer_id = [id]". (Refer to "Favorite_Tour", "Route" tables in "DB Sheet" file)                                                                                                                                                                          |
+| (6), (7), (8)     | BR213   | **Displaying Rules:** System displays "Customer Detail" view at steps (6-8) with panels: personal info ([lblFullName], [lblEmail], [lblPhone], [lblAddress], [lblStatus]); statistics (total bookings, total spent, last booking date); recent bookings list; favorite routes list; action buttons [btnEdit], [btnDelete]. Staff confirms at step (8). (Refer to "Customer Detail" view in "View Description" file) |
+
+##### 2.1.11.4 Edit Customer
+
+###### Use Case Description
+
+| Name               | Edit Customer                                                                                            |
+| :----------------- | :------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to modify customer information including personal details and account status. |
+| **Actor**          | Staff (must be signed in with staff role)                                                                |
+| **Trigger**        | Staff selects "Edit Customer" function on a customer.                                                    |
+| **Pre-condition**  | Staff must be authenticated with staff role. Customer must exist.                                        |
+| **Post-condition** | Customer information is updated. Staff views updated customer details with success confirmation.         |
+
+###### Sequence Flow
+
+[sequence-adjust-customers-edit-customer](../sequence/adjust-customers/edit-customer)
+
+###### Activities Flow
+
+[activity-adjust-customers-edit-customer](../activity/adjust-customers/edit-customer)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                 |
+| :---------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR214   | **Querying Rules:** When staff selects "Edit Customer" at step (1), system queries at step (2) with SQL: "SELECT \* FROM User WHERE user_id = [id] AND role = 'CUSTOMER'". If COUNT = 0 → display "Customer not found" (Refer to MSG 110), end. Else proceed to step (3). (Refer to "User" table in "DB Sheet" file)                                        |
+| (3)               | BR215   | **Displaying Rules:** System displays "Edit Customer" form at step (3) with [lblUsername] (read-only), [txtBoxFullName], [txtBoxEmail], [txtBoxPhone], [txtAreaAddress], [datePickerBirthday], [dropdownGender], [dropdownStatus] (Active, Locked), [btnSave], [btnCancel], all pre-filled. (Refer to "Edit Customer Form" view in "View Description" file) |
+| (6)               | BR216   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 4-6), system validates at step (6): if email invalid format OR phone invalid format → error. Checks unique: "SELECT COUNT(\*) FROM User WHERE email = [email] AND user_id != [current_id]". If duplicate → error (Refer to MSG 111). Else proceed to step (7).                      |
+| (7)               | BR217   | **Querying Rules:** System updates at step (7) with SQL: "UPDATE User SET full_name = [name], email = [email], phone = [phone], address = [address], birthday = [birthday], gender = [gender], status = [status], updated_at = NOW() WHERE user_id = [id]". (Refer to "User" table in "DB Sheet" file)                                                      |
+| (8), (9), (10)    | BR218   | **Displaying Rules:** System displays success "Customer updated successfully!" (Refer to MSG 112) at step (8), reloads details at step (9). Staff confirms end at step (10).                                                                                                                                                                                |
+
+##### 2.1.11.5 Delete Customer
+
+###### Use Case Description
+
+| Name               | Delete Customer                                                                                                                      |
+| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to delete or disable customer accounts. Cannot delete if customer has active bookings or unpaid invoices. |
+| **Actor**          | Staff (must be signed in with staff role)                                                                                            |
+| **Trigger**        | Staff clicks "Delete" button on a customer.                                                                                          |
+| **Pre-condition**  | Staff must be authenticated with staff role. Customer must exist.                                                                    |
+| **Post-condition** | Customer account is either disabled (status set to Locked) or permanently deleted. Staff views updated customers list.               |
+
+###### Sequence Flow
+
+[sequence-adjust-customers-delete-customer](../sequence/adjust-customers/delete-customer)
+
+###### Activities Flow
+
+[activity-adjust-customers-delete-customer](../activity/adjust-customers/delete-customer)
+
+###### Business Rules
+
+| Activity               | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| :--------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3), (3.1), (3.2)      | BR219   | **Querying Rules:** When staff clicks [btnDelete] at step (2), system checks at step (3) with SQL: "SELECT COUNT(\*) as active_bookings FROM Tour_Booking WHERE customer_id = [id] AND status IN ('PENDING', 'CONFIRMED')". Checks unpaid: "SELECT COUNT(\*) FROM Invoice i JOIN Tour_Booking tb WHERE tb.customer_id = [id] AND i.payment_status = 'PENDING'". If active_bookings > 0 OR unpaid > 0 → display "Cannot delete: Customer has active bookings or unpaid invoices" (Refer to MSG 113) at step (3.1), end. Else proceed to step (4). (Refer to "Tour_Booking", "Invoice" tables in "DB Sheet" file) |
+| (4)                    | BR220   | **Displaying Rules:** System displays confirmation at step (4): "Delete or disable customer '[full_name]'?" with [btnDisable] "Set to LOCKED status", [btnDeletePermanently] "Delete permanently (cannot undo)", [btnCancel].                                                                                                                                                                                                                                                                                                                                                                                   |
+| (5), (5.1), (5.2), (6) | BR221   | **Choosing/Querying Rules:** At step (5), if [btnCancel] at step (5.1) → close at step (5.2), end. If [btnDisable] → "UPDATE User SET status = 'Locked' WHERE user_id = [id]" at step (6). If [btnDeletePermanently] → "DELETE FROM Cart WHERE customer_id = [id]" then "DELETE FROM User WHERE user_id = [id]" at step (6). Commits. (Refer to "User", "Cart" tables in "DB Sheet" file)                                                                                                                                                                                                                       |
+| (7), (8), (9)          | BR222   | **Displaying Rules:** System displays success message (Refer to MSG 114) at step (7), redirects to list at step (8). Staff confirms end at step (9).                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+
+#### 2.1.12 Adjust Staffs Use Case
+
+##### 2.1.12.1 Add New Staff
+
+###### Use Case Description
+
+| Name               | Add New Staff                                                                                                                                           |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Description**    | This use case allows admin to create new staff accounts with appropriate credentials and permissions.                                                   |
+| **Actor**          | Admin (must be signed in with admin role)                                                                                                               |
+| **Trigger**        | Admin selects "Add New Staff" function in staff management page.                                                                                        |
+| **Pre-condition**  | Admin must be authenticated with admin role. Admin must have access to staff management module.                                                         |
+| **Post-condition** | New staff account is created with role STAFF. Empty cart is created for staff. Welcome email is sent with login credentials. Admin views staff details. |
+
+###### Sequence Flow
+
+[sequence-adjust-staffs-add-new-staff](../sequence/adjust-staffs/add-new-staff)
+
+###### Activities Flow
+
+[activity-adjust-staffs-add-new-staff](../activity/adjust-staffs/add-new-staff)
+
+###### Business Rules
+
+| Activity            | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| :------------------ | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)                 | BR223   | **Displaying Rules:** System displays "Add New Staff" form at step (2) with [txtBoxUsername], [txtBoxPassword], [txtBoxFullName], [txtBoxEmail], [txtBoxPhone], [txtAreaAddress], [datePickerBirthday], [dropdownGender], [btnSave], [btnCancel]. (Refer to "Add Staff Form" view in "View Description" file)                                                                                                                                                                  |
+| (5)                 | BR224   | **Validation Rules:** When admin clicks [btnSave] in repeat loop (steps 3-5), system validates at step (5): if username.length < 3 OR password.length < 8 OR email invalid OR phone invalid OR age < 18 → error. Checks unique: "SELECT COUNT(\*) FROM User WHERE username = [username] OR email = [email]". If duplicate → error (Refer to MSG 115). Else proceed to step (6).                                                                                                |
+| (6)                 | BR225   | **Querying Rules:** System creates staff in transaction at step (6): "INSERT INTO User (username, password, full_name, email, phone, address, birthday, gender, role, status, created_at) VALUES ([username], HASH([password]), [full_name], [email], [phone], [address], [birthday], [gender], 'STAFF', 'Active', NOW())". Creates cart: "INSERT INTO Cart (customer_id, created_at) VALUES ([user_id], NOW())". Commits. (Refer to "User", "Cart" tables in "DB Sheet" file) |
+| (7), (8), (9), (10) | BR226   | **Displaying Rules:** System sends welcome email at step (7), displays success "Staff created successfully!" (Refer to MSG 116), redirects to details at step (8-9). Admin confirms end at step (10).                                                                                                                                                                                                                                                                          |
+
+##### 2.1.12.2 View and Filter Staffs
+
+###### Use Case Description
+
+| Name               | View and Filter Staffs                                                                                                                               |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to view all staff members with work statistics and filter them by various criteria.                                       |
+| **Actor**          | Admin (must be signed in with admin role)                                                                                                            |
+| **Trigger**        | Admin selects "Manage Staffs" function in staff management module.                                                                                   |
+| **Pre-condition**  | Admin must be authenticated with admin role.                                                                                                         |
+| **Post-condition** | Admin views staffs list with work statistics. Can filter by keyword, phone, lock status, gender. List shows staff cards with contact info and stats. |
+
+###### Sequence Flow
+
+[sequence-adjust-staffs-view-and-filter-staffs](../sequence/adjust-staffs/view-and-filter-staffs)
+
+###### Activities Flow
+
+[activity-adjust-staffs-view-and-filter-staffs](../activity/adjust-staffs/view-and-filter-staffs)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| :---------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR227   | **Querying Rules:** When admin selects "Manage Staffs" at step (1), system queries at step (2) with SQL: "SELECT u.\*, COUNT(tb.booking_id) as total_managed_bookings FROM User u LEFT JOIN Tour_Booking tb ON u.user_id = tb.staff_id WHERE u.role = 'STAFF' GROUP BY u.user_id ORDER BY u.created_at DESC". If COUNT = 0 → display "No staffs found" (Refer to MSG 117) at step (2.1) with add button, end. Else proceed to step (3). (Refer to "User", "Tour_Booking" tables in "DB Sheet" file) |
+| (3)               | BR228   | **Displaying Rules:** System displays "Staffs List" view at step (3) with filter panel: [txtBoxKeyword], [txtBoxPhone], [checkboxIsLocked], [dropdownGender], [btnApplyFilter]; and grid with [cardStaff] showing staff info, total managed bookings, action buttons. (Refer to "Staffs List" view in "View Description" file)                                                                                                                                                                      |
+| (6), (6.1)        | BR229   | **Querying Rules:** When admin clicks [btnApplyFilter] in repeat loop (steps 4-6), system validates at step (6). Builds dynamic SQL with WHERE (u.full_name LIKE '%[keyword]%' OR u.username LIKE '%[keyword]%') AND (u.phone = [phone] OR [phone] = null) AND (u.status = 'Locked' OR [isLocked] = false) AND (u.gender = [gender] OR [gender] = null). If COUNT = 0 → display "No staffs match" (Refer to MSG 118) at step (6.1). Else proceed to step (7).                                       |
+| (7), (8)          | BR230   | **Displaying Rules:** System updates grid at step (7) with filtered results, displays "[filtered] of [total] staffs". Admin can repeat or confirm end at step (8).                                                                                                                                                                                                                                                                                                                                  |
+
+##### 2.1.12.3 View Staff Details
+
+###### Use Case Description
+
+| Name               | View Staff Details                                                                                                                                                          |
+| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to view comprehensive staff information including personal details, work statistics, and recent bookings handled.                                |
+| **Actor**          | Admin (must be signed in with admin role)                                                                                                                                   |
+| **Trigger**        | Admin clicks on a staff from staffs list.                                                                                                                                   |
+| **Pre-condition**  | Admin must be authenticated with admin role. Staff must exist.                                                                                                              |
+| **Post-condition** | Admin views complete staff profile with work statistics (total bookings/trips/routes handled), recent bookings list (TOP 10), and available action buttons for edit/delete. |
+
+###### Sequence Flow
+
+[sequence-adjust-staffs-view-staff-details](../sequence/adjust-staffs/view-staff-details)
+
+###### Activities Flow
+
+[activity-adjust-staffs-view-staff-details](../activity/adjust-staffs/view-staff-details)
+
+###### Business Rules
+
+| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| :---------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2), (2.1), (2.2) | BR231   | **Querying Rules:** When admin selects staff at step (1), system queries at step (2) with SQL: "SELECT \* FROM User WHERE user_id = [id] AND role = 'STAFF'". If COUNT = 0 → display "Staff not found" (Refer to MSG 119) at step (2.1), end. Else proceed to step (3). (Refer to "User" table in "DB Sheet" file)                                                                                                             |
+| (3)               | BR232   | **Querying Rules:** System queries work stats at step (3) with SQL: "SELECT COUNT(DISTINCT tb.booking_id) as total_bookings, COUNT(DISTINCT t.trip_id) as total_trips, COUNT(DISTINCT r.route_id) as total_routes FROM Tour_Booking tb LEFT JOIN Trip t ON tb.trip_id = t.trip_id LEFT JOIN Route r ON t.route_id = r.route_id WHERE tb.staff_id = [id]". (Refer to "Tour_Booking", "Trip", "Route" tables in "DB Sheet" file) |
+| (4)               | BR233   | **Querying Rules:** System queries recent bookings at step (4) with SQL: "SELECT tb.\*, u.full_name, t.departure_date, r.route_name FROM Tour_Booking tb JOIN User u, Trip t, Route r WHERE tb.staff_id = [id] ORDER BY tb.booking_date DESC LIMIT 10". (Refer to "Tour_Booking", "User", "Trip", "Route" tables in "DB Sheet" file)                                                                                           |
+| (5), (6), (7)     | BR234   | **Displaying Rules:** System displays "Staff Detail" view at steps (5-7) with panels: personal info ([lblFullName], [lblEmail], [lblPhone], [lblStatus]); work statistics (total bookings, trips, routes handled); recent bookings list (TOP 10); action buttons [btnEdit], [btnDelete]. Admin confirms at step (7). (Refer to "Staff Detail" view in "View Description" file)                                                 |
+
+##### 2.1.12.4 Edit Staff
+
+###### Use Case Description
+
+| Name               | Edit Staff                                                                                                                                    |
+| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to modify staff information including personal details, password, and account status.                              |
+| **Actor**          | Admin (must be signed in with admin role)                                                                                                     |
+| **Trigger**        | Admin selects "Edit Staff" function on a staff.                                                                                               |
+| **Pre-condition**  | Admin must be authenticated with admin role. Staff must exist.                                                                                |
+| **Post-condition** | Staff information is updated. Notification email sent if email/password changed. Admin views updated staff details with success confirmation. |
+
+###### Sequence Flow
+
+[sequence-adjust-staffs-edit-staff](../sequence/adjust-staffs/edit-staff)
+
+###### Activities Flow
+
+[activity-adjust-staffs-edit-staff](../activity/adjust-staffs/edit-staff)
+
+###### Business Rules
+
+| Activity             | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                 |
+| :------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (2), (2.1), (2.2)    | BR235   | **Querying Rules:** When admin selects "Edit Staff" at step (1), system queries at step (2) with SQL: "SELECT \* FROM User WHERE user_id = [id] AND role = 'STAFF'". If COUNT = 0 → display "Staff not found" (Refer to MSG 120), end. Else proceed to step (3). (Refer to "User" table in "DB Sheet" file)                                                                                 |
+| (3)                  | BR236   | **Displaying Rules:** System displays "Edit Staff" form at step (3) with [lblUsername] (read-only), [txtBoxPassword], [txtBoxFullName], [txtBoxEmail], [txtBoxPhone], [txtAreaAddress], [datePickerBirthday], [dropdownGender], [dropdownStatus] (Active, Locked), [btnSave], [btnCancel], all pre-filled. (Refer to "Edit Staff Form" view in "View Description" file)                     |
+| (6)                  | BR237   | **Validation Rules:** When admin clicks [btnSave] in repeat loop (steps 4-6), system validates at step (6): if password not empty AND password.length < 8 → error. If email invalid → error. Checks unique: "SELECT COUNT(\*) FROM User WHERE email = [email] AND user_id != [current_id]". If duplicate → error (Refer to MSG 121). Else proceed to step (7).                              |
+| (7)                  | BR238   | **Querying Rules:** System updates at step (7) with SQL: "UPDATE User SET password = CASE WHEN [newPassword] != '' THEN HASH([newPassword]) ELSE password END, full_name = [name], email = [email], phone = [phone], address = [address], birthday = [birthday], gender = [gender], status = [status], updated_at = NOW() WHERE user_id = [id]". (Refer to "User" table in "DB Sheet" file) |
+| (8), (9), (10), (11) | BR239   | **Displaying Rules:** System sends notification email if email/password changed at step (8), displays success "Staff updated successfully!" (Refer to MSG 122) at step (9), reloads details at step (10). Admin confirms end at step (11).                                                                                                                                                  |
+
+##### 2.1.12.5 Delete Staff
+
+###### Use Case Description
+
+| Name               | Delete Staff                                                                                                                       |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to delete or disable staff accounts. Cannot delete if staff has active bookings assigned.               |
+| **Actor**          | Admin (must be signed in with admin role)                                                                                          |
+| **Trigger**        | Admin clicks "Delete" button on a staff.                                                                                           |
+| **Pre-condition**  | Admin must be authenticated with admin role. Staff must exist.                                                                     |
+| **Post-condition** | Staff account is either disabled (status set to Locked) or permanently deleted. Action is logged. Admin views updated staffs list. |
+
+###### Sequence Flow
+
+[sequence-adjust-staffs-delete-staff](../sequence/adjust-staffs/delete-staff)
+
+###### Activities Flow
+
+[activity-adjust-staffs-delete-staff](../activity/adjust-staffs/delete-staff)
+
+###### Business Rules
+
+| Activity               | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| :--------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (3), (3.1), (3.2)      | BR240   | **Querying Rules:** When admin clicks [btnDelete] at step (2), system checks at step (3) with SQL: "SELECT COUNT(\*) as active_bookings FROM Tour_Booking WHERE staff_id = [id] AND status IN ('PENDING', 'CONFIRMED')". If active_bookings > 0 → display "Cannot delete: Staff has active bookings. Suggest disable instead" (Refer to MSG 123) at step (3.1), end. Else proceed to step (4). (Refer to "Tour_Booking" table in "DB Sheet" file) |
+| (4)                    | BR241   | **Displaying Rules:** System displays confirmation at step (4): "Delete or disable staff '[full_name]'?" with [btnDisable] "Set to LOCKED status", [btnDeletePermanently] "Delete permanently (cannot undo)", [btnCancel].                                                                                                                                                                                                                        |
+| (5), (5.1), (5.2), (6) | BR242   | **Choosing/Querying Rules:** At step (5), if [btnCancel] at step (5.1) → close at step (5.2), end. If [btnDisable] → "UPDATE User SET status = 'Locked' WHERE user_id = [id]" at step (6). If [btnDeletePermanently] → "DELETE FROM Cart WHERE customer_id = [id]" then "DELETE FROM User WHERE user_id = [id]" at step (6). Commits. (Refer to "User", "Cart" tables in "DB Sheet" file)                                                         |
+| (7), (8), (9)          | BR243   | **Displaying Rules:** System logs action, displays success message (Refer to MSG 124) at step (7), redirects to list at step (8). Admin confirms end at step (9).                                                                                                                                                                                                                                                                                 |
+
+#### 2.1.13 View Reports Use Case
+
+##### 2.1.13.1 Revenue Report
+
+###### Use Case Description
+
+| Name               | Revenue Report                                                                                                                           |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to generate revenue reports showing total revenue, booking counts, trends over time with line and bar charts. |
+| **Actor**          | Admin (must be signed in with admin role)                                                                                                |
+| **Trigger**        | Admin selects "Revenue Report" function in reports module.                                                                               |
+| **Pre-condition**  | Admin must be authenticated with admin role. System must have booking and invoice data.                                                  |
+| **Post-condition** | Admin views revenue report with statistics, charts, and can export to PDF/Excel.                                                         |
+
+###### Sequence Flow
+
+[sequence-view-reports-revenue-report](../sequence/view-reports/revenue-report)
+
+###### Activities Flow
+
+[activity-view-reports-revenue-report](../activity/view-reports/revenue-report)
+
+###### Business Rules
+
+| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| :----------------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)                      | BR244   | **Displaying Rules:** System displays "Revenue Report Configuration" form at step (2) with [dropdownDateRange], [datePickerFrom], [datePickerTo], [btnGenerate]. (Refer to "Report Configuration" view in "View Description" file)                                                                                                                                                                                                              |
+| (3), (4)                 | BR245   | **Validation Rules:** When admin configures and clicks [btnGenerate] in repeat loop (steps 3-4), system validates: if [datePickerFrom] > [datePickerTo] → error. If date range > 2 years → warning. Else proceed to step (5).                                                                                                                                                                                                                   |
+| (5), (5.1), (5.2)        | BR246   | **Querying Rules:** System queries revenue at step (5): "SELECT DATE(booking_date) as date, SUM(total_amount) as revenue, COUNT(\*) as bookings FROM Tour_Booking tb JOIN Invoice i WHERE i.payment_status = 'PAID' AND booking_date BETWEEN [from] AND [to] GROUP BY DATE(booking_date)". If COUNT = 0 → display "No data" (Refer to MSG 125) at step (5.1), end. Else proceed. (Refer to "Tour_Booking", "Invoice" tables in "DB Sheet" file) |
+| (6), (7)                 | BR247   | **Querying/Displaying Rules:** System calculates statistics and generates line/bar charts at steps (6-7): totals (SUM), averages (AVG), % changes, trends. Displays report with overview cards, charts, data table, export buttons.                                                                                                                                                                                                             |
+| (10), (10.1), (11), (12) | BR248   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 126) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "RevenueReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                      |
+| (13)                     | BR249   | **Displaying Rules:** Admin confirms end at step (13).                                                                                                                                                                                                                                                                                                                                                                                          |
+
+##### 2.1.13.2 Booking Report
+
+###### Use Case Description
+
+| Name               | Booking Report                                                                                                                            |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to generate booking reports showing detailed booking information with status distribution and route analytics. |
+| **Actor**          | Admin (must be signed in with admin role)                                                                                                 |
+| **Trigger**        | Admin selects "Booking Report" function in reports module.                                                                                |
+| **Pre-condition**  | Admin must be authenticated with admin role. System must have booking data.                                                               |
+| **Post-condition** | Admin views booking report with statistics, pie/bar charts, and can export to PDF/Excel.                                                  |
+
+###### Sequence Flow
+
+[sequence-view-reports-booking-report](../sequence/view-reports/booking-report)
+
+###### Activities Flow
+
+[activity-view-reports-booking-report](../activity/view-reports/booking-report)
+
+###### Business Rules
+
+| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| :----------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (2)                      | BR250   | **Displaying Rules:** System displays "Booking Report Configuration" form at step (2) with [dropdownDateRange], [datePickerFrom], [datePickerTo], [dropdownStatusFilter], [dropdownRouteFilter], [btnGenerate].                                                                                                                                                                                                                                                                 |
+| (3), (4)                 | BR251   | **Validation Rules:** When admin configures and clicks [btnGenerate] in repeat loop (steps 3-4), system validates: if [datePickerFrom] > [datePickerTo] → error. If date range > 2 years → warning. Else proceed to step (5).                                                                                                                                                                                                                                                   |
+| (5), (5.1), (5.2)        | BR252   | **Querying Rules:** System queries bookings at step (5): "SELECT tb.\*, u.full_name, t.\*, r.route_name FROM Tour_Booking tb JOIN User u, Trip t, Route r WHERE booking_date BETWEEN [from] AND [to] AND (status = [filter] OR [filter] IS NULL) AND (r.route_id = [routeFilter] OR [routeFilter] IS NULL)". If COUNT = 0 → display "No data" (Refer to MSG 127) at step (5.1), end. Else proceed. (Refer to "Tour_Booking", "User", "Trip", "Route" tables in "DB Sheet" file) |
+| (6), (7)                 | BR253   | **Querying/Displaying Rules:** System calculates statistics and generates pie/bar charts at steps (6-7): totals, status distribution, bookings by route. Displays report with overview cards, charts, data table, export buttons.                                                                                                                                                                                                                                               |
+| (10), (10.1), (11), (12) | BR254   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 128) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "BookingReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                                                      |
+| (13)                     | BR255   | **Displaying Rules:** Admin confirms end at step (13).                                                                                                                                                                                                                                                                                                                                                                                                                          |
+
+##### 2.1.13.3 Popular Routes Report
+
+###### Use Case Description
+
+| Name               | Popular Routes Report                                                                                                                |
+| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to generate reports showing most popular routes ranked by booking counts and revenue with bar/pie charts. |
+| **Actor**          | Admin (must be signed in with admin role)                                                                                            |
+| **Trigger**        | Admin selects "Popular Routes Report" function in reports module.                                                                    |
+| **Pre-condition**  | Admin must be authenticated with admin role. System must have routes and booking data.                                               |
+| **Post-condition** | Admin views popular routes report with rankings, statistics, charts, and can export to PDF/Excel.                                    |
+
+###### Sequence Flow
+
+[sequence-view-reports-popular-routes-report](../sequence/view-reports/popular-routes-report)
+
+###### Activities Flow
+
+[activity-view-reports-popular-routes-report](../activity/view-reports/popular-routes-report)
+
+###### Business Rules
+
+| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| :----------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (2)                      | BR256   | **Displaying Rules:** System displays "Popular Routes Report Configuration" form at step (2) with [dropdownDateRange], [datePickerFrom], [datePickerTo], [numericMinBookings], [btnGenerate].                                                                                                                                                                                                                                                                                                           |
+| (3), (4)                 | BR257   | **Validation Rules:** When admin configures and clicks [btnGenerate] in repeat loop (steps 3-4), system validates: if [datePickerFrom] > [datePickerTo] → error. If date range > 2 years → warning. Else proceed to step (5).                                                                                                                                                                                                                                                                           |
+| (5), (5.1), (5.2)        | BR258   | **Querying Rules:** System queries popular routes at step (5): "SELECT r.\*, COUNT(tb.booking_id) as total_bookings, SUM(tb.total_amount) as total_revenue FROM Route r JOIN Trip t, Tour_Booking tb WHERE tb.booking_date BETWEEN [from] AND [to] GROUP BY r.route_id HAVING total_bookings >= [minBookings] ORDER BY total_bookings DESC". If COUNT = 0 → display "No data" (Refer to MSG 129) at step (5.1), end. Else proceed. (Refer to "Route", "Trip", "Tour_Booking" tables in "DB Sheet" file) |
+| (6), (7)                 | BR259   | **Querying/Displaying Rules:** System calculates rankings and generates bar/pie charts at steps (6-7): top routes, totals, revenue distribution. Displays report with overview cards, charts, data table, export buttons.                                                                                                                                                                                                                                                                               |
+| (10), (10.1), (11), (12) | BR260   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 130) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "PopularRoutesReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                                                                        |
+| (13)                     | BR261   | **Displaying Rules:** Admin confirms end at step (13).                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+
+##### 2.1.13.4 Customer Report
+
+###### Use Case Description
+
+| Name               | Customer Report                                                                                                                      |
+| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to generate customer reports showing customer statistics, top customers by spending, and customer trends. |
+| **Actor**          | Admin (must be signed in with admin role)                                                                                            |
+| **Trigger**        | Admin selects "Customer Report" function in reports module.                                                                          |
+| **Pre-condition**  | Admin must be authenticated with admin role. System must have customer and booking data.                                             |
+| **Post-condition** | Admin views customer report with statistics, bar/line charts for top customers and trends, and can export to PDF/Excel.              |
+
+###### Sequence Flow
+
+[sequence-view-reports-customer-report](../sequence/view-reports/customer-report)
+
+###### Activities Flow
+
+[activity-view-reports-customer-report](../activity/view-reports/customer-report)
+
+###### Business Rules
+
+| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| :----------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)                      | BR262   | **Displaying Rules:** System displays "Customer Report Configuration" form at step (2) with [dropdownDateRange], [datePickerFrom], [datePickerTo], [dropdownCustomerType] (All, New, Returning), [btnGenerate].                                                                                                                                                                                                                                                                                                             |
+| (3), (4)                 | BR263   | **Validation Rules:** When admin configures and clicks [btnGenerate] in repeat loop (steps 3-4), system validates: if [datePickerFrom] > [datePickerTo] → error. If date range > 2 years → warning. Else proceed to step (5).                                                                                                                                                                                                                                                                                               |
+| (5), (5.1), (5.2)        | BR264   | **Querying Rules:** System queries customers at step (5): "SELECT u.\*, COUNT(tb.booking_id) as total_bookings, SUM(tb.total_amount) as total_spent FROM User u LEFT JOIN Tour_Booking tb ON u.user_id = tb.customer_id WHERE u.role = 'CUSTOMER' AND (tb.booking_date BETWEEN [from] AND [to] OR tb.booking_date IS NULL) GROUP BY u.user_id ORDER BY total_spent DESC". If COUNT = 0 → display "No data" (Refer to MSG 131) at step (5.1), end. Else proceed. (Refer to "User", "Tour_Booking" tables in "DB Sheet" file) |
+| (6), (7)                 | BR265   | **Querying/Displaying Rules:** System calculates statistics and generates bar/line charts at steps (6-7): top 10 customers by spending, new customer trends, totals, averages. Displays report with overview cards, charts, data table, export buttons.                                                                                                                                                                                                                                                                     |
+| (10), (10.1), (11), (12) | BR266   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 132) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "CustomerReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                                                                                                 |
+| (13)                     | BR267   | **Displaying Rules:** Admin confirms end at step (13).                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+
+## 3. Non-functional Requirements
+
+###### Use Case Description
+
+| Name               | View Suggested Products                                                                                  |
+| :----------------- | :------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to view products suggested based on the current product they are viewing. |
+| **Actor**          | Customer                                                                                                 |
+| **Trigger**        | Automatically displayed when viewing product details.                                                    |
+| **Pre-condition**  | Customer's device must be connected to the internet. Customer is viewing a product detail page.          |
+| **Post-condition** | Suggested products are displayed based on recommendation algorithm.                                      |
+
+###### Sequence Flow
+
+[sequence-view-product-view-suggested-product](../sequence/view-product/view-suggested-product)
+
+###### Activities Flow
+
+[activity-view-product-view-suggested-product](../activity/view-product/view-suggested-product)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| :------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)      | BR41    | **Querying Rules:** System queries suggested products using recommendation algorithm based on: <br/>1. Same category as current product<br/>2. Frequently bought together<br/>3. Customer browsing history (if signed in)<br/>4. Similar price range<br/>System queries from "PRODUCT" table (Refer to "Product" table in "DB Sheet" file) with SQL: "SELECT \* FROM Product WHERE category = [current_category] AND productID != [current_product] AND status = 'active' ORDER BY similarity_score DESC LIMIT 8". |
+| (3)      | BR42    | **Displaying Rules:** The system displays suggested products section at the bottom of product detail page showing: product thumbnail, name, price, rating, and quick view button. Display is organized in horizontal scrollable carousel with 4 products visible at a time. (Refer to "Suggested Products" section in "View Description" file)                                                                                                                                                                     |
+| (3.2)    | BR43    | **Navigation Rules:** When customer clicks on a suggested product, system redirects to that product's detail page and recursively executes the "View Product Detail" use case for the selected product.                                                                                                                                                                                                                                                                                                            |
+
+##### 2.1.2.6 Add Product to Cart
+
+###### Use Case Description
+
+| Name               | Add Product to Cart                                                                      |
+| :----------------- | :--------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to add products to their shopping cart.                   |
+| **Actor**          | Customer                                                                                 |
+| **Trigger**        | When the customer clicks "Add to Cart" button after selecting quantity.                  |
+| **Pre-condition**  | Customer's device must be connected to the internet. Product must be available in stock. |
+| **Post-condition** | Product is added to customer's shopping cart.                                            |
+
+###### Sequence Flow
+
+[sequence-view-product-add-product-to-cart](../sequence/view-product/add-product-to-cart)
+
+###### Activities Flow
+
+[activity-view-product-add-product-to-cart](../activity/view-product/add-product-to-cart)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| :------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (2)      | BR44    | **Validation Rules:** When customer enters quantity and clicks "Add to Cart", system validates: <br/>- Quantity must be a positive integer<br/>- Quantity must be greater than 0<br/>- Quantity must not exceed available stock<br/>- Quantity must not exceed maximum purchase limit (if any)<br/>If validation fails, system displays error message (Refer to MSG 19).                                                                                                                                                  |
+| (5)      | BR45    | **Validation Rules:** System validates cart data before storing: <br/>- Check if product still exists and is active in "PRODUCT" table<br/>- Check if product is still in stock<br/>- If product already exists in cart, add quantities together<br/>- If total quantity exceeds stock, display error (Refer to MSG 20)<br/>Otherwise, store/update cart item in "CART" table (Refer to "Cart" table in "DB Sheet" file) and display success notification with cart icon update showing new item count (Refer to MSG 21). |
+
+#### 2.1.3 Manage Cart Use Case
+
+##### 2.1.3.1 Manage Cart
+
+###### Use Case Description
+
+| Name               | Manage Cart                                                            |
+| :----------------- | :--------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to manage items in their shopping cart. |
+| **Actor**          | Customer                                                               |
+| **Trigger**        | When the customer clicks on the cart icon or navigates to cart page.   |
+| **Pre-condition**  | Customer's device must be connected to the internet.                   |
+| **Post-condition** | Customer can view and manage cart items.                               |
+
+###### Sequence Flow
+
+[sequence-manage-cart-manage-cart](../sequence/manage-cart/manage-cart)
+
+###### Activities Flow
+
+[activity-manage-cart-manage-cart](../activity/manage-cart/manage-cart)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                |
+| :------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (1)      | BR46    | **Querying Rules:** System queries cart items from "CART" table (Refer to "Cart" table in "DB Sheet" file) for the current customer using SQL: "SELECT \* FROM Cart c JOIN Product p ON c.productID = p.productID WHERE c.customerID = [Customer.ID]". System calculates: subtotal per item, cart subtotal, applicable discounts, shipping estimate, and total amount.                                                     |
+| (2)      | BR47    | **Displaying Rules:** The system displays "Cart View" showing: list of cart items (each with product image, name, price, quantity selector, subtotal, remove button), cart summary panel (subtotal, discount, shipping, total), "Continue Shopping" button, and "Proceed to Checkout" button. If cart is empty, displays empty cart message with "Browse Products" link. (Refer to "Cart" view in "View Description" file) |
+| (3)      | BR48    | **Choosing Rules:** Customer can choose from available cart management functions: Change Product Amount, Remove Product from Cart, or Purchase. Only one operation can be performed at a time.                                                                                                                                                                                                                             |
+
+##### 2.1.3.2 Change Product Amount
+
+###### Use Case Description
+
+| Name               | Change Product Amount                                                            |
+| :----------------- | :------------------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to change the quantity of products in their cart. |
+| **Actor**          | Customer                                                                         |
+| **Trigger**        | When the customer adjusts the quantity selector for a cart item.                 |
+| **Pre-condition**  | Customer's device must be connected to the internet. Product must exist in cart. |
+| **Post-condition** | Product quantity in cart is updated.                                             |
+
+###### Sequence Flow
+
+[sequence-manage-cart-change-product-amount](../sequence/manage-cart/change-product-amount)
+
+###### Activities Flow
+
+[activity-manage-cart-change-product-amount](../activity/manage-cart/change-product-amount)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| :------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3)      | BR49    | **Validation Rules:** When customer changes product quantity, system validates: <br/>- New quantity must be a positive integer<br/>- New quantity must be greater than 0<br/>- New quantity must not exceed available stock<br/>- New quantity must not exceed maximum purchase limit<br/>If validation fails, system displays error message (Refer to MSG 19) and reverts to previous quantity. Otherwise, system updates quantity in "CART" table and displays success notification (Refer to MSG 22). |
+| (5)      | BR50    | **Displaying Rules:** After successful update, system refreshes cart view showing: updated quantity, updated item subtotal, updated cart total. All calculations are updated in real-time without page reload.                                                                                                                                                                                                                                                                                           |
+
+##### 2.1.3.3 Remove Product from Cart
+
+###### Use Case Description
+
+| Name               | Remove Product from Cart                                                         |
+| :----------------- | :------------------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to remove products from their cart.               |
+| **Actor**          | Customer                                                                         |
+| **Trigger**        | When the customer clicks the "Remove" button for a cart item.                    |
+| **Pre-condition**  | Customer's device must be connected to the internet. Product must exist in cart. |
+| **Post-condition** | Product is removed from cart.                                                    |
+
+###### Sequence Flow
+
+[sequence-manage-cart-remove-product-from-cart](../sequence/manage-cart/remove-product-from-cart)
+
+###### Activities Flow
+
+[activity-manage-cart-remove-product-from-cart](../activity/manage-cart/remove-product-from-cart)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| :------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3)      | BR51    | **Validation Rules:** System validates product exists in customer's cart by querying "CART" table (Refer to "Cart" table in "DB Sheet" file) using SQL: "SELECT \* FROM Cart WHERE customerID = [Customer.ID] AND productID = [Product.ID]". If product is not found in cart, system displays error message (Refer to MSG 23). Otherwise, system deletes cart item from "CART" table and displays success notification (Refer to MSG 24). |
+| (5)      | BR52    | **Displaying Rules:** After successful removal, system updates cart view removing the item from display and recalculating: cart subtotal, applicable discounts, shipping estimate, and total amount. If cart becomes empty, displays empty cart message.                                                                                                                                                                                  |
+
+##### 2.1.3.4 Purchase
+
+###### Use Case Description
+
+| Name               | Purchase                                                                                                              |
+| :----------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to proceed to checkout and purchase items in their cart.                               |
+| **Actor**          | Customer                                                                                                              |
+| **Trigger**        | When the customer clicks "Proceed to Checkout" button.                                                                |
+| **Pre-condition**  | Customer's device must be connected to the internet. Customer must be signed in. Cart must contain at least one item. |
+| **Post-condition** | Customer is redirected to checkout page.                                                                              |
+
+###### Sequence Flow
+
+[sequence-manage-cart-purchase](../sequence/manage-cart/purchase)
+
+###### Activities Flow
+
+[activity-manage-cart-purchase](../activity/manage-cart/purchase)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| :------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3)      | BR53    | **Validation Rules:** Before proceeding to checkout, system validates all cart items: <br/>- All products must still exist and be active in "PRODUCT" table<br/>- All products must be in stock with sufficient quantity<br/>- Cart must not be empty<br/>- Cart total must meet minimum order amount (if applicable)<br/>If any validation fails, system displays specific error message (Refer to MSG 25 for invalid cart, MSG 26 for invalid product) and highlights problematic items. |
+| (4)      | BR54    | **Redirect Rules:** If all validations pass, system closes Cart View and redirects customer to Checkout View with cart data. System creates temporary order session with cart items, calculated totals, and customer information. (Refer to "Checkout" view in "View Description" file)                                                                                                                                                                                                    |
+
+#### 2.1.4 View Order Use Case
+
+##### 2.1.4.1 View Order
+
+###### Use Case Description
+
+| Name               | View Order                                                                       |
+| :----------------- | :------------------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to view their order history and manage orders.    |
+| **Actor**          | Customer                                                                         |
+| **Trigger**        | When the customer navigates to "My Orders" section.                              |
+| **Pre-condition**  | Customer's device must be connected to the internet. Customer must be signed in. |
+| **Post-condition** | Customer can view list of orders and choose order management functions.          |
+
+###### Sequence Flow
+
+[sequence-view-order-view-order](../sequence/view-order/view-order)
+
+###### Activities Flow
+
+[activity-view-order-view-order](../activity/view-order/view-order)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                          |
+| :------- | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (1)      | BR55    | **Querying Rules:** System queries orders from "ORDER" table (Refer to "Order" table in "DB Sheet" file) for current customer using SQL: "SELECT \* FROM Order WHERE customerID = [Customer.ID] ORDER BY created_date DESC". System retrieves order summary including: order ID, date, status, total amount, and item count.                         |
+| (2)      | BR56    | **Displaying Rules:** The system displays "Order Management" view showing paginated list of orders (10 per page). Each order displays: order number, date, status badge, total amount, item count, and quick action buttons. Orders are grouped by status: Active Orders, Past Orders. (Refer to "Order Management" view in "View Description" file) |
+| (3)      | BR57    | **Choosing Rules:** Customer can choose from available order functions: Cancel Order, Return Product, Review Product, Search Order, or View Order Detail. Only one operation can be performed at a time.                                                                                                                                             |
+
+##### 2.1.4.2 Search Order
+
+###### Use Case Description
+
+| Name               | Search Order                                                                        |
+| :----------------- | :---------------------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to search for specific orders using search criteria. |
 | **Actor**          | Customer                                                                            |
-| **Trigger**        | When customer clicks on an order from the order list.                               |
-| **Pre-condition**  | Customer must be signed in. Order must belong to customer.                          |
-| **Post-condition** | Detailed order information is displayed.                                            |
+| **Trigger**        | When the customer enters search criteria in the order search box.                   |
+| **Pre-condition**  | Customer's device must be connected to the internet. Customer must be signed in.    |
+| **Post-condition** | Filtered order results are displayed.                                               |
 
 ###### Sequence Flow
 
-[sequence-view-order-view-order-detail](../sequence/view-order/view-order-detail.html)
+[sequence-view-order-search-order](../sequence/view-order/search-order)
 
 ###### Activities Flow
 
-[activity-view-order-view-order-detail](../activity/view-order/view-order-detail.html)
+[activity-view-order-search-order](../activity/view-order/search-order)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Detail Display:** System shows comprehensive order information:<br>**Order Summary:**<br>- Order number, date, status<br>- Estimated delivery date<br>- Tracking number (if shipped)<br><br>**Items:**<br>- Product images, names, quantities<br>- Individual prices and totals<br>- Links to product pages<br><br>**Pricing:**<br>- Subtotal, tax, shipping<br>- Discounts/promotions applied<br>- Grand total<br><br>**Addresses:**<br>- Shipping address<br>- Billing address<br><br>**Payment:**<br>- Payment method used<br>- Payment status<br><br>**Actions:**<br>- Cancel order (if eligible)<br>- Return items (if eligible)<br>- Review products (if delivered)<br>- Download invoice |
-| (2)      | BR2     | **Action Availability:** System determines available actions based on order status:<br>- Cancel: only if status is "Pending" or "Processing"<br>- Return: only if status is "Delivered" and within return window<br>- Review: only if status is "Delivered"<br>- Track: only if status is "Shipped" or "Delivered"                                                                                                                                                                                                                                                                                                                                                                                |
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| :------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (3)      | BR58    | **Searching Rules:** When customer enters search criteria, system uses Text_change() method with debounce delay of 300ms. System queries "ORDER" table (Refer to "Order" table in "DB Sheet" file) using SQL: "SELECT \* FROM Order WHERE customerID = [Customer.ID] AND (orderID LIKE '%keyword%' OR status = 'keyword' OR DATE(created_date) = 'keyword') ORDER BY created_date DESC". Search can filter by: order ID, order date, order status (Pending, Processing, Shipped, Delivered, Cancelled). |
+| (4)      | BR59    | **Displaying Rules:** System displays "Order Management" view with filtered results showing matching orders. If no results found, displays "No orders found" message with "Clear Search" option. Active filters are displayed as removable tags above the order list.                                                                                                                                                                                                                                   |
 
-##### 2.1.5.3 Search Order Use Case
+##### 2.1.4.3 View Order Detail
 
 ###### Use Case Description
 
-| Name               | Search Order                                                  |
-| ------------------ | ------------------------------------------------------------- |
-| **Description**    | This use case allows customers to search for specific orders. |
-| **Actor**          | Customer                                                      |
-| **Trigger**        | When customer enters search criteria in the order list page.  |
-| **Pre-condition**  | Customer must be signed in.                                   |
-| **Post-condition** | Order list is filtered according to search criteria.          |
+| Name               | View Order Detail                                                                                                   |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------ |
+| **Description**    | This use case allows customers to view detailed information of a specific order.                                    |
+| **Actor**          | Customer                                                                                                            |
+| **Trigger**        | When the customer clicks on an order from the order list.                                                           |
+| **Pre-condition**  | Customer's device must be connected to the internet. Customer must be signed in. Order must belong to the customer. |
+| **Post-condition** | Detailed order information is displayed.                                                                            |
 
 ###### Sequence Flow
 
-[sequence-view-order-search-order](../sequence/view-order/search-order.html)
+[sequence-view-order-view-order-detail](../sequence/view-order/view-order-detail)
 
 ###### Activities Flow
 
-[activity-view-order-search-order](../activity/view-order/search-order.html)
+[activity-view-order-view-order-detail](../activity/view-order/view-order-detail)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                          |
-| -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (1)      | BR1     | **Search Capabilities:** System provides search by:<br>- Order number (exact match)<br>- Product name (partial match)<br>- Date range<br>- Status<br>- Price range                                                                   |
-| (2)      | BR2     | **Search Execution:** System queries ORDER table:<br>- Filters by customer ID<br>- Applies search criteria<br>- Joins with ORDERDETAILS for product search<br>- Returns sorted results<br>- Displays "No orders found" if no matches |
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| :------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3)      | BR60    | **Querying Rules:** System queries order details from "ORDER" and "ORDER_ITEM" tables (Refer to "Order" and "OrderItem" tables in "DB Sheet" file) using SQL: "SELECT \* FROM Order o JOIN OrderItem oi ON o.orderID = oi.orderID JOIN Product p ON oi.productID = p.productID WHERE o.orderID = [Order.ID] AND o.customerID = [Customer.ID]". System also retrieves order timeline, shipping information, and payment details.                                                                              |
+| (4)      | BR61    | **Displaying Rules:** The system displays "Order Detail" view showing: order header (order number, date, status), order timeline (ordered, processing, shipped, delivered), product list (each with image, name, quantity, price, review button if delivered), order summary (subtotal, shipping, tax, discount, total), shipping address, billing address, payment method, and available actions (Cancel Order, Return Product, Contact Support). (Refer to "Order Detail" view in "View Description" file) |
 
-##### 2.1.5.4 Cancel Order Use Case
+##### 2.1.4.4 Cancel Order
 
 ###### Use Case Description
 
-| Name               | Cancel Order                                                                 |
-| ------------------ | ---------------------------------------------------------------------------- |
-| **Description**    | This use case allows customers to cancel orders that haven't been processed. |
+| Name               | Cancel Order                                                                                                                                  |
+| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to cancel a pending order.                                                                                     |
+| **Actor**          | Customer                                                                                                                                      |
+| **Trigger**        | When the customer clicks "Cancel Order" button in order detail view.                                                                          |
+| **Pre-condition**  | Customer's device must be connected to the internet. Customer must be signed in. Order must be in cancellable status (Pending or Processing). |
+| **Post-condition** | Order is cancelled and status is updated.                                                                                                     |
+
+###### Sequence Flow
+
+[sequence-view-order-cancel-order](../sequence/view-order/cancel-order)
+
+###### Activities Flow
+
+[activity-view-order-cancel-order](../activity/view-order/cancel-order)
+
+###### Business Rules
+
+| Activity     | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| :----------- | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)          | BR62    | **Displaying Rules:** The system displays a confirmation dialog asking customer to confirm order cancellation with message: "Are you sure you want to cancel this order? This action cannot be undone." (Refer to "Confirmation Dialog" view in "View Description" file)                                                                                                                                                                                                                                                                       |
+| (2.1), (2.2) | BR63    | **Selection Rules:** Customer must confirm cancellation. If customer clicks "Cancel" button, dialog closes and use case ends. If customer clicks "Confirm" button, system proceeds with cancellation.                                                                                                                                                                                                                                                                                                                                          |
+| (4)          | BR64    | **Validation Rules:** System validates order can be cancelled by checking: <br/>- Order status must be "Pending" or "Processing"<br/>- Order must not have been shipped<br/>- Order must belong to the customer<br/>If validation fails, system displays error message (Refer to MSG 27). Otherwise, system updates order status to "Cancelled" in "ORDER" table, restores product inventory, processes refund if payment was made, creates cancellation record in "ORDER_HISTORY" table, and displays success notification (Refer to MSG 28). |
+
+##### 2.1.4.5 Return Product
+
+###### Use Case Description
+
+| Name               | Return Product                                                                                                                                  |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to return a product from a completed order.                                                                      |
+| **Actor**          | Customer                                                                                                                                        |
+| **Trigger**        | When the customer clicks "Return" button for a product in order detail view.                                                                    |
+| **Pre-condition**  | Customer's device must be connected to the internet. Customer must be signed in. Order must be delivered. Product must be within return period. |
+| **Post-condition** | Return request is created and product status is updated.                                                                                        |
+
+###### Sequence Flow
+
+[sequence-view-order-return-product](../sequence/view-order/return-product)
+
+###### Activities Flow
+
+[activity-view-order-return-product](../activity/view-order/return-product)
+
+###### Business Rules
+
+| Activity     | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| :----------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (2)          | BR65    | **Displaying Rules:** The system displays a confirmation dialog asking customer to confirm product return with message: "Do you want to return this product? Please ensure the product is in original condition with all accessories." Also displays return policy summary and estimated refund amount. (Refer to "Confirmation Dialog" view in "View Description" file)                                                                                                                                                                                                                                                                                                                                |
+| (2.1), (2.2) | BR66    | **Selection Rules:** Customer must confirm return. If customer clicks "Cancel" button, dialog closes and use case ends. If customer clicks "Confirm" button, system proceeds with return request.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| (4)          | BR67    | **Validation Rules:** System validates product can be returned by checking: <br/>- Order status must be "Delivered"<br/>- Product must be within return period (typically 30 days from delivery)<br/>- Product must not be marked as non-returnable<br/>- Product must not have been previously returned<br/>If validation fails, system displays error message (Refer to MSG 29). Otherwise, system creates return request in "PRODUCT_RETURN" table, updates product status to "Return Requested" in "ORDER_ITEM" table, sends return instructions to customer's email, creates return record in "ORDER_HISTORY" table, and displays success notification with return instructions (Refer to MSG 30). |
+
+##### 2.1.4.6 Review Product
+
+###### Use Case Description
+
+| Name               | Review Product                                                                                                                                     |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to write a review for a product they have purchased.                                                                |
+| **Actor**          | Customer                                                                                                                                           |
+| **Trigger**        | When the customer clicks "Write Review" button for a delivered product.                                                                            |
+| **Pre-condition**  | Customer's device must be connected to the internet. Customer must be signed in. Order must be delivered. Product must not have been reviewed yet. |
+| **Post-condition** | Product review is created and stored in the system.                                                                                                |
+
+###### Sequence Flow
+
+[sequence-view-order-review-product](../sequence/view-order/review-product)
+
+###### Activities Flow
+
+[activity-view-order-review-product](../activity/view-order/review-product)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| :------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)      | BR68    | **Displaying Rules:** The system displays "Product Review" form with empty fields including: star rating selector (1-5 stars), review title input (max 100 characters), review text area (max 500 characters), image upload section (optional, max 5 images), and Submit button. (Refer to "Product Review" view in "View Description" file)                                                                                                                                                                                                                                                                                                                                                                                  |
+| (4)      | BR69    | **Validation Rules:** System validates review content in real-time: <br/>- Star rating must be selected (required)<br/>- Review title must not be empty and must be 10-100 characters<br/>- Review text must not be empty and must be 50-500 characters<br/>- Review must not contain profanity or inappropriate content<br/>- If images are uploaded, each must be < 2MB and in JPG/PNG format<br/>If validation fails, system displays error message (Refer to MSG 31).                                                                                                                                                                                                                                                     |
+| (7)      | BR70    | **Validation Rules:** When customer clicks "Submit" button, system validates review data: <br/>- Customer must have purchased the product<br/>- Customer must not have reviewed this product before<br/>- All required fields must be filled<br/>- Images (if provided) must be valid<br/>If validation fails, system displays error message (Refer to MSG 32). Otherwise, system stores review in "REVIEW" table with status "Pending" for moderation, stores review images in "REVIEW_IMAGE" table, updates product rating statistics, creates review record in "ORDER_HISTORY" table, and displays success notification (Refer to MSG 33) with message "Thank you for your review! It will be published after moderation." |
+
+#### 2.1.5 Contact Support Use Case
+
+##### 2.1.5.1 Contact Support
+
+###### Use Case Description
+
+| Name               | Contact Support                                                                                |
+| :----------------- | :--------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to contact customer support through third-party chat interface. |
+| **Actor**          | Customer                                                                                       |
+| **Trigger**        | When the customer clicks "Contact Support" or "Help" button.                                   |
+| **Pre-condition**  | Customer's device must be connected to the internet.                                           |
+| **Post-condition** | Customer is redirected to support chat interface.                                              |
+
+###### Sequence Flow
+
+[sequence-contact-support-contact-support](../sequence/contact-support/contact-support)
+
+###### Activities Flow
+
+[activity-contact-support-contact-support](../activity/contact-support/contact-support)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                   |
+| :------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)      | BR71    | **Redirect Rules:** The system redirects customer to third-party chat support interface (e.g., Tawk.to, Zendesk Chat, Intercom). System passes customer context including: customer ID (if signed in), current page URL, and basic customer information to pre-populate chat. |
+| (3)      | BR72    | **Interaction Rules:** Customer interacts with support chat independently. System does not control or monitor chat interactions. Chat history and support tickets are managed by the third-party support system.                                                              |
+
+#### 2.1.6 View Customer Self Report Use Case
+
+##### 2.1.6.1 View Customer Self Report
+
+###### Use Case Description
+
+| Name               | View Customer Self Report                                                        |
+| :----------------- | :------------------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to view their own activity and purchase reports.  |
+| **Actor**          | Customer                                                                         |
+| **Trigger**        | When the customer navigates to "My Reports" or "My Statistics" section.          |
+| **Pre-condition**  | Customer's device must be connected to the internet. Customer must be signed in. |
+| **Post-condition** | Customer activity report is displayed.                                           |
+
+###### Sequence Flow
+
+[sequence-view-customer-self-report-view-customer-self-report](../sequence/view-customer-self-report/view-customer-self-report)
+
+###### Activities Flow
+
+[activity-view-customer-self-report-view-customer-self-report](../activity/view-customer-self-report/view-customer-self-report)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                          |
+| :------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (1)      | BR73    | **Displaying Rules:** The system displays "Customer Report" view with empty report charts and filter options. Available report types include: Purchase History, Spending Analysis, Order Statistics, Product Categories. Time range options include: Last 7 days, Last 30 days, Last 3 months, Last year, Custom range. (Refer to "Customer Report" view in "View Description" file) |
+| (4)      | BR74    | **Querying Rules:** When customer selects report type and time range, system queries data from "ORDER", "ORDER_ITEM", and "CUSTOMER_REPORT" tables (Refer to corresponding tables in "DB Sheet" file) using SQL based on selected options. System calculates statistics including: total orders, total spending, average order value, most purchased categories, spending trends.    |
+| (6)      | BR75    | **Displaying Rules:** System displays report data in visual format using charts and graphs: <br/>- Bar chart for spending by time period<br/>- Pie chart for spending by category<br/>- Line chart for order trends<br/>- Table for top purchased products<br/>System also displays summary statistics cards showing key metrics.                                                    |
+
+#### 2.1.7 View Document Use Case
+
+##### 2.1.7.1 View Document
+
+###### Use Case Description
+
+| Name               | View Document                                                                |
+| :----------------- | :--------------------------------------------------------------------------- |
+| **Description**    | This use case allows customers to view system documents and guides.          |
 | **Actor**          | Customer                                                                     |
-| **Trigger**        | When customer clicks "Cancel Order" on order details page.                   |
-| **Pre-condition**  | Order must be in "Pending" or "Processing" status.                           |
-| **Post-condition** | Order is cancelled and refund is initiated.                                  |
+| **Trigger**        | When the customer navigates to "Help Center", "FAQ", or "Documents" section. |
+| **Pre-condition**  | Customer's device must be connected to the internet.                         |
+| **Post-condition** | Document list and selected document content are displayed.                   |
 
 ###### Sequence Flow
 
-[sequence-view-order-cancel-order](../sequence/view-order/cancel-order.html)
+[sequence-view-document-view-document](../sequence/view-document/view-document)
 
 ###### Activities Flow
 
-[activity-view-order-cancel-order](../activity/view-order/cancel-order.html)
+[activity-view-document-view-document](../activity/view-document/view-document)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                            |
-| -------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Cancellation Eligibility:** System checks:<br>- Order status is "Pending" or "Processing"<br>- Order hasn't been shipped<br>- Order is less than 24 hours old<br>If not eligible, display error message.                                                                                                                             |
-| (2)      | BR2     | **Confirmation Dialog:** System displays:<br>- Order details<br>- Refund amount and method<br>- Estimated refund time<br>- Optional cancellation reason dropdown<br>- "Confirm Cancellation" and "Keep Order" buttons<br>(Refer to MSG 11)                                                                                             |
-| (3)      | BR3     | **Cancellation Processing:** Upon confirmation:<br>- Update order status to "Cancelled"<br>- Release reserved inventory<br>- Initiate refund process<br>- Send cancellation confirmation email<br>- Log cancellation with reason<br>- Update customer's order history<br>Display success message with refund details (Refer to MSG 7). |
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                            |
+| :------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)      | BR76    | **Querying Rules:** System queries documents from "DOCUMENT" table (Refer to "Document" table in "DB Sheet" file) using SQL: "SELECT \* FROM Document WHERE status = 'published' AND target_audience LIKE '%customer%' ORDER BY category, title". Documents are organized by categories: Getting Started, Shopping Guide, Payment & Shipping, Returns & Refunds, Account Management, Terms & Policies. |
+| (3)      | BR77    | **Displaying Rules:** The system displays "Document Management" view showing: document categories in sidebar, document list with title and brief description, search box for filtering documents. (Refer to "Document Management" view in "View Description" file)                                                                                                                                     |
+| (3.3)    | BR78    | **Searching Rules:** If customer enters search criteria, system queries documents using SQL: "SELECT \* FROM Document WHERE status = 'published' AND (title LIKE '%keyword%' OR content LIKE '%keyword%') ORDER BY relevance DESC". Search results display with highlighted keywords.                                                                                                                  |
+| (7)      | BR79    | **Displaying Rules:** When customer selects a document, system displays "Document Detail" view showing: document title, last updated date, full document content (formatted with headings, lists, images), related documents section, "Was this helpful?" feedback buttons. (Refer to "Document Detail" view in "View Description" file)                                                               |
 
-##### 2.1.5.5 Return Product Use Case
+#### 2.1.8 Manage Product Use Case (Staff)
+
+##### 2.1.8.1 Manage Product
 
 ###### Use Case Description
 
-| Name               | Return Product                                                            |
-| ------------------ | ------------------------------------------------------------------------- |
-| **Description**    | This use case allows customers to request returns for delivered products. |
-| **Actor**          | Customer                                                                  |
-| **Trigger**        | When customer clicks "Return" button on delivered order.                  |
-| **Pre-condition**  | Order must be delivered. Product must be within return window (30 days).  |
-| **Post-condition** | Return request is created and submitted for approval.                     |
+| Name               | Manage Product                                                                                   |
+| :----------------- | :----------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to manage products in the system.                                     |
+| **Actor**          | Staff                                                                                            |
+| **Trigger**        | When the staff navigates to "Product Management" section.                                        |
+| **Pre-condition**  | Staff's device must be connected to the internet. Staff must be signed in with staff privileges. |
+| **Post-condition** | Staff can view product list and choose product management functions.                             |
 
 ###### Sequence Flow
 
-[sequence-view-order-return-product](../sequence/view-order/return-product.html)
+[sequence-manage-product-manage-product](../sequence/manage-product/manage-product)
 
 ###### Activities Flow
 
-[activity-view-order-return-product](../activity/view-order/return-product.html)
+[activity-manage-product-manage-product](../activity/manage-product/manage-product)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                 |
-| -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Return Eligibility:** System validates:<br>- Order status is "Delivered"<br>- Delivery date is within 30 days<br>- Product is not in non-returnable category<br>- Product hasn't been previously returned<br>If not eligible, show error with reason.                                                                                                     |
-| (2)      | BR2     | **Return Form:** System displays return request form:<br>- Select items to return (checkboxes)<br>- Return reason (dropdown: defective, wrong item, not as described, etc.)<br>- Detailed description (text area)<br>- Photo upload (up to 5 images)<br>- Return method preference (pickup/drop-off)<br>- Refund preference (original payment/store credit) |
-| (3)      | BR3     | **Return Processing:** Upon submission:<br>- Create return request in RETURN table<br>- Generate return authorization number<br>- Send confirmation email with return instructions<br>- Update order status to "Return Requested"<br>- Notify customer service team<br>- Display return tracking information<br>Show success message (Refer to MSG 7).      |
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                             |
+| :------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (1)      | BR80    | **Querying Rules:** System queries all products from "PRODUCT" table (Refer to "Product" table in "DB Sheet" file) using SQL: "SELECT \* FROM Product ORDER BY created_date DESC". System retrieves: product ID, name, category, price, stock quantity, status, and last modified date.                                                                 |
+| (2)      | BR81    | **Displaying Rules:** The system displays "Product Management" view showing: product list in table format with pagination (20 products per page), filter options (category, status, stock level), search box, "Add Product" button, and action buttons (Edit, Delete) for each product. (Refer to "Product Management" view in "View Description" file) |
+| (3)      | BR82    | **Choosing Rules:** Staff can choose from available product management functions: Add Product, Delete Product, Delete Review, Search Product, or Update Product. Only one operation can be performed at a time.                                                                                                                                         |
 
-##### 2.1.5.6 Review Product Use Case
+##### 2.1.8.2 Add Product
 
 ###### Use Case Description
 
-| Name               | Review Product                                                                         |
-| ------------------ | -------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows customers to submit reviews for products they have purchased.     |
-| **Actor**          | Customer                                                                               |
-| **Trigger**        | When customer clicks "Write Review" on delivered order.                                |
-| **Pre-condition**  | Order must be delivered. Customer must not have reviewed this product from this order. |
-| **Post-condition** | Product review is submitted and published (after moderation).                          |
+| Name               | Add Product                                                                                      |
+| :----------------- | :----------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to add a new product to the system.                                   |
+| **Actor**          | Staff                                                                                            |
+| **Trigger**        | When the staff clicks "Add Product" button.                                                      |
+| **Pre-condition**  | Staff's device must be connected to the internet. Staff must be signed in with staff privileges. |
+| **Post-condition** | New product is created and stored in the system.                                                 |
 
 ###### Sequence Flow
 
-[sequence-view-order-review-product](../sequence/view-order/review-product.html)
+[sequence-manage-product-add-product](../sequence/manage-product/add-product)
 
 ###### Activities Flow
 
-[activity-view-order-review-product](../activity/view-order/review-product.html)
+[activity-manage-product-add-product](../activity/manage-product/add-product)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                         |
-| -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Review Form Display:** System shows review form with:<br>- Product name and image<br>- Star rating selector (1-5 stars)<br>- Review title (required, max 100 chars)<br>- Review text (required, min 20 chars, max 1000 chars)<br>- Pros and cons (optional)<br>- Photo upload (up to 5 images, optional)<br>- Checkbox: "I recommend this product"<br>- Submit and Cancel buttons |
-| (2)      | BR2     | **Content Validation:** System validates:<br>- Rating is selected<br>- Title is not empty<br>- Review text meets length requirements<br>- No prohibited words or spam content<br>- Images are valid format and size<br>If validation fails, show specific error (Refer to MSG 1).                                                                                                   |
-| (3)      | BR3     | **Review Submission:** Upon valid submission:<br>- Create review record in REVIEW table<br>- Link to customer, product, and order<br>- Set status to "Pending" (awaiting moderation)<br>- Upload and process review images<br>- Update product's review statistics<br>- Send confirmation email<br>- Notify moderation team<br>Display success message (Refer to MSG 7).            |
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| :------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (1)      | BR83    | **Displaying Rules:** The system displays "Product Detail" form with empty fields including: product name, category dropdown, description editor, price, stock quantity, SKU, brand, specifications table, product images uploader (max 10 images), status selector (Active/Inactive), and Save button. (Refer to "Product Detail" view in "View Description" file)                                                                                                                                                                                                                                                                                          |
+| (3)      | BR84    | **Validation Rules:** System validates product data in real-time: <br/>- Product name: required, 5-200 characters<br/>- Category: required, must select from predefined categories<br/>- Description: required, minimum 50 characters<br/>- Price: required, must be positive number, maximum 10 digits<br/>- Stock quantity: required, must be non-negative integer<br/>- SKU: required, unique, alphanumeric, 5-30 characters<br/>- Product images: at least 1 required, each < 5MB, JPG/PNG format<br/>If validation fails, system displays error message (Refer to MSG 34).                                                                              |
+| (5)      | BR85    | **Validation Rules:** When staff clicks "Save" button, system validates product data: <br/>- Check if SKU is unique in "PRODUCT" table<br/>- Validate all required fields are filled<br/>- Validate images are valid and uploaded successfully<br/>If validation fails, system displays error message (Refer to MSG 35). Otherwise, system stores product data in "PRODUCT" table, stores product images in "PRODUCT_IMAGE" table, creates product specifications in "PRODUCT_SPECIFICATION" table if provided, generates product slug for URL, and displays success notification (Refer to MSG 36). System then closes the form and refreshes product list. |
 
-#### 2.1.6 Product Viewing Use Cases
-
-##### 2.1.6.1 View Product Use Case
+##### 2.1.8.3 Update Product
 
 ###### Use Case Description
 
-| Name               | View Product                                                        |
-| ------------------ | ------------------------------------------------------------------- |
-| **Description**    | This use case allows customers to browse and view product listings. |
-| **Actor**          | Customer                                                            |
-| **Trigger**        | When customer navigates to product category or home page.           |
-| **Pre-condition**  | None (accessible to guests and signed-in users).                    |
-| **Post-condition** | Product listing page is displayed.                                  |
+| Name               | Update Product                                                                                                                     |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to update existing product information.                                                                 |
+| **Actor**          | Staff                                                                                                                              |
+| **Trigger**        | When the staff clicks "Edit" button for a product.                                                                                 |
+| **Pre-condition**  | Staff's device must be connected to the internet. Staff must be signed in with staff privileges. Product must exist in the system. |
+| **Post-condition** | Product information is updated in the system.                                                                                      |
 
 ###### Sequence Flow
 
-[sequence-view-product-view-product](../sequence/view-product/view-product.html)
+[sequence-manage-product-update-product](../sequence/manage-product/update-product)
 
 ###### Activities Flow
 
-[activity-view-product-view-product](../activity/view-product/view-product.html)
+[activity-manage-product-update-product](../activity/manage-product/update-product)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                         |
-| -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Product Listing Display:** System shows products in grid/list view with:<br>- Product image (primary)<br>- Product name<br>- Price (with discount if applicable)<br>- Rating (stars and count)<br>- Quick "Add to Cart" button<br>- "Wishlist" icon<br>- Stock status indicator<br>- Promotion badge (if applicable)<br>- Pagination controls (24 products per page)              |
-| (2)      | BR2     | **Filtering and Sorting:** System provides:<br>**Filters:**<br>- Category/subcategory<br>- Price range<br>- Brand<br>- Rating (4+ stars, 3+ stars, etc.)<br>- Features/specifications<br>- Availability (In stock, On sale)<br><br>**Sort Options:**<br>- Relevance (default)<br>- Price: Low to High<br>- Price: High to Low<br>- Newest Arrivals<br>- Best Selling<br>- Top Rated |
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| :------- | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3)      | BR86    | **Querying Rules:** System queries product details from "PRODUCT", "PRODUCT_IMAGE", and "PRODUCT_SPECIFICATION" tables (Refer to corresponding tables in "DB Sheet" file) using SQL: "SELECT \* FROM Product WHERE productID = [Product.ID]" along with related data from joined tables.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| (4)      | BR87    | **Displaying Rules:** The system displays "Product Detail" form filled with current product data including: all product fields, existing images with delete option, existing specifications, and Save button. (Refer to "Product Detail" view in "View Description" file)                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| (6)      | BR88    | **Validation Rules:** System validates updated product data in real-time using same validation rules as Add Product (BR2 from 2.1.8.2). If validation fails, system displays error message (Refer to MSG 34).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| (8)      | BR89    | **Validation Rules:** When staff clicks "Save" button, system validates updated data: <br/>- Check if SKU is unique (excluding current product) in "PRODUCT" table<br/>- Validate all required fields are filled<br/>- Validate new images (if uploaded) are valid<br/>- At least 1 product image must remain<br/>If validation fails, system displays error message (Refer to MSG 35). Otherwise, system updates product data in "PRODUCT" table, adds/deletes product images in "PRODUCT_IMAGE" table as needed, updates product specifications in "PRODUCT_SPECIFICATION" table, updates modified timestamp, and displays success notification (Refer to MSG 37). System then closes the form and refreshes product list. |
 
-##### 2.1.6.2 Search Product Use Case
+##### 2.1.8.4 Delete Product
 
 ###### Use Case Description
 
-| Name               | Search Product                                                        |
-| ------------------ | --------------------------------------------------------------------- |
-| **Description**    | This use case allows customers to search for products using keywords. |
-| **Actor**          | Customer                                                              |
-| **Trigger**        | When customer enters text in search box.                              |
-| **Pre-condition**  | None.                                                                 |
-| **Post-condition** | Search results are displayed.                                         |
+| Name               | Delete Product                                                                                                                     |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to delete a product from the system.                                                                    |
+| **Actor**          | Staff                                                                                                                              |
+| **Trigger**        | When the staff clicks "Delete" button for a product.                                                                               |
+| **Pre-condition**  | Staff's device must be connected to the internet. Staff must be signed in with staff privileges. Product must exist in the system. |
+| **Post-condition** | Product is deleted from the system.                                                                                                |
 
 ###### Sequence Flow
 
-[sequence-view-product-search-product](../sequence/view-product/search-product.html)
+[sequence-manage-product-delete-product](../sequence/manage-product/delete-product)
 
 ###### Activities Flow
 
-[activity-view-product-search-product](../activity/view-product/search-product.html)
+[activity-manage-product-delete-product](../activity/manage-product/delete-product)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                    |
-| -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Search Interface:** System provides:<br>- Prominent search box in header<br>- Auto-complete suggestions as user types<br>- Recent searches (for signed-in users)<br>- Popular searches<br>- Search button and Enter key support                                                              |
-| (2)      | BR2     | **Search Processing:** System performs full-text search:<br>- Searches product name, description, brand, category<br>- Uses relevance scoring algorithm<br>- Handles spelling mistakes (fuzzy matching)<br>- Supports boolean operators (AND, OR, NOT)<br>- Highlights search terms in results |
-| (3)      | BR3     | **Results Display:** System shows:<br>- Number of results found<br>- Search query displayed<br>- Products sorted by relevance<br>- Same filters/sorts as View Product<br>- "No results" message with suggestions if empty<br>- Option to clear search                                          |
+| Activity     | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| :----------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)          | BR90    | **Displaying Rules:** The system displays a confirmation dialog asking staff to confirm product deletion with message: "Are you sure you want to delete this product? This action cannot be undone. All product data including reviews will be removed." (Refer to "Confirmation Dialog" view in "View Description" file)                                                                                                                                                                                                                                                                           |
+| (2.1), (2.2) | BR91    | **Selection Rules:** Staff must confirm deletion. If staff clicks "Cancel" button, dialog closes and use case ends. If staff clicks "Confirm" button, system proceeds with deletion.                                                                                                                                                                                                                                                                                                                                                                                                                |
+| (4)          | BR92    | **Validation Rules:** System validates product can be deleted by checking: <br/>- Product must not have pending orders<br/>- Product must not be in active shopping carts (or system will notify cart owners)<br/>If validation fails, system displays error message (Refer to MSG 38). Otherwise, system performs soft delete by updating status to "Deleted" in "PRODUCT" table (keeping data for audit purposes), removes product from search index, archives product images, archives product reviews, and displays success notification (Refer to MSG 39). System then refreshes product list. |
 
-##### 2.1.6.3 View Product Detail Use Case
+##### 2.1.8.5 Search Product
 
 ###### Use Case Description
 
-| Name               | View Product Detail                                                                   |
-| ------------------ | ------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows customers to view detailed information about a specific product. |
-| **Actor**          | Customer                                                                              |
-| **Trigger**        | When customer clicks on a product from listings or search results.                    |
-| **Pre-condition**  | Product must exist and be active.                                                     |
-| **Post-condition** | Product detail page is displayed.                                                     |
+| Name               | Search Product (Staff)                                                                           |
+| :----------------- | :----------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to search for products in the product management system.              |
+| **Actor**          | Staff                                                                                            |
+| **Trigger**        | When the staff enters search criteria in the search box.                                         |
+| **Pre-condition**  | Staff's device must be connected to the internet. Staff must be signed in with staff privileges. |
+| **Post-condition** | Filtered product results are displayed.                                                          |
 
 ###### Sequence Flow
 
-[sequence-view-product-view-product-detail](../sequence/view-product/view-product-detail.html)
+[sequence-manage-product-search-product](../sequence/manage-product/search-product)
 
 ###### Activities Flow
 
-[activity-view-product-view-product-detail](../activity/view-product/view-product-detail.html)
+[activity-manage-product-search-product](../activity/manage-product/search-product)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Product Detail Display:** System shows comprehensive product information:<br><br>**Image Gallery:**<br>- Multiple high-quality images<br>- 360° view (if available)<br>- Zoom functionality<br>- Video (if available)<br><br>**Product Information:**<br>- Full product name<br>- SKU/Model number<br>- Brand (clickable to brand page)<br>- Price with any discounts<br>- Stock availability<br>- Estimated delivery date<br><br>**Purchase Section:**<br>- Quantity selector<br>- Variation selectors (size, color, etc.)<br>- Add to Cart button<br>- Add to Wishlist button<br>- Share buttons (social media)<br><br>**Details Tabs:**<br>- Description<br>- Specifications<br>- Shipping & Returns<br>- Warranty Information |
-| (2)      | BR2     | **Dynamic Price Display:** System shows:<br>- Original price (if on sale)<br>- Current price<br>- Discount percentage<br>- Price per unit (if applicable)<br>- Tax information<br>- Bulk purchase discounts (if applicable)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| :------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3)      | BR93    | **Searching Rules:** When staff enters search criteria, system uses Text_change() method with debounce delay of 300ms. System queries "PRODUCT" table (Refer to "Product" table in "DB Sheet" file) using SQL: "SELECT \* FROM Product WHERE (productID LIKE '%keyword%' OR name LIKE '%keyword%' OR SKU LIKE '%keyword%' OR category LIKE '%keyword%') AND status != 'Deleted' ORDER BY name ASC". Filters can include: category, status (Active/Inactive), stock level (In Stock/Low Stock/Out of Stock), price range. |
+| (4)      | BR94    | **Displaying Rules:** System displays "Product Management" view with filtered results showing matching products. Active filters are displayed as removable tags above the product table. Result count is displayed. If no results found, displays "No products found" message with "Clear Search" option.                                                                                                                                                                                                                |
 
-##### 2.1.6.4 View Product Reviews Use Case
+##### 2.1.8.6 Delete Review
 
 ###### Use Case Description
 
-| Name               | View Product Reviews                                              |
-| ------------------ | ----------------------------------------------------------------- |
-| **Description**    | This use case allows customers to read reviews for a product.     |
-| **Actor**          | Customer                                                          |
-| **Trigger**        | When customer scrolls to reviews section or clicks "Reviews" tab. |
-| **Pre-condition**  | Must be on product detail page.                                   |
-| **Post-condition** | Product reviews are displayed.                                    |
+| Name               | Delete Review                                                                                                                     |
+| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to delete inappropriate product reviews.                                                               |
+| **Actor**          | Staff                                                                                                                             |
+| **Trigger**        | When the staff clicks "Delete" button for a review in product review management section.                                          |
+| **Pre-condition**  | Staff's device must be connected to the internet. Staff must be signed in with staff privileges. Review must exist in the system. |
+| **Post-condition** | Review is deleted from the system.                                                                                                |
 
 ###### Sequence Flow
 
-[sequence-view-product-view-product-reviews](../sequence/view-product/view-product-reviews.html)
+[sequence-manage-product-delete-review](../sequence/manage-product/delete-review)
 
 ###### Activities Flow
 
-[activity-view-product-view-product-reviews](../activity/view-product/view-product-reviews.html)
+[activity-manage-product-delete-review](../activity/manage-product/delete-review)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                           |
-| -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Reviews Summary Display:** System shows:<br>- Average star rating (large)<br>- Total number of reviews<br>- Rating distribution (5-star: X%, 4-star: Y%, etc.)<br>- Percentage who recommend product<br>- "Write a Review" button (if purchased)                                    |
-| (2)      | BR2     | **Individual Reviews Display:** System shows each review with:<br>- Reviewer name (or anonymous)<br>- Verified purchase badge<br>- Star rating<br>- Review title<br>- Review text<br>- Review date<br>- Review images (if any)<br>- Helpful count<br>- "Helpful" and "Report" buttons |
-| (3)      | BR3     | **Review Filtering and Sorting:** System provides:<br>**Filters:**<br>- By rating (5 stars, 4 stars, etc.)<br>- Verified purchases only<br>- With images only<br><br>**Sort Options:**<br>- Most Helpful<br>- Most Recent<br>- Highest Rating<br>- Lowest Rating                      |
+| Activity     | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| :----------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (2)          | BR95    | **Displaying Rules:** The system displays a confirmation dialog asking staff to confirm review deletion with message: "Are you sure you want to delete this review? This action cannot be undone." Dialog also shows review content preview. (Refer to "Confirmation Dialog" view in "View Description" file)                                                                                                                                                                                                                                                                                                                                                                                                 |
+| (2.1), (2.2) | BR96    | **Selection Rules:** Staff must confirm deletion. If staff clicks "Cancel" button, dialog closes and use case ends. If staff clicks "Confirm" button, system proceeds with deletion.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| (4)          | BR97    | **Validation Rules:** System validates review exists in "REVIEW" table (Refer to "Review" table in "DB Sheet" file) using SQL: "SELECT \* FROM Review WHERE reviewID = [Review.ID]". If review not found, system displays error message (Refer to MSG 40). Otherwise, system deletes review from "REVIEW" table, deletes associated review images from "REVIEW_IMAGE" table, updates product rating statistics (recalculates average rating without deleted review), creates deletion audit log in "REVIEW_AUDIT" table with staff ID and reason, sends notification to review author about deletion (if applicable), and displays success notification (Refer to MSG 41). System then refreshes review list. |
 
-##### 2.1.6.5 Add Product to Cart Use Case
+#### 2.1.9 Manage User Use Case
+
+##### 2.1.9.1 Manage User
 
 ###### Use Case Description
 
-| Name               | Add Product to Cart                                                         |
-| ------------------ | --------------------------------------------------------------------------- |
-| **Description**    | This use case allows customers to add products to their shopping cart.      |
-| **Actor**          | Customer                                                                    |
-| **Trigger**        | When customer clicks "Add to Cart" button.                                  |
-| **Pre-condition**  | Product must be in stock. Customer must be signed in (or allow guest cart). |
-| **Post-condition** | Product is added to cart and cart count is updated.                         |
+| Name               | Manage User                                                                                            |
+| :----------------- | :----------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff and admin to manage user accounts in the system.                            |
+| **Actor**          | Staff, Admin                                                                                           |
+| **Trigger**        | When the staff/admin navigates to "User Management" section.                                           |
+| **Pre-condition**  | Actor's device must be connected to the internet. Actor must be signed in with appropriate privileges. |
+| **Post-condition** | Actor can view user list and choose user management functions.                                         |
 
 ###### Sequence Flow
 
-[sequence-view-product-add-product-to-cart](../sequence/view-product/add-product-to-cart.html)
+[sequence-manage-user-manage-user](../sequence/manage-user/manage-user)
 
 ###### Activities Flow
 
-[activity-view-product-add-product-to-cart](../activity/view-product/add-product-to-cart.html)
+[activity-manage-user-manage-user](../activity/manage-user/manage-user)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                          |
-| -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Pre-Add Validation:** System checks:<br>- Product is in stock<br>- Requested quantity ≤ available stock<br>- Product is not discontinued<br>- Variations are selected (if required)<br>If validation fails, show appropriate error.                                                                |
-| (2)      | BR2     | **Add to Cart Processing:** System:<br>- Checks if product already in cart<br> _ If yes: Update quantity (existing + new)<br> _ If no: Create new cart item<br>- Validate total quantity against stock and limits<br>- Update CART table<br>- Recalculate cart totals<br>- Update cart icon badge    |
-| (3)      | BR3     | **Success Feedback:** System shows:<br>- Success notification/toast<br>- Mini cart preview showing:<br> _ Just-added product<br> _ Cart subtotal<br> _ "View Cart" button<br> _ "Checkout" button<br>- Options to:<br> _ Continue shopping (dismiss)<br> _ View full cart<br> \* Proceed to checkout |
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| :------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (1)      | BR98    | **Querying Rules:** System queries users from "USER" table (Refer to "User" table in "DB Sheet" file) based on actor's role: <br/>- Staff: Can view only customers using SQL: "SELECT _ FROM User WHERE role = 'customer' ORDER BY created_date DESC"<br/>- Admin: Can view all users using SQL: "SELECT _ FROM User ORDER BY created_date DESC"<br/>System retrieves: user ID, name, email, role, status, registration date. |
+| (2)      | BR99    | **Displaying Rules:** The system displays "User Management" view showing: user list in table format with pagination (20 users per page), filter options (role, status, registration date), search box, and available action buttons based on actor's role. (Refer to "User Management" view in "View Description" file)                                                                                                       |
+| (3)      | BR100   | **Choosing Rules:** Actor can choose from available user management functions based on their role: <br/>- Staff: Search User, View Customer Report<br/>- Admin: All functions including Change User Roles, Delete User, Search User, View Customer Report, View Staff Report                                                                                                                                                  |
 
-##### 2.1.6.6 View Suggested Products Use Case
+##### 2.1.9.2 Search User
 
 ###### Use Case Description
 
-| Name               | View Suggested Products                                                                   |
-| ------------------ | ----------------------------------------------------------------------------------------- |
-| **Description**    | This use case displays product recommendations based on current product or user behavior. |
-| **Actor**          | Customer                                                                                  |
-| **Trigger**        | Automatically displayed on product detail page.                                           |
-| **Pre-condition**  | Must be viewing a product detail page.                                                    |
-| **Post-condition** | Related or recommended products are shown.                                                |
+| Name               | Search User                                                                                            |
+| :----------------- | :----------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff and admin to search for users in the system.                                |
+| **Actor**          | Staff, Admin                                                                                           |
+| **Trigger**        | When the actor enters search criteria in the user search box.                                          |
+| **Pre-condition**  | Actor's device must be connected to the internet. Actor must be signed in with appropriate privileges. |
+| **Post-condition** | Filtered user results are displayed.                                                                   |
 
 ###### Sequence Flow
 
-[sequence-view-product-view-suggested-product](../sequence/view-product/view-suggested-product.html)
+[sequence-manage-user-search-user](../sequence/manage-user/search-user)
 
 ###### Activities Flow
 
-[activity-view-product-view-suggested-product](../activity/view-product/view-suggested-product.html)
+[activity-manage-user-search-user](../activity/manage-user/search-user)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Recommendation Algorithm:** System generates suggestions based on:<br>- Same category products<br>- Frequently bought together<br>- Customers also viewed<br>- Based on browsing history (signed-in users)<br>- Similar price range<br>- Same brand alternatives                                                                                                                                                                                                              |
-| (2)      | BR2     | **Suggestions Display:** System shows multiple sections:<br><br>**"Frequently Bought Together":**<br>- Current product + 2-3 complementary products<br>- Bundle price with discount<br>- "Add all to cart" option<br><br>**"Similar Products":**<br>- 4-6 products in same category<br>- Similar features/price<br>- Horizontal scrollable carousel<br><br>**"Customers Also Viewed":**<br>- Products viewed by others who viewed current product<br>- Grid or carousel display |
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| :------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3)      | BR101   | **Searching Rules:** When actor enters search criteria, system uses Text*change() method with debounce delay of 300ms. System queries "USER" table (Refer to "User" table in "DB Sheet" file) based on actor's role: <br/>- Staff searches customers only: "SELECT * FROM User WHERE role = 'customer' AND (name LIKE '%keyword%' OR email LIKE '%keyword%' OR userID LIKE '%keyword%') ORDER BY name ASC"<br/>- Admin searches all users: "SELECT \_ FROM User WHERE (name LIKE '%keyword%' OR email LIKE '%keyword%' OR userID LIKE '%keyword%') ORDER BY name ASC"<br/>Filters can include: role, status (Active/Inactive/Suspended), registration date range. |
+| (4)      | BR102   | **Displaying Rules:** System displays "User Management" view with filtered results showing matching users. Active filters are displayed as removable tags. Result count is displayed. If no results found, displays "No users found" message with "Clear Search" option.                                                                                                                                                                                                                                                                                                                                                                                          |
 
-#### 2.1.7 Document Management Use Cases
-
-##### 2.1.7.1 Adjust Document Use Case
+##### 2.1.9.3 Change User Roles (Admin only)
 
 ###### Use Case Description
 
-| Name               | Adjust Document                                                                        |
-| ------------------ | -------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to manage informational documents (policies, guides, FAQs). |
-| **Actor**          | Admin                                                                                  |
-| **Trigger**        | When admin clicks on "Documents" in admin panel.                                       |
-| **Pre-condition**  | Admin must be authenticated.                                                           |
-| **Post-condition** | Document management interface is displayed.                                            |
+| Name               | Change User Roles                                                                                                               |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| **Description**    | This use case allows admin to change a user's role in the system.                                                               |
+| **Actor**          | Admin                                                                                                                           |
+| **Trigger**        | When the admin clicks "Change Role" button for a user.                                                                          |
+| **Pre-condition**  | Admin's device must be connected to the internet. Admin must be signed in with admin privileges. User must exist in the system. |
+| **Post-condition** | User's role is updated in the system.                                                                                           |
 
 ###### Sequence Flow
 
-[sequence-adjust-document-adjust-document](../sequence/adjust-document/adjust-document.html)
+[sequence-manage-user-change-user-roles](../sequence/manage-user/change-user-roles)
 
 ###### Activities Flow
 
-[activity-adjust-document-adjust-document](../activity/adjust-document/adjust-document.html)
+[activity-manage-user-change-user-roles](../activity/manage-user/change-user-roles)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                   |
-| -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Document List Display:** System shows documents with:<br>- Document title<br>- Category (Policy, Guide, FAQ, Terms, etc.)<br>- Status (Published, Draft)<br>- Last modified date<br>- Action buttons (Edit, Delete, View)<br>- "Create New Document" button |
-| (2)      | BR2     | **Available Operations:** Admin can:<br>- Create new document<br>- Update existing document<br>- Delete document<br>- Search documents<br>- Preview document                                                                                                  |
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| :------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3)      | BR103   | **Querying Rules:** System queries user details from "USER" table (Refer to "User" table in "DB Sheet" file) using SQL: "SELECT \* FROM User WHERE userID = [User.ID]". System retrieves current role and associated permissions.                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| (4)      | BR104   | **Displaying Rules:** The system displays "User Detail" view showing: current user information, current role badge, role selector dropdown (Customer, Staff, Admin), role descriptions, and "Change Roles" button. (Refer to "User Detail" view in "View Description" file)                                                                                                                                                                                                                                                                                                                                                                                                 |
+| (6)      | BR105   | **Validation Rules:** System validates role change in real-time: <br/>- New role must be different from current role<br/>- New role must be one of: Customer, Staff, Admin<br/>- Admin cannot change their own role to prevent lockout<br/>If validation fails, system displays error message (Refer to MSG 42).                                                                                                                                                                                                                                                                                                                                                            |
+| (8)      | BR106   | **Validation Rules:** When admin clicks "Change Roles" button, system validates: <br/>- User is not the current admin (self)<br/>- New role is valid<br/>- No pending administrative actions by user (if demoting from Staff/Admin)<br/>If validation fails, system displays error message (Refer to MSG 43). Otherwise, system updates role in "USER" table, updates permissions in "USER_PERMISSION" table, creates role change audit log in "USER_AUDIT" table, invalidates user's current session to force re-authentication, sends notification email to user about role change, and displays success notification (Refer to MSG 44). System then refreshes user list. |
 
-##### 2.1.7.2 Create Document Use Case
+##### 2.1.9.4 Delete User (Admin only)
 
 ###### Use Case Description
 
-| Name               | Create Document                                                   |
-| ------------------ | ----------------------------------------------------------------- |
-| **Description**    | This use case allows admin to create new informational documents. |
-| **Actor**          | Admin                                                             |
-| **Trigger**        | When admin clicks "Create New Document" button.                   |
-| **Pre-condition**  | Admin must be authenticated.                                      |
-| **Post-condition** | New document is created and published/saved as draft.             |
+| Name               | Delete User                                                                                                                     |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| **Description**    | This use case allows admin to delete a user account from the system.                                                            |
+| **Actor**          | Admin                                                                                                                           |
+| **Trigger**        | When the admin clicks "Delete" button for a user.                                                                               |
+| **Pre-condition**  | Admin's device must be connected to the internet. Admin must be signed in with admin privileges. User must exist in the system. |
+| **Post-condition** | User account is deleted from the system.                                                                                        |
 
 ###### Sequence Flow
 
-[sequence-adjust-document-create-document](../sequence/adjust-document/create-document.html)
+[sequence-manage-user-delete-user](../sequence/manage-user/delete-user)
 
 ###### Activities Flow
 
-[activity-adjust-document-create-document](../activity/adjust-document/create-document.html)
+[activity-manage-user-delete-user](../activity/manage-user/delete-user)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                  |
-| -------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Document Editor Display:** System shows form with:<br>- Title field (required)<br>- Category dropdown (required)<br>- Rich text editor for content (required)<br>- Meta description (for SEO)<br>- Featured image upload<br>- Status toggle (Draft/Published)<br>- Save and Cancel buttons |
-| (2)      | BR2     | **Content Validation:** System validates:<br>- Title is not empty (max 200 chars)<br>- Category is selected<br>- Content has minimum 50 characters<br>- Images are valid format (JPG, PNG) and size (max 5MB)<br>If invalid, show error (Refer to MSG 1 or MSG 8).                           |
-| (3)      | BR3     | **Document Creation:** Upon save:<br>- Generate unique document ID<br>- Process and optimize images<br>- Save content to DOCUMENT table<br>- Generate URL slug from title<br>- Set publication timestamp<br>- Log creation action<br>Display success message (Refer to MSG 7).               |
+| Activity     | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| :----------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)          | BR107   | **Displaying Rules:** The system displays a confirmation dialog asking admin to confirm user deletion with message: "Are you sure you want to delete this user account? This action cannot be undone. All user data will be removed." Dialog shows user's name and email for confirmation. (Refer to "Confirmation Dialog" view in "View Description" file)                                                                                                                                                                                                                                                                                                                                                                                                           |
+| (2.1), (2.2) | BR108   | **Selection Rules:** Admin must confirm deletion. If admin clicks "Cancel" button, dialog closes and use case ends. If admin clicks "Confirm" button, system proceeds with deletion.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| (4)          | BR109   | **Validation Rules:** System validates user can be deleted by checking: <br/>- User is not the current admin (self)<br/>- User must not have pending orders (orders must be completed or cancelled)<br/>- User must not have active disputes or support tickets<br/>If validation fails, system displays error message (Refer to MSG 45). Otherwise, system performs soft delete by updating status to "Deleted" in "USER" table (keeping data for audit purposes), anonymizes user's personal data (replaces with "Deleted User") for privacy compliance, archives user's orders and reviews, invalidates all user sessions, creates deletion audit log in "USER_AUDIT" table, and displays success notification (Refer to MSG 46). System then refreshes user list. |
 
-##### 2.1.7.3 View Document Use Case
+##### 2.1.9.5 View Customer Report
 
 ###### Use Case Description
 
-| Name               | View Document                                                         |
-| ------------------ | --------------------------------------------------------------------- |
-| **Description**    | This use case allows customers to read informational documents.       |
-| **Actor**          | Customer                                                              |
-| **Trigger**        | When customer navigates to help/info section or clicks document link. |
-| **Pre-condition**  | Document must be published.                                           |
-| **Post-condition** | Document content is displayed.                                        |
+| Name               | View Customer Report                                                                                                                      |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff and admin to view customer activity and purchase reports.                                                      |
+| **Actor**          | Staff, Admin                                                                                                                              |
+| **Trigger**        | When the actor clicks "View Report" button for a customer.                                                                                |
+| **Pre-condition**  | Actor's device must be connected to the internet. Actor must be signed in with appropriate privileges. Customer must exist in the system. |
+| **Post-condition** | Customer activity report is displayed.                                                                                                    |
 
 ###### Sequence Flow
 
-[sequence-view-document-view-document](../sequence/view-document/view-document.html)
+[sequence-manage-user-view-customer-report](../sequence/manage-user/view-customer-report)
 
 ###### Activities Flow
 
-[activity-view-document-view-document](../activity/view-document/view-document.html)
+[activity-manage-user-view-customer-report](../activity/manage-user/view-customer-report)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                         |
-| -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Document List Display:** System shows:<br>- Document categories with icons<br>- Popular/recent documents<br>- Search box for documents<br>- Breadcrumb navigation                                                                                                 |
-| (2)      | BR2     | **Document Content Display:** When document is opened:<br>- Show document title<br>- Display rich content (formatted text, images)<br>- Show last updated date<br>- Related documents section<br>- "Was this helpful?" feedback widget<br>- Print and share options |
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| :------- | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (1)      | BR110   | **Displaying Rules:** The system displays "Customer Report" view with empty report charts and filter options. Available report types include: Purchase History, Spending Analysis, Order Statistics, Product Preferences, Account Activity. Time range options include: Last 7 days, Last 30 days, Last 3 months, Last year, Custom range. (Refer to "Customer Report" view in "View Description" file)                                                                                                                |
+| (4)      | BR111   | **Querying Rules:** When actor selects customer, report type, and time range, system queries data from "ORDER", "ORDER_ITEM", and "CUSTOMER_REPORT" tables (Refer to corresponding tables in "DB Sheet" file) using SQL based on selected options: "SELECT \* FROM Order WHERE customerID = [Customer.ID] AND DATE(created_date) BETWEEN [start_date] AND [end_date]". System calculates: total orders, total spending, average order value, order frequency, most purchased categories, spending trends, return rate. |
+| (6)      | BR112   | **Displaying Rules:** System displays report data in visual format using charts and graphs: <br/>- Bar chart for spending by time period<br/>- Pie chart for spending by category<br/>- Line chart for order trends over time<br/>- Table for top purchased products<br/>- Summary statistics cards showing key metrics<br/>- Customer lifetime value (CLV) indicator<br/>Report can be exported to PDF or Excel format.                                                                                               |
 
-#### 2.1.8 Additional Features
-
-##### 2.1.8.1 View Shop Report Use Case
+##### 2.1.9.6 View Staff Report (Admin only)
 
 ###### Use Case Description
 
-| Name               | View Shop Report                                                           |
-| ------------------ | -------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to view comprehensive shop performance reports. |
-| **Actor**          | Admin                                                                      |
-| **Trigger**        | When admin clicks "Reports" in admin panel.                                |
-| **Pre-condition**  | Admin must be authenticated.                                               |
-| **Post-condition** | Selected report is displayed with data visualization.                      |
+| Name               | View Staff Report                                                                                                                       |
+| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to view staff performance and activity reports.                                                              |
+| **Actor**          | Admin                                                                                                                                   |
+| **Trigger**        | When the admin clicks "View Report" button for a staff member.                                                                          |
+| **Pre-condition**  | Admin's device must be connected to the internet. Admin must be signed in with admin privileges. Staff member must exist in the system. |
+| **Post-condition** | Staff performance report is displayed.                                                                                                  |
 
 ###### Sequence Flow
 
-[sequence-view-shop-report-view-shop-report](../sequence/view-shop-report/view-shop-report.html)
+[sequence-manage-user-view-staff-report](../sequence/manage-user/view-staff-report)
 
 ###### Activities Flow
 
-[activity-view-shop-report-view-shop-report](../activity/view-shop-report/view-shop-report.html)
+[activity-manage-user-view-staff-report](../activity/manage-user/view-staff-report)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                    |
-| -------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Report Types Available:**<br>- Sales Report (revenue, orders, trends)<br>- Product Performance (best sellers, stock levels)<br>- Customer Analytics (new, returning, segments)<br>- Review Statistics (ratings, sentiment)<br>- Traffic Report (visitors, conversions)<br>Each with customizable date ranges |
-| (2)      | BR2     | **Data Visualization:** System displays:<br>- Key metrics in dashboard cards<br>- Line/bar charts for trends<br>- Pie charts for distributions<br>- Data tables with export options<br>- Comparison with previous periods<br>- Export to PDF/Excel functionality                                               |
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| :------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (1)      | BR113   | **Displaying Rules:** The system displays "Staff Report" view with empty report charts and filter options. Available report types include: Product Management Activity, User Management Activity, Review Moderation Activity, Order Processing Activity, Overall Performance. Time range options include: Last 7 days, Last 30 days, Last 3 months, Last year, Custom range. (Refer to "Staff Report" view in "View Description" file)                                                                                                          |
+| (4)      | BR114   | **Querying Rules:** When admin selects staff, report type, and time range, system queries data from "STAFF_ACTIVITY", "PRODUCT", "REVIEW", "USER_AUDIT" tables (Refer to corresponding tables in "DB Sheet" file) using SQL based on selected options: "SELECT \* FROM StaffActivity WHERE staffID = [Staff.ID] AND DATE(activity_date) BETWEEN [start_date] AND [end_date]". System calculates: total products added/updated, total reviews moderated, total users managed, average response time, activity distribution, performance metrics. |
+| (6)      | BR115   | **Displaying Rules:** System displays report data in visual format: <br/>- Bar chart for activities by type<br/>- Line chart for activity trends over time<br/>- Pie chart for time distribution by activity type<br/>- Table for detailed activity log<br/>- Summary statistics cards showing key performance indicators<br/>Report can be exported to PDF or Excel format for performance reviews.                                                                                                                                            |
 
-##### 2.1.8.2 Contact Support Use Case
+#### 2.1.10 View Shop Report Use Case
+
+##### 2.1.10.1 View Shop Report
 
 ###### Use Case Description
 
-| Name               | Contact Support                                             |
-| ------------------ | ----------------------------------------------------------- |
-| **Description**    | This use case allows customers to contact customer support. |
-| **Actor**          | Customer                                                    |
-| **Trigger**        | When customer clicks "Contact Us" or "Help" button.         |
-| **Pre-condition**  | None (available to all users).                              |
-| **Post-condition** | Support request is submitted or chat session is initiated.  |
+| Name               | View Shop Report                                                                                 |
+| :----------------- | :----------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to view overall shop performance and analytics reports.               |
+| **Actor**          | Admin                                                                                            |
+| **Trigger**        | When the admin navigates to "Shop Reports" or "Analytics" section.                               |
+| **Pre-condition**  | Admin's device must be connected to the internet. Admin must be signed in with admin privileges. |
+| **Post-condition** | Shop performance report is displayed with selected metrics.                                      |
 
 ###### Sequence Flow
 
-[sequence-contact-support-contact-support](../sequence/contact-support/contact-support.html)
+[sequence-view-shop-report-view-shop-report](../sequence/view-shop-report/view-shop-report)
 
 ###### Activities Flow
 
-[activity-contact-support-contact-support](../activity/contact-support/contact-support.html)
+[activity-view-shop-report-view-shop-report](../activity/view-shop-report/view-shop-report)
 
 ###### Business Rules
 
-| Activity | BR Code | Description                                                                                                                                                                                                                                                    |
-| -------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1)      | BR1     | **Support Options Display:**<br>- Live chat widget (if available)<br>- Contact form<br>- FAQ/Help center link<br>- Email address<br>- Phone number<br>- Business hours                                                                                         |
-| (2)      | BR2     | **Contact Form Fields:**<br>- Name (required)<br>- Email (required)<br>- Order number (optional)<br>- Subject/Category (dropdown)<br>- Message (required, min 20 chars)<br>- File attachments (optional, max 3 files)<br>- Priority (Normal/Urgent)            |
-| (3)      | BR3     | **Support Request Processing:**<br>- Create ticket in support system<br>- Send confirmation email with ticket number<br>- Auto-response with expected reply time<br>- Route to appropriate support team<br>- Display success message with ticket tracking info |
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| :------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (1)      | BR116   | **Displaying Rules:** The system displays "Shop Report" view with empty report charts and filter options. Available report types include: Sales Overview, Revenue Analysis, Product Performance, Customer Analytics, Inventory Status, Order Statistics. Time range options include: Today, Yesterday, Last 7 days, Last 30 days, Last 3 months, Last year, Custom range. (Refer to "Shop Report" view in "View Description" file)                                                                                                                                                                                                                                                                      |
+| (4)      | BR117   | **Querying Rules:** When admin selects report type and time range, system queries aggregated data from multiple tables including "ORDER", "PRODUCT", "USER", "ORDER_ITEM" (Refer to corresponding tables in "DB Sheet" file). System calculates comprehensive metrics: <br/>- Total revenue and revenue trends<br/>- Total orders and order status distribution<br/>- Average order value<br/>- Best-selling products<br/>- Low stock alerts<br/>- Customer acquisition and retention rates<br/>- Return rate and return reasons<br/>- Category performance<br/>- Peak sales hours/days<br/>- Conversion rate                                                                                           |
+| (6)      | BR118   | **Displaying Rules:** System displays comprehensive shop report with multiple visualization components: <br/>- Dashboard overview with key metrics cards (revenue, orders, customers, conversion rate)<br/>- Line chart for revenue/sales trends<br/>- Bar chart for top-selling products<br/>- Pie chart for order status distribution<br/>- Pie chart for revenue by category<br/>- Table for product performance ranking<br/>- Table for inventory alerts<br/>- Heat map for sales by time period<br/>- Comparison metrics vs. previous period<br/>Report supports drill-down functionality to view detailed data. Reports can be exported to PDF, Excel, or scheduled for automatic email delivery. |
+
+#### 2.1.11 View System Monitoring Use Case
+
+##### 2.1.11.1 View System Monitoring
+
+###### Use Case Description
+
+| Name               | View System Monitoring                                                                           |
+| :----------------- | :----------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to monitor system performance, health, and usage statistics.          |
+| **Actor**          | Admin                                                                                            |
+| **Trigger**        | When the admin navigates to "System Monitoring" or "System Health" section.                      |
+| **Pre-condition**  | Admin's device must be connected to the internet. Admin must be signed in with admin privileges. |
+| **Post-condition** | System monitoring dashboard is displayed with real-time metrics.                                 |
+
+###### Sequence Flow
+
+[sequence-view-system-monitoring-view-system-monitoring](../sequence/view-system-monitoring/view-system-monitoring)
+
+###### Activities Flow
+
+[activity-view-system-monitoring-view-system-monitoring](../activity/view-system-monitoring/view-system-monitoring)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| :------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)      | BR119   | **Querying Rules:** System queries monitoring data from "MONITORING_DATA" table and system logs (Refer to "MonitoringData" table in "DB Sheet" file). System collects real-time metrics: <br/>- System uptime and availability percentage<br/>- Server response time (average, min, max)<br/>- API endpoint performance<br/>- Database query performance<br/>- Active user sessions<br/>- Memory and CPU usage<br/>- Disk space usage<br/>- Error rate and error logs<br/>- Failed login attempts<br/>- Request rate (requests per second)<br/>- Cache hit rate                                                                                                                                                                                                                                                 |
+| (4)      | BR120   | **Displaying Rules:** System displays "System Monitoring" dashboard with real-time visualizations: <br/>- Status indicator (Healthy/Warning/Critical) at the top<br/>- Real-time metrics cards showing: uptime percentage (target: 99.5%), average response time, active sessions, error rate<br/>- Line chart for response time trends (last 24 hours)<br/>- Line chart for memory/CPU usage over time<br/>- Bar chart for API endpoint performance<br/>- Table for recent error logs with severity levels<br/>- Table for slow database queries<br/>- System resource gauge charts (memory, CPU, disk)<br/>- Alert notifications for threshold breaches<br/>Dashboard auto-refreshes every 30 seconds. Historical data can be viewed for up to 30 days. Critical alerts trigger email notifications to admin. |
+
+#### 2.1.12 Adjust Document Use Case
+
+##### 2.1.12.1 Adjust Document
+
+###### Use Case Description
+
+| Name               | Adjust Document                                                                                  |
+| :----------------- | :----------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to manage system documents and guides.                                |
+| **Actor**          | Admin                                                                                            |
+| **Trigger**        | When the admin navigates to "Document Management" section.                                       |
+| **Pre-condition**  | Admin's device must be connected to the internet. Admin must be signed in with admin privileges. |
+| **Post-condition** | Admin can view document list and choose document management functions.                           |
+
+###### Sequence Flow
+
+[sequence-adjust-document-adjust-document](../sequence/adjust-document/adjust-document)
+
+###### Activities Flow
+
+[activity-adjust-document-adjust-document](../activity/adjust-document/adjust-document)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                         |
+| :------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (1)      | BR121   | **Querying Rules:** System queries all documents from "DOCUMENT" table (Refer to "Document" table in "DB Sheet" file) using SQL: "SELECT \* FROM Document ORDER BY category, title ASC". System retrieves: document ID, title, category, status (Draft/Published), target audience, last modified date, and author.                                                                                 |
+| (2)      | BR122   | **Displaying Rules:** The system displays "Document Management" view showing: document list organized by category in table format with pagination (20 documents per page), filter options (category, status, target audience), search box, "Create Document" button, and action buttons (Edit, Delete, Preview) for each document. (Refer to "Document Management" view in "View Description" file) |
+| (3)      | BR123   | **Choosing Rules:** Admin can choose from available document management functions: Create Document, Delete Document, Search Document, or Update Document. Only one operation can be performed at a time.                                                                                                                                                                                            |
+
+##### 2.1.12.2 Create Document
+
+###### Use Case Description
+
+| Name               | Create Document                                                                                  |
+| :----------------- | :----------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to create a new system document.                                      |
+| **Actor**          | Admin                                                                                            |
+| **Trigger**        | When the admin clicks "Create Document" button.                                                  |
+| **Pre-condition**  | Admin's device must be connected to the internet. Admin must be signed in with admin privileges. |
+| **Post-condition** | New document is created and stored in the system.                                                |
+
+###### Sequence Flow
+
+[sequence-adjust-document-create-document](../sequence/adjust-document/create-document)
+
+###### Activities Flow
+
+[activity-adjust-document-create-document](../activity/adjust-document/create-document)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| :------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (1)      | BR124   | **Displaying Rules:** The system displays "Document Detail" form with empty fields including: document title, category dropdown (Getting Started, Shopping Guide, Payment & Shipping, Returns & Refunds, Account Management, Terms & Policies), rich text content editor with formatting toolbar, target audience multi-select (Customer, Staff, Admin), status selector (Draft/Published), meta description (for SEO), and Save button. (Refer to "Document Detail" view in "View Description" file)                                                                                                                                                                                              |
+| (3)      | BR125   | **Validation Rules:** System validates document data in real-time: <br/>- Title: required, 5-200 characters<br/>- Category: required, must select from predefined categories<br/>- Content: required, minimum 100 characters<br/>- Target audience: at least one must be selected<br/>- Meta description: optional, maximum 300 characters<br/>If validation fails, system displays error message (Refer to MSG 47).                                                                                                                                                                                                                                                                               |
+| (5)      | BR126   | **Validation Rules:** When admin clicks "Save" button, system validates document data: <br/>- All required fields are filled<br/>- Title is not duplicate within same category<br/>- Content is properly formatted and valid HTML<br/>If validation fails, system displays error message (Refer to MSG 48). Otherwise, system stores document in "DOCUMENT" table with: created date, last modified date, author (current admin ID), generates document slug for URL, creates document version in "DOCUMENT_VERSION" table for version control, indexes document content for search, and displays success notification (Refer to MSG 49). System then closes the form and refreshes document list. |
+
+##### 2.1.12.3 Update Document
+
+###### Use Case Description
+
+| Name               | Update Document                                                                                                                     |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to update existing document content and settings.                                                        |
+| **Actor**          | Admin                                                                                                                               |
+| **Trigger**        | When the admin clicks "Edit" button for a document.                                                                                 |
+| **Pre-condition**  | Admin's device must be connected to the internet. Admin must be signed in with admin privileges. Document must exist in the system. |
+| **Post-condition** | Document information is updated in the system.                                                                                      |
+
+###### Sequence Flow
+
+[sequence-adjust-document-update-document](../sequence/adjust-document/update-document)
+
+###### Activities Flow
+
+[activity-adjust-document-update-document](../activity/adjust-document/update-document)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| :------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| (3)      | BR127   | **Querying Rules:** System queries document details from "DOCUMENT" table (Refer to "Document" table in "DB Sheet" file) using SQL: "SELECT \* FROM Document WHERE documentID = [Document.ID]". System also retrieves document version history from "DOCUMENT_VERSION" table.                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| (4)      | BR128   | **Displaying Rules:** The system displays "Document Detail" form filled with current document data including: all document fields, version history section showing previous versions with rollback option, and Save button. (Refer to "Document Detail" view in "View Description" file)                                                                                                                                                                                                                                                                                                                                                                                                                |
+| (6)      | BR129   | **Validation Rules:** System validates updated document data in real-time using same validation rules as Create Document (BR2 from 2.1.12.2). If validation fails, system displays error message (Refer to MSG 47).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| (8)      | BR130   | **Validation Rules:** When admin clicks "Save" button, system validates updated data: <br/>- All required fields are filled<br/>- Title is not duplicate (excluding current document) within same category<br/>- Content is properly formatted<br/>If validation fails, system displays error message (Refer to MSG 48). Otherwise, system updates document in "DOCUMENT" table, updates last modified date and modified by field, creates new version entry in "DOCUMENT_VERSION" table with change log, updates document slug if title changed, re-indexes document content for search, and displays success notification (Refer to MSG 50). System then closes the form and refreshes document list. |
+
+##### 2.1.12.4 Delete Document
+
+###### Use Case Description
+
+| Name               | Delete Document                                                                                                                     |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to delete a document from the system.                                                                    |
+| **Actor**          | Admin                                                                                                                               |
+| **Trigger**        | When the admin clicks "Delete" button for a document.                                                                               |
+| **Pre-condition**  | Admin's device must be connected to the internet. Admin must be signed in with admin privileges. Document must exist in the system. |
+| **Post-condition** | Document is deleted from the system.                                                                                                |
+
+###### Sequence Flow
+
+[sequence-adjust-document-delete-document](../sequence/adjust-document/delete-document)
+
+###### Activities Flow
+
+[activity-adjust-document-delete-document](../activity/adjust-document/delete-document)
+
+###### Business Rules
+
+| Activity     | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| :----------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (2)          | BR131   | **Displaying Rules:** The system displays a confirmation dialog asking admin to confirm document deletion with message: "Are you sure you want to delete this document? This action cannot be undone." Dialog shows document title for confirmation. (Refer to "Confirmation Dialog" view in "View Description" file)                                                                                                                                                                                                                                                                                    |
+| (2.1), (2.2) | BR132   | **Selection Rules:** Admin must confirm deletion. If admin clicks "Cancel" button, dialog closes and use case ends. If admin clicks "Confirm" button, system proceeds with deletion.                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| (4)          | BR133   | **Validation Rules:** System validates document exists in "DOCUMENT" table (Refer to "Document" table in "DB Sheet" file). If document not found, system displays error message (Refer to MSG 51). Otherwise, system performs soft delete by updating status to "Deleted" in "DOCUMENT" table (keeping data for audit purposes), removes document from search index, archives document versions in "DOCUMENT_VERSION" table, creates deletion audit log in "DOCUMENT_AUDIT" table with admin ID and timestamp, and displays success notification (Refer to MSG 52). System then refreshes document list. |
+
+##### 2.1.12.5 Search Document
+
+###### Use Case Description
+
+| Name               | Search Document (Admin)                                                                          |
+| :----------------- | :----------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows admin to search for documents in the document management system.            |
+| **Actor**          | Admin                                                                                            |
+| **Trigger**        | When the admin enters search criteria in the document search box.                                |
+| **Pre-condition**  | Admin's device must be connected to the internet. Admin must be signed in with admin privileges. |
+| **Post-condition** | Filtered document results are displayed.                                                         |
+
+###### Sequence Flow
+
+[sequence-adjust-document-search-document](../sequence/adjust-document/search-document)
+
+###### Activities Flow
+
+[activity-adjust-document-search-document](../activity/adjust-document/search-document)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| :------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (3)      | BR134   | **Searching Rules:** When admin enters search criteria, system uses Text_change() method with debounce delay of 300ms. System queries "DOCUMENT" table (Refer to "Document" table in "DB Sheet" file) using SQL: "SELECT \* FROM Document WHERE status != 'Deleted' AND (title LIKE '%keyword%' OR content LIKE '%keyword%' OR category LIKE '%keyword%') ORDER BY title ASC". Filters can include: category, status (Draft/Published), target audience (Customer/Staff/Admin), last modified date range. |
+| (4)      | BR135   | **Displaying Rules:** System displays "Document Management" view with filtered results showing matching documents. Active filters are displayed as removable tags. Result count is displayed. If no results found, displays "No documents found" message with "Clear Search" option. Search results highlight matched keywords in title and content preview.                                                                                                                                              |
+
+#### 2.1.13 View Staff Self Report Use Case
+
+##### 2.1.13.1 View Staff Self Report
+
+###### Use Case Description
+
+| Name               | View Staff Self Report                                                                           |
+| :----------------- | :----------------------------------------------------------------------------------------------- |
+| **Description**    | This use case allows staff to view their own performance and activity reports.                   |
+| **Actor**          | Staff                                                                                            |
+| **Trigger**        | When the staff navigates to "My Performance" or "My Reports" section.                            |
+| **Pre-condition**  | Staff's device must be connected to the internet. Staff must be signed in with staff privileges. |
+| **Post-condition** | Staff performance report is displayed.                                                           |
+
+###### Sequence Flow
+
+[sequence-view-staff-self-report-view-staff-self-report](../sequence/view-staff-self-report/view-staff-self-report)
+
+###### Activities Flow
+
+[activity-view-staff-self-report-view-staff-self-report](../activity/view-staff-self-report/view-staff-self-report)
+
+###### Business Rules
+
+| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| :------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (1)      | BR136   | **Displaying Rules:** The system displays "Staff Self Report" view with empty report charts and filter options. Available report types include: My Product Management Activity, My User Management Activity, My Review Moderation Activity, Overall My Performance. Time range options include: Today, Last 7 days, Last 30 days, Last 3 months, This year. (Refer to "Staff Self Report" view in "View Description" file)                                                                                                                                         |
+| (4)      | BR137   | **Querying Rules:** When staff selects report type and time range, system queries data from "STAFF_ACTIVITY" table (Refer to "StaffActivity" table in "DB Sheet" file) filtered by current staff ID using SQL: "SELECT \* FROM StaffActivity WHERE staffID = [CurrentStaff.ID] AND DATE(activity_date) BETWEEN [start_date] AND [end_date]". System calculates: total products added/updated, total reviews moderated, total users managed, activity distribution, daily averages.                                                                                 |
+| (6)      | BR138   | **Displaying Rules:** System displays staff self report with visualizations: <br/>- Summary cards showing: total activities, products managed, reviews moderated, users helped<br/>- Line chart showing activity trends over selected period<br/>- Bar chart showing activity distribution by type<br/>- Calendar heat map showing daily activity intensity<br/>- Table listing recent activities with timestamps<br/>- Performance comparison vs. team average (if available)<br/>Report helps staff track their own productivity and identify improvement areas. |
 
 ### 2.2 List Description
 
-The Electricilies system utilizes the following main data lists:
+The Electricilies system utilizes the following main data lists and tables:
 
-| List Code | List Name    | Description                                                                                           |
-| --------- | ------------ | ----------------------------------------------------------------------------------------------------- |
-| LIST01    | PRODUCT      | Stores all product information including name, description, price, stock, images, and specifications. |
-| LIST02    | CATEGORY     | Product categories and subcategories with hierarchical structure.                                     |
-| LIST03    | USER         | User accounts including customers, staff, and administrators with authentication credentials.         |
-| LIST04    | ORDER        | Customer orders with order details, shipping info, and payment information.                           |
-| LIST05    | ORDERDETAILS | Individual items within each order with quantity and price at time of purchase.                       |
-| LIST06    | CART         | Shopping cart items for active user sessions.                                                         |
-| LIST07    | REVIEW       | Product reviews submitted by verified customers.                                                      |
-| LIST08    | DOCUMENT     | Informational documents, policies, and help articles.                                                 |
-| LIST09    | INVENTORY    | Product inventory tracking with stock levels and locations.                                           |
+| \#  | List Code | List Name             | Description                                                                                                                                                                                               |
+| :-- | :-------- | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | List01    | User                  | This list contains all user accounts in the system including customers, staff, and admins. Information includes user ID, name, email, password hash, role, status, registration date, and last login.     |
+| 2   | List02    | Account               | This list stores authentication credentials and account linking information. It includes account ID, user ID, username, password hash, third-party provider links, account status, and security settings. |
+| 3   | List03    | Product               | This list holds all product information including product ID, name, description, category, price, stock quantity, SKU, brand, status, created date, and modified date.                                    |
+| 4   | List04    | Product Image         | This list stores product images with image ID, product ID, image URL, image order, and upload date. Each product can have multiple images.                                                                |
+| 5   | List05    | Product Specification | This list contains product specifications with specification ID, product ID, specification name, and specification value.                                                                                 |
+| 6   | List06    | Cart                  | This list manages shopping cart items with cart ID, customer ID, product ID, quantity, added date, and cart session ID.                                                                                   |
+| 7   | List07    | Order                 | This list stores order information including order ID, customer ID, order date, order status, total amount, shipping address, billing address, payment method, and tracking number.                       |
+| 8   | List08    | Order Item            | This list contains individual items in each order with order item ID, order ID, product ID, quantity, unit price, and subtotal.                                                                           |
+| 9   | List09    | Review                | This list holds product reviews with review ID, product ID, customer ID, rating (1-5), review title, review text, helpful count, status, and created date.                                                |
+| 10  | List10    | Review Image          | This list stores review images with image ID, review ID, image URL, and upload date.                                                                                                                      |
+| 11  | List11    | Document              | This list contains system documents and guides with document ID, title, category, content, target audience, status, created date, last modified date, and author ID.                                      |
+| 12  | List12    | Document Version      | This list tracks document version history with version ID, document ID, version number, content snapshot, change log, and version date.                                                                   |
+| 13  | List13    | Staff Activity        | This list logs staff activities with activity ID, staff ID, activity type, activity description, timestamp, and affected entity.                                                                          |
+| 14  | List14    | Customer Report       | This list stores aggregated customer statistics and metrics for reporting purposes.                                                                                                                       |
+| 15  | List15    | Staff Report          | This list stores aggregated staff performance statistics and metrics for reporting purposes.                                                                                                              |
+| 16  | List16    | Shop Report           | This list stores aggregated shop-wide statistics including sales, revenue, inventory, and customer metrics.                                                                                               |
+| 17  | List17    | Monitoring Data       | This list contains system monitoring metrics including uptime, response time, error logs, resource usage, and performance data.                                                                           |
+| 18  | List18    | User Audit            | This list tracks user-related administrative actions with audit ID, actor ID, action type, target user ID, timestamp, and change details.                                                                 |
+| 19  | List19    | Account Provider      | This list manages third-party authentication provider linkages with provider ID, user ID, provider name, provider user ID, and linked date.                                                               |
+| 20  | List20    | Product Return        | This list manages product return requests with return ID, order ID, product ID, customer ID, reason, status, request date, and resolution date.                                                           |
+| 21  | List21    | Password Reset Token  | This list stores password reset tokens with token ID, user ID, reset token, expiration time, and used status.                                                                                             |
+| 22  | List22    | Order History         | This list tracks order status changes and events with history ID, order ID, status, event type, timestamp, and notes.                                                                                     |
+| 23  | List23    | Review Audit          | This list logs review moderation actions with audit ID, review ID, staff ID, action type, reason, and timestamp.                                                                                          |
+| 24  | List24    | Document Audit        | This list logs document management actions with audit ID, document ID, admin ID, action type, and timestamp.                                                                                              |
+| 25  | List25    | Account Activity      | This list tracks account-related events including login attempts, password changes, and profile updates with activity ID, user ID, activity type, IP address, device info, timestamp, and status.         |
 
 ### 2.3 View Description
 
-The system implements the following main views:
+The Electricilies system provides the following main views/screens:
 
-| View Code | View Name          | Description                                                                       |
-| --------- | ------------------ | --------------------------------------------------------------------------------- |
-| VIEW01    | Home               | Landing page with featured products, promotions, and category navigation.         |
-| VIEW02    | Product List       | Grid/list view of products with filtering and sorting capabilities.               |
-| VIEW03    | Product Detail     | Detailed product page with images, specifications, reviews, and purchase options. |
-| VIEW04    | Shopping Cart      | Cart page showing selected items with quantity adjustment and checkout options.   |
-| VIEW05    | Checkout           | Multi-step checkout process for shipping, payment, and order confirmation.        |
-| VIEW06    | Order History      | Customer's order list with search and filter functionality.                       |
-| VIEW07    | Order Detail       | Detailed view of a specific order with tracking and action options.               |
-| VIEW08    | User Profile       | Customer account management with personal information and preferences.            |
-| VIEW09    | Admin Dashboard    | Administrator control panel with statistics and quick actions.                    |
-| VIEW10    | Product Management | Staff interface for managing product catalog.                                     |
+| \#  | View Code | View Name              | Description                                                                                                                                                                                        | User Role              |
+| :-- | :-------- | :--------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------- |
+| 1   | View01    | Sign Up                | Registration form for new customers with fields for username, password, email, full name, and sign-up button.                                                                                      | Guest                  |
+| 2   | View02    | Sign In                | Login form with username/email and password fields, sign-in button, forgot password link, and sign-up link.                                                                                        | Guest                  |
+| 3   | View03    | Home View              | Main landing page displaying featured products, categories, search bar, navigation menu, cart icon, and user account menu.                                                                         | All                    |
+| 4   | View04    | Profile View           | User profile page showing personal information, edit profile button, change password option, account activity link, linked accounts section, and delete account option.                            | Customer, Staff, Admin |
+| 5   | View05    | Product List           | Grid or list view of products with product cards showing thumbnail, name, price, rating, and quick actions. Includes pagination and sorting options.                                               | All                    |
+| 6   | View06    | Product Search         | Search results page with filters sidebar, search criteria display, product grid, sorting options, and result count.                                                                                | All                    |
+| 7   | View07    | Product Detail         | Detailed product page with image gallery, product information, price, availability, quantity selector, add to cart button, specifications table, reviews section, and suggested products carousel. | All                    |
+| 8   | View08    | Cart View              | Shopping cart page listing cart items with product details, quantity selectors, remove buttons, cart summary panel, and checkout button.                                                           | Customer               |
+| 9   | View09    | Checkout View          | Checkout page with delivery information form, payment method selection, order summary, and place order button.                                                                                     | Customer               |
+| 10  | View10    | Order Management       | Order history page listing orders with order cards showing order number, date, status, total, and action buttons. Includes search and filter options.                                              | Customer               |
+| 11  | View11    | Order Detail           | Detailed order page showing order timeline, product list, order summary, shipping information, billing information, and available actions.                                                         | Customer               |
+| 12  | View12    | Product Review         | Review submission form with star rating selector, review title input, review text area, image upload section, and submit button.                                                                   | Customer               |
+| 13  | View13    | Customer Report        | Customer's personal analytics dashboard with charts showing purchase history, spending analysis, and statistics. Includes report type and time range selectors.                                    | Customer               |
+| 14  | View14    | Document Management    | Document listing page organized by categories with document cards, search box, and filter options. For customers, read-only view. For admins, includes create/edit/delete actions.                 | Admin                  |
+| 15  | View15    | Document Detail        | Document content page displaying title, formatted content, last updated date, and related documents. Includes edit options for admin.                                                              | Admin                  |
+| 16  | View16    | Product Management     | Product management dashboard for staff with product table, search box, filters, add product button, and action buttons for each product.                                                           | Staff                  |
+| 17  | View17    | Product Detail (Staff) | Product edit form for staff with fields for all product information, image uploader, specifications editor, and save button.                                                                       | Staff                  |
+| 18  | View18    | User Management        | User management page for staff/admin with user table, search box, filters, and action buttons based on role.                                                                                       | Staff, Admin           |
+| 19  | View19    | User Detail            | User information page showing user details, role selector (admin only), and user statistics.                                                                                                       | Staff, Admin           |
+| 20  | View20    | Staff Self Report      | Staff's personal performance dashboard with activity charts, statistics cards, and productivity metrics.                                                                                           | Staff                  |
+| 21  | View21    | Shop Report            | Comprehensive shop analytics dashboard for admin with multiple charts showing sales, revenue, inventory, and customer metrics. Includes report type and time range selectors.                      | Admin                  |
+| 22  | View22    | System Monitoring      | System health dashboard for admin showing real-time metrics, status indicators, performance charts, error logs, and resource usage.                                                                | Admin                  |
+| 23  | View23    | Confirmation Dialog    | Modal dialog for confirming critical actions with message, cancel button, and confirm button.                                                                                                      | All                    |
+| 24  | View24    | Password Recovery      | Password reset request form with email field and send reset email button.                                                                                                                          | Guest                  |
+| 25  | View25    | Account Activity       | List of account-related events showing timestamp, activity type, IP address, device info, and status.                                                                                              | Customer, Staff, Admin |
 
 ## 3. Non-functional Requirements
 
 ### 3.1 User Access and Security
 
-| Actor Function         | Customer | Staff | Admin |
-| ---------------------- | :------: | :---: | :---: |
-| View Products          |    X     |   X   |   X   |
-| Search Products        |    X     |   X   |   X   |
-| Add to Cart            |    X     |       |       |
-| Place Orders           |    X     |       |       |
-| View Own Orders        |  X(\*)   |       |       |
-| Cancel Orders          |  X(\*)   |       |       |
-| Return Products        |  X(\*)   |       |       |
-| Review Products        |  X(\*)   |       |       |
-| Manage Products        |          |   X   |   X   |
-| Delete Reviews         |          |   X   |   X   |
-| Manage Users           |          |       |   X   |
-| View Reports           |          |       |   X   |
-| Manage Documents       |          |       |   X   |
-| View System Monitoring |          |       |   X   |
+| Function                      | Guest | Customer | Staff | Admin |
+| :---------------------------- | :---: | :------: | :---: | :---: |
+| **Manage Account Functions**  |
+| Sign Up                       |   X   |          |       |       |
+| Sign In                       |   X   |    X     |   X   |   X   |
+| Sign Out                      |       |    X     |   X   |   X   |
+| Edit Profile                  |       |  X(\*)   | X(\*) | X(\*) |
+| Link Account With Third Party |       |  X(\*)   | X(\*) | X(\*) |
+| Delete Account                |       |  X(\*)   | X(\*) | X(\*) |
+| Reset Password                |       |  X(\*)   | X(\*) | X(\*) |
+| View Account Activity         |       |  X(\*)   | X(\*) | X(\*) |
+| Recover Account               |   X   |    X     |   X   |   X   |
+| **View Product Functions**    |
+| View Product                  |   X   |    X     |   X   |   X   |
+| Search Product                |   X   |    X     |   X   |   X   |
+| View Product Detail           |   X   |    X     |   X   |   X   |
+| View Product Reviews          |   X   |    X     |   X   |   X   |
+| View Suggested Products       |   X   |    X     |   X   |   X   |
+| Add Product to Cart           |       |    X     |       |       |
+| **Manage Cart Functions**     |
+| Manage Cart                   |       |  X(\*)   |       |       |
+| Change Product Amount         |       |  X(\*)   |       |       |
+| Remove Product from Cart      |       |  X(\*)   |       |       |
+| Purchase                      |       |  X(\*)   |       |       |
+| **View Order Functions**      |
+| View Order                    |       |  X(\*)   |       |       |
+| Search Order                  |       |  X(\*)   |       |       |
+| View Order Detail             |       |  X(\*)   |       |       |
+| Cancel Order                  |       |  X(\*)   |       |       |
+| Return Product                |       |  X(\*)   |       |       |
+| Review Product                |       |  X(\*)   |       |       |
+| **Other Customer Functions**  |
+| Contact Support               |   X   |    X     |       |       |
+| View Customer Self Report     |       |  X(\*)   |       |       |
+| View Document                 |   X   |    X     |   X   |   X   |
+| **Manage Product Functions**  |
+| Manage Product                |       |          |   X   |   X   |
+| Add Product                   |       |          |   X   |   X   |
+| Update Product                |       |          |   X   |   X   |
+| Delete Product                |       |          |   X   |   X   |
+| Search Product (Staff)        |       |          |   X   |   X   |
+| Delete Review                 |       |          |   X   |   X   |
+| **Manage User Functions**     |
+| Manage User                   |       |          |   X   |   X   |
+| Search User                   |       |          |   X   |   X   |
+| View Customer Report          |       |          |   X   |   X   |
+| Change User Roles             |       |          |       |   X   |
+| Delete User                   |       |          |       |   X   |
+| View Staff Report             |       |          |       |   X   |
+| **Admin Functions**           |
+| View Shop Report              |       |          |       |   X   |
+| View System Monitoring        |       |          |       |   X   |
+| Adjust Document               |       |          |       |   X   |
+| Create Document               |       |          |       |   X   |
+| Update Document               |       |          |       |   X   |
+| Delete Document               |       |          |       |   X   |
+| Search Document (Admin)       |       |          |       |   X   |
+| **Staff Functions**           |
+| View Staff Self Report        |       |          | X(\*) | X(\*) |
 
 **Legend:**
 
-- X: Full permission to perform the action
-- X(\*): Permission limited to own items/data only
+- X: User has full permission to perform the action
+- X(\*): User has permission to perform the action on their own items only
+- X(\*\*): User has permission to perform the action on items sent to them only
 
 **Security Requirements:**
 
-- All passwords must be hashed using bcrypt with minimum 10 rounds
-- Session tokens must expire after 24 hours of inactivity
+- JWT must be expired shortly, no more than 5 minutes
 - HTTPS must be enforced for all connections
 - API endpoints must validate authentication tokens
 - Failed login attempts limited to 3 before temporary account lock (15 minutes)
@@ -918,6 +2888,10 @@ The system implements the following main views:
 - SQL injection prevention through parameterized queries
 - XSS protection through input sanitization and output encoding
 - CSRF tokens required for all state-changing operations
+- File upload restrictions: max 5MB for product images, 2MB for review images
+- Rate limiting: max 100 requests per minute per IP address
+- Admin actions must be logged in audit trail
+- User sessions must be invalidated on password change or role change
 
 ### 3.2 Performance Requirements
 
@@ -926,36 +2900,338 @@ The system implements the following main views:
 - Page load time: < 3 seconds for 95% of requests
 - API response time: < 500ms for 90% of requests
 - Database query time: < 200ms for standard queries
-- Search results: < 1 second for product searches
+- Search results: < 1 second for product/user/document searches
+- Image loading: < 2 seconds for product images with lazy loading
+- Cart operations: < 300ms for add/update/remove operations
+- Report generation: < 5 seconds for standard reports
 
 **Scalability:**
 
 - Support minimum 1,000 concurrent users
 - Support minimum 10,000 active customer accounts
+- Support minimum 5,000 staff members
 - Support minimum 50,000 products in catalog
 - Database capable of handling 100,000 orders per year
+- Support minimum 500,000 product reviews
 - Cart operations support 500 concurrent transactions
+- System should scale horizontally with load balancer
 
 **Availability:**
 
-- 99.5% uptime during business hours
+- 99.5% uptime during business hours (24/7)
 - Scheduled maintenance windows: 2 AM - 4 AM on weekends
 - Maximum unplanned downtime: 4 hours per month
 - Backup systems with < 15 minutes failover time
+- Database replication for high availability
+- Automated health checks every 5 minutes
+- Disaster recovery plan with < 1 hour recovery time
 
 **Data Volume:**
 
 - Product images: Max 5MB per image, up to 10 images per product
 - Review images: Max 2MB per image, up to 5 images per review
+- Document content: Max 10MB per document
 - Database growth rate: Estimated 20% annually
 - Daily backup of all transactional data
 - Archive old orders after 2 years (keep for compliance)
+- Log retention: 90 days for application logs, 1 year for audit logs
+- Maximum cart size: 100 items per customer
+- Maximum document file size: 10MB
+
+**Caching:**
+
+- Product catalog cached for 5 minutes
+- User session data cached for session duration
+- Static assets cached for 7 days with CDN
+- Database query results cached for frequently accessed data
+- Cache invalidation on data updates
 
 ### 3.3 Implementation Requirements
 
 **Technology Stack:**
 
-- Frontend: React.js, NextJS
-- Backend: Go
-- Auth: Keycloak
-- Database: PostgreSQL
+- Frontend: React.js with Next.js framework
+- Backend: Go (Golang) for API services
+- Authentication: Keycloak for identity and access management
+- Database: PostgreSQL for relational data
+- Search Engine: ParadeDB for product/user/document search
+- File Storage: AWS S3 or compatible object storage
+- CDN: CloudFlare or AWS CloudFront for static assets
+- Monitoring: Prometheus, Loki, Grafana for system monitoring
+
+**Development Environment:**
+
+- Version Control: Git with Github Flow branching strategy
+- CI/CD: GitHub Actions
+- Code Quality: SonarQube for code analysis
+- Testing: Jest for frontend, Go test for backend
+- API Documentation: Swagger/OpenAPI specification
+- Containerization: Docker for development and deployment
+- Orchestration: Kubernetes for production deployment
+
+**Deployment:**
+
+- Development: Local Docker containers
+- Staging: Kubernetes cluster on cloud provider
+- Production: Kubernetes cluster with auto-scaling
+- Database: PostgreSQL on Kubernetes
+- Monitoring: Integrated logging and monitoring stack
+
+**Security Implementation:**
+
+- Authentication: OAuth 2.0 / OpenID Connect via Keycloak
+- Authorization: Role-Based Access Control (RBAC)
+- API Security: JWT tokens
+- Communication: TLS 1.3 for all external connections
+- Database: Encrypted at rest and in transit
+- Secrets Management: HashiCorp Vault or AWS Secrets Manager, or encrypted secret on repositories
+- Penetration Testing: Quarterly security audits
+
+**Compliance:**
+
+- GDPR compliance for EU customers
+- PCI DSS compliance for payment processing
+- Data retention policies per regulatory requirements
+- Privacy policy and terms of service
+- Cookie consent management
+
+## 4. Other Requirements
+
+### 4.1 Archive Function
+
+| List                   | Actor        | Condition                                                                                                                                         |
+| :--------------------- | :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Order                  | Admin        | The Admin is able to archive completed orders older than 2 years. Archived orders remain accessible for compliance but are moved to cold storage. |
+| User                   | Admin        | The Admin is able to archive deleted user accounts after 90 days of deletion. Personal data is anonymized per GDPR requirements.                  |
+| Product                | Staff, Admin | Staff/Admin can archive discontinued products. Archived products are hidden from customer view but retain historical data for reporting.          |
+| Review                 | Staff, Admin | Staff/Admin can archive old reviews (older than 3 years) while maintaining review statistics.                                                     |
+| Document               | Admin        | The Admin is able to archive outdated documents. Archived documents are not visible to users but accessible to admin for historical reference.    |
+| Staff Activity Log     | Admin        | The Admin is able to archive staff activity logs older than 1 year for audit compliance.                                                          |
+| System Monitoring Data | Admin        | The Admin is able to archive system monitoring data older than 90 days to maintain database performance.                                          |
+
+### 4.2 Security Audit Function
+
+Enable Security Audit Function for "Admin" to track critical system events:
+
+- User account creation, modification, and deletion
+- User role changes and permission modifications
+- Failed login attempts and account lockouts
+- Password changes and password reset requests
+- Product creation, modification, and deletion
+- Order modifications and cancellations
+- Review deletions and moderation actions
+- Document creation, modification, and deletion
+- System configuration changes
+- Admin access to sensitive user data
+- API authentication failures
+- Suspicious activity patterns (e.g., rapid requests, unauthorized access attempts)
+
+All audit logs include: timestamp, actor ID, action type, affected entity, IP address, user agent, and action result. Audit logs are immutable and retained for minimum 1 year for compliance purposes.
+
+### 4.3 Electricilies Sites
+
+| \#  | Site Name     | Description                                                                                                                                                                                                                                                                                                                                                                   |
+| :-- | :------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Customer Site | This is the main e-commerce website for customers. It provides functionalities to browse products, search products, view product details and reviews, manage shopping cart, place orders, track orders, write reviews, view documents, contact support, and view personal reports.                                                                                            |
+| 2   | Staff Site    | This site is designed for staff members. It enables them to manage products (add, update, delete), moderate product reviews, search products with advanced filters, view and manage users (customers only), view customer reports, and view their own performance reports.                                                                                                    |
+| 3   | Admin Site    | This is the control console for administrators. It provides full access to manage users (including staff), change user roles, view comprehensive shop reports, monitor system health and performance, manage system documents, view staff performance reports, and access all staff functionalities. Admin site includes advanced analytics and system configuration options. |
+
+### 4.4 Electricilies Lists
+
+Refer to section 2.2 List Description for detailed information about all lists/tables used in the Electricilies system.
+
+### 4.5 Custom Pages
+
+Custom pages implemented in the Electricilies system:
+
+| \#  | Page Name            | Description                                                      | User Role               |
+| :-- | :------------------- | :--------------------------------------------------------------- | :---------------------- |
+| 1   | Dashboard            | Personalized dashboard showing quick stats and recent activities | Customer, Staff, Admin  |
+| 2   | Analytics Dashboard  | Comprehensive analytics page with customizable widgets           | Admin                   |
+| 3   | Inventory Management | Advanced inventory tracking and low-stock alerts                 | Staff, Admin            |
+| 4   | Bulk Operations      | Interface for bulk product updates and data import/export        | Staff, Admin            |
+| 5   | Notification Center  | Centralized notification management for all system alerts        | All authenticated users |
+| 6   | Order Tracking       | Real-time order tracking with map integration                    | Customer                |
+| 7   | Wishlist             | Product wishlist management for customers                        | Customer                |
+| 8   | Comparison Tool      | Side-by-side product comparison interface                        | Customer                |
+| 9   | Advanced Search      | Advanced search page with multiple filter options                | All                     |
+| 10  | Category Management  | Product category hierarchy management                            | Admin                   |
+
+### 4.6 Scheduled Agents
+
+Scheduled jobs and automated tasks in the Electricilies system:
+
+| \#  | Agent Name                    | Schedule                    | Description                                                                        |
+| :-- | :---------------------------- | :-------------------------- | :--------------------------------------------------------------------------------- |
+| 1   | Order Status Sync             | Every 15 minutes            | Synchronizes order status with shipping providers and updates tracking information |
+| 2   | Inventory Alert               | Daily at 8:00 AM            | Checks inventory levels and sends low-stock alerts to staff                        |
+| 3   | Abandoned Cart Reminder       | Daily at 10:00 AM           | Sends email reminders to customers with abandoned carts (older than 24 hours)      |
+| 4   | Review Notification           | Daily at 9:00 AM            | Sends email notifications to customers prompting them to review delivered orders   |
+| 5   | Report Generation             | Daily at 1:00 AM            | Generates and caches daily sales and performance reports                           |
+| 6   | Database Backup               | Daily at 2:00 AM            | Performs full database backup and verification                                     |
+| 7   | Log Cleanup                   | Weekly on Sunday at 3:00 AM | Archives old logs and cleans up temporary data                                     |
+| 10  | Analytics Aggregation         | Daily at 4:00 AM            | Aggregates daily analytics data for reporting                                      |
+| 11  | Product Recommendation Update | Daily at 5:00 AM            | Updates product recommendation algorithm with latest purchase data                 |
+| 12  | Price Update                  | As configured               | Processes scheduled price changes and promotional pricing                          |
+
+### 4.7 Technical Concern
+
+**Scalability Concerns:**
+
+- **High Traffic Events:** System must handle traffic spikes during sales events (Black Friday, Flash Sales). Implement auto-scaling, CDN caching, and queue-based order processing to maintain performance.
+
+- **Large Product Catalog:** With 50,000+ products, search and filtering performance is critical. ParadeDB indexing and optimized database queries with proper indexing are essential.
+
+- **Image Storage:** Large volume of product and review images can impact storage costs and performance. Implement image compression, lazy loading, CDN delivery, and tiered storage (hot/cold) strategy.
+
+**Data Management Concerns:**
+
+- **Data Volume Growth:** 20% annual growth requires capacity planning for database, storage, and backup systems. Implement data archiving strategy for old orders and reviews.
+
+- **Search Performance:** Full-text search across products, documents, and users with complex filters requires optimized ParadeDB configuration and query optimization.
+
+- **Report Generation:** Complex reports with large datasets may impact database performance. Implement report caching, pre-aggregation of metrics, and scheduled report generation during off-peak hours.
+
+**Security Concerns:**
+
+- **PCI DSS Compliance:** Payment processing must comply with PCI DSS standards. Use tokenization and never store full credit card data. Implement third-party payment gateway integration (Stripe, PayPal).
+
+- **Data Privacy:** GDPR compliance requires proper consent management, right to be forgotten, data portability, and data encryption. Implement personal data anonymization for archived users.
+
+- **API Security:** Public APIs must be protected against abuse. Implement rate limiting, API key rotation, request validation, and DDoS protection.
+
+**Performance Concerns:**
+
+- **Database Queries:** Complex queries for reports and analytics can impact database performance. Implement read replicas, query optimization, and appropriate indexing strategy.
+
+- **Concurrent Users:** Target of 1,000 concurrent users requires horizontal scaling capability. Implement stateless application design, session management in Redis, and load balancing.
+
+- **Real-time Updates:** Cart synchronization, inventory updates, and order status require real-time or near-real-time processing. Implement WebSocket connections for live updates and message queue for asynchronous processing.
+
+**Integration Concerns:**
+
+- **Third-party Services:** Dependencies on external services (payment gateway, shipping providers, email service, support chat) require proper error handling, retry logic, and fallback mechanisms.
+
+- **Authentication Provider:** Keycloak integration requires proper configuration, token management, and session synchronization. Implement token refresh mechanism and handle authentication failures gracefully.
+
+**Operational Concerns:**
+
+- **Monitoring and Alerting:** Critical for maintaining 99.5% uptime. Implement comprehensive monitoring for application health, database performance, API response times, error rates, and resource utilization.
+
+- **Deployment Strategy:** Zero-downtime deployments are essential for 24/7 availability. Implement blue-green deployment or rolling updates with health checks.
+
+- **Disaster Recovery:** RTO (Recovery Time Objective) of < 1 hour requires automated backup verification, documented recovery procedures, and regular disaster recovery drills.
+
+## 5. Appendixes
+
+### 5.1 Glossary
+
+The list below contains all the necessary terms to interpret the document, including acronyms and abbreviations.
+
+| Term       | Description                                                             |
+| :--------- | :---------------------------------------------------------------------- |
+| _API_      | **A**pplication **P**rogramming **I**nterface                           |
+| _AWS_      | **A**mazon **W**eb **S**ervices                                         |
+| _BR_       | **B**usiness **R**ule                                                   |
+| _CDN_      | **C**ontent **D**elivery **N**etwork                                    |
+| _CLV_      | **C**ustomer **L**ifetime **V**alue                                     |
+| _CPU_      | **C**entral **P**rocessing **U**nit                                     |
+| _CRUD_     | **C**reate, **R**ead, **U**pdate, **D**elete                            |
+| _CSRF_     | **C**ross-**S**ite **R**equest **F**orgery                              |
+| _DB_       | **D**ata**b**ase                                                        |
+| _GDPR_     | **G**eneral **D**ata **P**rotection **R**egulation                      |
+| _HTML_     | **H**yper**T**ext **M**arkup **L**anguage                               |
+| _HTTPS_    | **H**yper**T**ext **T**ransfer **P**rotocol **S**ecure                  |
+| _ID_       | **Id**entifier                                                          |
+| _IP_       | **I**nternet **P**rotocol                                               |
+| _JPG/JPEG_ | **J**oint **P**hotographic **E**xperts **G**roup (image format)         |
+| _JSON_     | **J**ava**S**cript **O**bject **N**otation                              |
+| _JWT_      | **J**SON **W**eb **T**oken                                              |
+| _MB_       | **M**ega**b**yte                                                        |
+| _MSG_      | **M**es**s**a**g**e                                                     |
+| _N/A_      | **N**ot **A**vailable or **N**ot **A**pplicable                         |
+| _OAuth_    | **O**pen **Auth**orization                                              |
+| _PCI DSS_  | **P**ayment **C**ard **I**ndustry **D**ata **S**ecurity **S**tandard    |
+| _PDF_      | **P**ortable **D**ocument **F**ormat                                    |
+| _PNG_      | **P**ortable **N**etwork **G**raphics (image format)                    |
+| _RBAC_     | **R**ole-**B**ased **A**ccess **C**ontrol                               |
+| _REST_     | **RE**presentational **S**tate **T**ransfer                             |
+| _RTO_      | **R**ecovery **T**ime **O**bjective                                     |
+| _SEO_      | **S**earch **E**ngine **O**ptimization                                  |
+| _SKU_      | **S**tock **K**eeping **U**nit                                          |
+| _SQL_      | **S**tructured **Q**uery **L**anguage                                   |
+| _SRS_      | **S**oftware **R**equirements **S**pecification                         |
+| _SSL/TLS_  | **S**ecure **S**ockets **L**ayer / **T**ransport **L**ayer **S**ecurity |
+| _TBD_      | **T**o **b**e **d**etermined or **t**o **b**e **d**efined               |
+| _UC_       | **U**se **C**ase                                                        |
+| _UI_       | **U**ser **I**nterface                                                  |
+| _URL_      | **U**niform **R**esource **L**ocator                                    |
+| _UUID_     | **U**niversally **U**nique **Id**entifier                               |
+| _XSS_      | **C**ross-**S**ite **S**cripting                                        |
+
+### 5.2 Mapping to Notes Application
+
+\*\* There is no mapping between the Electricilies application and any source Notes application. \*\*
+
+### 5.3 Messages
+
+This section describes the details of messages used in business rules including error messages, confirmation messages, success messages, and informational messages.
+
+| Message Code | Message Content                                                                                                              | Button |
+| :----------- | :--------------------------------------------------------------------------------------------------------------------------- | :----- |
+| MSG 1        | This field is required. Please provide valid information to proceed.                                                         | Ok     |
+| MSG 2        | This username or email is already registered. Please use a different one.                                                    | Ok     |
+| MSG 3        | Invalid authorization code or verifier. Please try again.                                                                    | Ok     |
+| MSG 4        | Invalid authentication token. Please sign in again.                                                                          | Ok     |
+| MSG 5        | Invalid username/email or password. Please check your credentials and try again.                                             | Ok     |
+| MSG 6        | You have been successfully signed out. Redirecting to sign in page...                                                        | Ok     |
+| MSG 7        | Email address is already registered by another account. Please use a different email.                                        | Ok     |
+| MSG 8        | Phone number is already registered by another account. Please use a different phone.                                         | Ok     |
+| MSG 9        | Profile updated successfully.                                                                                                | Ok     |
+| MSG 10       | This account is already linked to this provider or provider account is linked to another user.                               | Ok     |
+| MSG 11       | Account linked successfully with third-party provider.                                                                       | Ok     |
+| MSG 12       | Cannot delete account. You have pending orders or active subscriptions that must be resolved first.                          | Ok     |
+| MSG 13       | Your account has been deleted successfully. Thank you for using our service.                                                 | Ok     |
+| MSG 14       | Password does not meet requirements. Must be at least 8 characters with uppercase, lowercase, number, and special character. | Ok     |
+| MSG 15       | Current password is incorrect. Please try again.                                                                             | Ok     |
+| MSG 16       | Password updated successfully.                                                                                               | Ok     |
+| MSG 17       | If this email is registered, you will receive a password reset link shortly.                                                 | Ok     |
+| MSG 18       | Password reset email sent successfully. Please check your inbox and follow the instructions.                                 | Ok     |
+| MSG 19       | Invalid quantity. Please enter a valid positive number that does not exceed available stock.                                 | Ok     |
+| MSG 20       | Total quantity exceeds available stock. Please reduce quantity.                                                              | Ok     |
+| MSG 21       | Product added to cart successfully.                                                                                          | Ok     |
+| MSG 22       | Cart updated successfully.                                                                                                   | Ok     |
+| MSG 23       | Product not found in cart.                                                                                                   | Ok     |
+| MSG 24       | Product removed from cart successfully.                                                                                      | Ok     |
+| MSG 25       | Cannot proceed to checkout. Some items in your cart are no longer available or have insufficient stock.                      | Ok     |
+| MSG 26       | Cannot proceed to checkout. One or more products are no longer available.                                                    | Ok     |
+| MSG 27       | Cannot cancel order. Order has already been shipped or is not in cancellable status.                                         | Ok     |
+| MSG 28       | Order cancelled successfully. Refund will be processed within 3-5 business days.                                             | Ok     |
+| MSG 29       | Cannot return product. Product is not eligible for return or return period has expired.                                      | Ok     |
+| MSG 30       | Return request created successfully. Please check your email for return instructions.                                        | Ok     |
+| MSG 31       | Invalid review content. Please ensure all required fields are filled correctly.                                              | Ok     |
+| MSG 32       | Cannot submit review. You have not purchased this product or have already reviewed it.                                       | Ok     |
+| MSG 33       | Thank you for your review! It will be published after moderation.                                                            | Ok     |
+| MSG 34       | Invalid product data. Please check all required fields and try again.                                                        | Ok     |
+| MSG 35       | Cannot save product. SKU already exists or validation failed.                                                                | Ok     |
+| MSG 36       | Product created successfully.                                                                                                | Ok     |
+| MSG 37       | Product updated successfully.                                                                                                | Ok     |
+| MSG 38       | Cannot delete product. Product has pending orders or is in active carts.                                                     | Ok     |
+| MSG 39       | Product deleted successfully.                                                                                                | Ok     |
+| MSG 40       | Review not found.                                                                                                            | Ok     |
+| MSG 41       | Review deleted successfully.                                                                                                 | Ok     |
+| MSG 42       | Invalid role change. Please select a different role.                                                                         | Ok     |
+| MSG 43       | Cannot change user role. User has pending administrative actions.                                                            | Ok     |
+| MSG 44       | User role updated successfully. User will need to sign in again.                                                             | Ok     |
+| MSG 45       | Cannot delete user. User has pending orders or active disputes.                                                              | Ok     |
+| MSG 46       | User deleted successfully.                                                                                                   | Ok     |
+| MSG 47       | Invalid document data. Please check all required fields.                                                                     | Ok     |
+| MSG 48       | Cannot save document. Title already exists in this category or validation failed.                                            | Ok     |
+| MSG 49       | Document created successfully.                                                                                               | Ok     |
+| MSG 50       | Document updated successfully.                                                                                               | Ok     |
+| MSG 51       | Document not found.                                                                                                          | Ok     |
+| MSG 52       | Document deleted successfully.                                                                                               | Ok     |
+
+### 5.4 Issues List
+
+N/A

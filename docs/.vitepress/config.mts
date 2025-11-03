@@ -1180,8 +1180,20 @@ export default defineConfig({
 								collapsed: true,
 								items: [
 									{
-										text: "View Reports",
-										link: "/docs/activity/view-reports/view-reports",
+										text: "Revenue Report",
+										link: "/docs/activity/view-reports/revenue-report",
+									},
+									{
+										text: "Booking Report",
+										link: "/docs/activity/view-reports/booking-report",
+									},
+									{
+										text: "Popular Routes Report",
+										link: "/docs/activity/view-reports/popular-routes-report",
+									},
+									{
+										text: "Customer Report",
+										link: "/docs/activity/view-reports/customer-report",
 									},
 								],
 							},
