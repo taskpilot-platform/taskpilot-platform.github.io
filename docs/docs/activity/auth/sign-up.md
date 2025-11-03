@@ -2,76 +2,50 @@
 
 ```plantuml
 @startuml
-|User|
+|U|User
+|S|System
+
+|U|
 start
-:(1) Open SignUpView;
+:(1) Access sign up page;
 
-|System|
-:(2) Generate code verifier (random)\nand hash it -> code challenge;
-:(3) Redirect with code challenge;
-:(4) Display SignUpView;
+|S|
+:(2) Display sign up form;
 
-|User|
-:(5) Enter user data;
+|U|
+:(3) Enter registration data \n (username, email, password, etc.);
+:(4) Click "Sign Up";
 
+|S|
 repeat
-  |System|
-  :(6) Validate data format;
-  if (Data format valid?) then (yes)
-    --
-  else (no)
-    :(6.1) Display "Invalid data format" error;
-    |User|
-    :(6.2) Re-enter user data;
-  endif
-repeat while (Data format valid?) is (no) not (yes)
+  :(5) Validate data format;
+repeat while (Data format valid?) is (No) not (Yes)
 
-|System|
-:(7) Send user data;
+:(6) Send registration request;
+:(7) Check username and email uniqueness;
+:(8) Query existing username and email;
 
-|Database|
-:(8) Check if user/email exists;
-if (User/email exists?) then (yes)
-  |System|
-  :(8.1) Display "User already exists" error;
+if (Username or email already exists?) then (Yes)
+  :(8.1) Display error notification;
   stop
-else (no)
-  :(9) Create new user + hash password;
-  :(10) Send authorization code;
+else (No)
 endif
 
-|System|
-:(11) Send authorization code + verifier;
+:(9) Hash password;
+:(10) Create new user with role CUSTOMER;
+:(11) Insert user record;
+:(12) Create cart for user;
+:(13) Insert cart record;
+:(14) Generate JWT token;
+:(15) Return success with JWT token;
+:(16) Redirect to home page;
+:(17) Display home view;
 
-|Database|
-:(12) Validate code + verifier + challenge;
-if (Valid?) then (yes)
-  :(13) Return JWT Token;
-else (no)
-  |System|
-  :(12.1) Display "Invalid verifier/code" error;
-  stop
-endif
+|U|
+:(18) Confirm end;
 
-|System|
-:(14) Send JWT Token;
-:(15) Validate JWT;
-
-|Database|
-:(16) Verify JWT & write data;
-if (JWT valid?) then (yes)
-  :(17) Return success;
-else (no)
-  |System|
-  :(16.1) Display "Invalid JWT" error;
-  stop
-endif
-
-|System|
-:(18) Redirect to HomeView;
-:(19) Display HomeView;
-
-|Database|
 stop
 @enduml
 ```
+
+<!-- diagram id="activity-auth-sign-up" -->

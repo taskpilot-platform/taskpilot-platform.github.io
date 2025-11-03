@@ -2,67 +2,61 @@
 
 ```plantuml
 @startuml
-|User|
+|U|User
+|S|System
+
+|U|
 start
-:(1) Enter credential;
-:(2) Click "Sign In";
+:(1) Access sign in page;
 
-|System|
-:(3) Generate code verifier\nand code challenge;
-:(4) Redirect with code challenge;
-:(5) Display SignInView;
+|S|
+:(2) Display sign in form;
 
+|U|
+:(3) Enter username/email and password;
+:(4) Click "Sign In";
+
+|S|
 repeat
-  :(6) Validate data format;
-  if (Data format valid?) then (yes)
-    --
-  else (no)
-    :(6.1) Display "Invalid data format" error;
-    |User|
-    :(6.2) Re-enter credential;
-  endif
-repeat while (Data format valid?) is (no) not (yes)
+  :(5) Validate data format;
+repeat while (Data format valid?) is (No) not (Yes)
 
-|System|
-:(7) Send user credential;
+:(6) Send login request;
+:(7) Query user by username or email;
+:(8) Find user and get password hash;
 
-|Database|
-:(8) Validate user credential;
-if (Credential valid?) then (yes)
-  :(9) Send authorization code;
-else (no)
-  |System|
-  :(8.1) Display "Invalid credential" error;
+if (User found?) then (No)
+  :(8.1) Display "Username/Email or password incorrect" error;
   stop
+else (Yes)
 endif
 
-|System|
-:(10) Send authorization code + verifier;
+:(9) Verify password hash;
 
-|Database|
-:(11) Validate code + verifier + challenge;
-if (Valid?) then (yes)
-  :(12) Return JWT Token;
-else (no)
-  |System|
-  :(11.1) Display "Invalid verifier/code" error;
+if (Password correct?) then (No)
+  :(9.1) Display "Username/Email or password incorrect" error;
   stop
+else (Yes)
 endif
 
-|System|
-:(13) Validate JWT;
-if (JWT valid?) then (yes)
-  :(14) Redirect to HomeView;
-else (no)
-  :(13.1) Display "Invalid JWT" error;
+:(10) Check account lock status;
+
+if (Account locked?) then (Yes)
+  :(10.1) Display "Account locked. Please contact support" error;
   stop
+else (No)
 endif
 
-|System|
-:(15) Display HomeView;
-|Database|
+:(11) Generate JWT token;
+:(12) Return success with JWT token;
+:(13) Redirect to home page;
+:(14) Display home view;
+
+|U|
+:(15) Confirm end;
+
 stop
 @enduml
 ```
 
-<!-- diagram id="activity-sign-in" -->
+<!-- diagram id="activity-auth-sign-in" -->

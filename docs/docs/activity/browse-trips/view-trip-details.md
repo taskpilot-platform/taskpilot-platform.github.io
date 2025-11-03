@@ -36,5 +36,3 @@ stop
 ```
 
 <!-- diagram id="activity-browse-trips-view-trip-details" -->
-
-<!-- diagram id="activity-browse-trips-view-trip-details" -->

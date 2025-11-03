@@ -624,10 +624,6 @@ export default defineConfig({
 								collapsed: true,
 								items: [
 									{
-										text: "View Reports",
-										link: "/docs/sequence/view-reports/view-reports",
-									},
-									{
 										text: "Revenue Report",
 										link: "/docs/sequence/view-reports/revenue-report",
 									},
@@ -731,6 +727,14 @@ export default defineConfig({
 								items: [
 									{ text: "Sign In", link: "/docs/activity/auth/sign-in" },
 									{ text: "Sign Up", link: "/docs/activity/auth/sign-up" },
+									{
+										text: "Forgot Password",
+										link: "/docs/activity/auth/forgot-password",
+									},
+									{
+										text: "Manage Profile",
+										link: "/docs/activity/auth/manage-profile",
+									},
 								],
 							},
 							{
