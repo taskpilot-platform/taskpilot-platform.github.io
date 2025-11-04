@@ -68,4 +68,4 @@ deactivate C
 @enduml
 ```
 
-<!-- diagram id="sequence-adjust-cart-remove-trip-to-cart" -->
+<!-- diagram id="sequence-adjust-cart-remove-trip-from-cart" -->

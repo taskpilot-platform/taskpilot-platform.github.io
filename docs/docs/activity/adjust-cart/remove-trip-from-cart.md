@@ -55,4 +55,4 @@ stop
 @enduml
 ```
 
-<!-- diagram id="activity-adjust-cart-remove-trip-to-cart" -->
+<!-- diagram id="activity-adjust-cart-remove-trip-from-cart" -->

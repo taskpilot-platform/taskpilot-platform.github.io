@@ -54,10 +54,6 @@ export default defineConfig({
 								text: "Admin",
 								link: "/docs/use-case/admin",
 							},
-							{
-								text: "Sample",
-								link: "docs/use-case/sample-workflow",
-							},
 						],
 					},
 					{
@@ -112,37 +108,11 @@ export default defineConfig({
 									},
 									{
 										text: "Remove Trip from Cart",
-										link: "/docs/sequence/adjust-cart/remove-trip-to-cart",
+										link: "/docs/sequence/adjust-cart/remove-trip-from-cart",
 									},
 									{
 										text: "View and Filter Trips in Cart",
 										link: "/docs/sequence/adjust-cart/view-and-filter-trips-in-cart",
-									},
-								],
-							},
-							{
-								text: "Adjust Document",
-								collapsed: true,
-								items: [
-									{
-										text: "Adjust Document",
-										link: "/docs/sequence/adjust-document/adjust-document",
-									},
-									{
-										text: "Create Document",
-										link: "/docs/sequence/adjust-document/create-document",
-									},
-									{
-										text: "Delete Document",
-										link: "/docs/sequence/adjust-document/delete-document",
-									},
-									{
-										text: "Search Document",
-										link: "/docs/sequence/adjust-document/search-document",
-									},
-									{
-										text: "Update Document",
-										link: "/docs/sequence/adjust-document/update-document",
 									},
 								],
 							},
@@ -252,16 +222,6 @@ export default defineConfig({
 								],
 							},
 							{
-								text: "Contact Support",
-								collapsed: true,
-								items: [
-									{
-										text: "Contact Support",
-										link: "/docs/sequence/contact-support/contact-support",
-									},
-								],
-							},
-							{
 								text: "Manage Attraction",
 								collapsed: true,
 								items: [
@@ -278,10 +238,6 @@ export default defineConfig({
 										link: "/docs/sequence/manage-attraction/edit-attraction-detail",
 									},
 									{
-										text: "Search Attraction",
-										link: "/docs/sequence/manage-attraction/search-attraction",
-									},
-									{
 										text: "View Attraction Detail",
 										link: "/docs/sequence/manage-attraction/view-attraction-detail",
 									},
@@ -296,42 +252,12 @@ export default defineConfig({
 								],
 							},
 							{
-								text: "Manage Cart",
-								collapsed: true,
-								items: [
-									{
-										text: "Add Trip to Cart",
-										link: "/docs/sequence/manage-cart/add-trip-to-cart",
-									},
-									{
-										text: "Checkout Cart",
-										link: "/docs/sequence/manage-cart/checkout-cart",
-									},
-									{
-										text: "Remove Trip from Cart",
-										link: "/docs/sequence/manage-cart/remove-trip-from-cart",
-									},
-									{
-										text: "Update Cart Item Quantity",
-										link: "/docs/sequence/manage-cart/update-cart-item-quantity",
-									},
-									{
-										text: "View Cart",
-										link: "/docs/sequence/manage-cart/view-cart",
-									},
-								],
-							},
-							{
 								text: "Manage Personal Booking",
 								collapsed: true,
 								items: [
 									{
 										text: "Book a Trip",
 										link: "/docs/sequence/manage-personal-booking/book-a-trip",
-									},
-									{
-										text: "Cancel Booking",
-										link: "/docs/sequence/manage-personal-booking/cancel-booking",
 									},
 									{
 										text: "Checkout Cart",
@@ -352,36 +278,6 @@ export default defineConfig({
 									{
 										text: "UCS-Manage-Personal-Booking",
 										link: "/docs/sequence/manage-personal-booking/UCS-manage-personal-booking",
-									},
-								],
-							},
-							{
-								text: "Manage Product",
-								collapsed: true,
-								items: [
-									{
-										text: "Add Product",
-										link: "/docs/sequence/manage-product/add-product",
-									},
-									{
-										text: "Delete Product",
-										link: "/docs/sequence/manage-product/delete-product",
-									},
-									{
-										text: "Delete Review",
-										link: "/docs/sequence/manage-product/delete-review",
-									},
-									{
-										text: "Manage Product",
-										link: "/docs/sequence/manage-product/manage-product",
-									},
-									{
-										text: "Search Product",
-										link: "/docs/sequence/manage-product/search-product",
-									},
-									{
-										text: "Update Product",
-										link: "/docs/sequence/manage-product/update-product",
 									},
 								],
 							},
@@ -426,10 +322,6 @@ export default defineConfig({
 									{
 										text: "Edit Route Details",
 										link: "/docs/sequence/manage-routes/edit-route-details",
-									},
-									{
-										text: "Search Route",
-										link: "/docs/sequence/manage-routes/search-route",
 									},
 									{
 										text: "View Route Detail",
@@ -480,146 +372,6 @@ export default defineConfig({
 								],
 							},
 							{
-								text: "Manage User",
-								collapsed: true,
-								items: [
-									{
-										text: "Delete Customer",
-										link: "/docs/sequence/manage-user/delete-customer",
-									},
-									{
-										text: "Delete Staff",
-										link: "/docs/sequence/manage-user/delete-staff",
-									},
-									{
-										text: "Manage User",
-										link: "/docs/sequence/manage-user/manage-user",
-									},
-									{
-										text: "Search User",
-										link: "/docs/sequence/manage-user/search-user",
-									},
-									{
-										text: "View Customer Report",
-										link: "/docs/sequence/manage-user/view-customer-report",
-									},
-									{
-										text: "View Staff Report",
-										link: "/docs/sequence/manage-user/view-staff-report",
-									},
-								],
-							},
-							{
-								text: "View Customer Self Report",
-								collapsed: true,
-								items: [
-									{
-										text: "View Customer Self Report",
-										link: "/docs/sequence/view-customer-self-report/view-customer-self-report",
-									},
-								],
-							},
-							{
-								text: "View Document",
-								collapsed: true,
-								items: [
-									{
-										text: "View Document",
-										link: "/docs/sequence/view-document/view-document",
-									},
-								],
-							},
-							{
-								text: "View Order",
-								collapsed: true,
-								items: [
-									{
-										text: "Cancel Order",
-										link: "/docs/sequence/view-order/cancel-order",
-									},
-									{
-										text: "Return Product",
-										link: "/docs/sequence/view-order/return-product",
-									},
-									{
-										text: "Review Product",
-										link: "/docs/sequence/view-order/review-product",
-									},
-									{
-										text: "Search Order",
-										link: "/docs/sequence/view-order/search-order",
-									},
-									{
-										text: "View Order Detail",
-										link: "/docs/sequence/view-order/view-order-detail",
-									},
-									{
-										text: "View Order",
-										link: "/docs/sequence/view-order/view-order",
-									},
-								],
-							},
-							{
-								text: "View Product",
-								collapsed: true,
-								items: [
-									{
-										text: "Add Product To Cart",
-										link: "/docs/sequence/view-product/add-product-to-cart",
-									},
-									{
-										text: "Search Product",
-										link: "/docs/sequence/view-product/search-product",
-									},
-									{
-										text: "View Product Detail",
-										link: "/docs/sequence/view-product/view-product-detail",
-									},
-									{
-										text: "View Product",
-										link: "/docs/sequence/view-product/view-product",
-									},
-									{
-										text: "View Product Reviews",
-										link: "/docs/sequence/view-product/view-product-reviews",
-									},
-									{
-										text: "View Suggested Product",
-										link: "/docs/sequence/view-product/view-suggested-product",
-									},
-								],
-							},
-							{
-								text: "View Shop Report",
-								collapsed: true,
-								items: [
-									{
-										text: "View Shop Report",
-										link: "/docs/sequence/view-shop-report/view-shop-report",
-									},
-								],
-							},
-							{
-								text: "View Staff Self Report",
-								collapsed: true,
-								items: [
-									{
-										text: "View Staff Self Report",
-										link: "/docs/sequence/view-staff-self-report/view-staff-self-report",
-									},
-								],
-							},
-							{
-								text: "View System Monitoring",
-								collapsed: true,
-								items: [
-									{
-										text: "View System Monitoring",
-										link: "/docs/sequence/view-system-monitoring/view-system-monitoring",
-									},
-								],
-							},
-							{
 								text: "View Reports",
 								collapsed: true,
 								items: [
@@ -656,32 +408,6 @@ export default defineConfig({
 						collapsed: true,
 						items: [
 							{
-								text: "Adjust Document",
-								collapsed: true,
-								items: [
-									{
-										text: "Adjust Document",
-										link: "/docs/activity/adjust-document/adjust-document",
-									},
-									{
-										text: "Create Document",
-										link: "/docs/activity/adjust-document/create-document",
-									},
-									{
-										text: "Delete Document",
-										link: "/docs/activity/adjust-document/delete-document",
-									},
-									{
-										text: "Search Document",
-										link: "/docs/activity/adjust-document/search-document",
-									},
-									{
-										text: "Update Document",
-										link: "/docs/activity/adjust-document/update-document",
-									},
-								],
-							},
-							{
 								text: "Adjust Cart",
 								collapsed: true,
 								items: [
@@ -695,7 +421,7 @@ export default defineConfig({
 									},
 									{
 										text: "Remove Trip from Cart",
-										link: "/docs/activity/adjust-cart/remove-trip-to-cart",
+										link: "/docs/activity/adjust-cart/remove-trip-from-cart",
 									},
 									{
 										text: "View and Filter Trips in Cart",
@@ -752,16 +478,6 @@ export default defineConfig({
 								],
 							},
 							{
-								text: "Contact Support",
-								collapsed: true,
-								items: [
-									{
-										text: "Contact Support",
-										link: "/docs/activity/contact-support/contact-support",
-									},
-								],
-							},
-							{
 								text: "Manage Personal Booking",
 								collapsed: true,
 								items: [
@@ -788,36 +504,6 @@ export default defineConfig({
 									{
 										text: "UCS-Manage-Personal-Booking",
 										link: "/docs/activity/manage-personal-booking/UCS-manage-personal-booking",
-									},
-								],
-							},
-							{
-								text: "Manage Product",
-								collapsed: true,
-								items: [
-									{
-										text: "Add Product",
-										link: "/docs/activity/manage-product/add-product",
-									},
-									{
-										text: "Delete Product",
-										link: "/docs/activity/manage-product/delete-product",
-									},
-									{
-										text: "Delete Review",
-										link: "/docs/activity/manage-product/delete-review",
-									},
-									{
-										text: "Manage Product",
-										link: "/docs/activity/manage-product/manage-product",
-									},
-									{
-										text: "Search Product",
-										link: "/docs/activity/manage-product/search-product",
-									},
-									{
-										text: "Update Product",
-										link: "/docs/activity/manage-product/update-product",
 									},
 								],
 							},
@@ -1032,146 +718,6 @@ export default defineConfig({
 									{
 										text: "UCS-Adjust-and-Track-Bookings",
 										link: "/docs/activity/adjust-and-track-bookings/UCS-adjust-and-track-bookings",
-									},
-								],
-							},
-							{
-								text: "Manage User",
-								collapsed: true,
-								items: [
-									{
-										text: "Delete Customer",
-										link: "/docs/activity/manage-user/delete-customer",
-									},
-									{
-										text: "Delete Staff",
-										link: "/docs/activity/manage-user/delete-staff",
-									},
-									{
-										text: "Manage User",
-										link: "/docs/activity/manage-user/manage-user",
-									},
-									{
-										text: "Search User",
-										link: "/docs/activity/manage-user/search-user",
-									},
-									{
-										text: "View Customer Report",
-										link: "/docs/activity/manage-user/view-customer-report",
-									},
-									{
-										text: "View Staff Report",
-										link: "/docs/activity/manage-user/view-staff-report",
-									},
-								],
-							},
-							{
-								text: "View Customer Self Report",
-								collapsed: true,
-								items: [
-									{
-										text: "View Customer Self Report",
-										link: "/docs/activity/view-customer-self-report/view-customer-self-report",
-									},
-								],
-							},
-							{
-								text: "View Document",
-								collapsed: true,
-								items: [
-									{
-										text: "View Document",
-										link: "/docs/activity/view-document/view-document",
-									},
-								],
-							},
-							{
-								text: "View Order",
-								collapsed: true,
-								items: [
-									{
-										text: "Cancel Order",
-										link: "/docs/activity/view-order/cancel-order",
-									},
-									{
-										text: "Return Product",
-										link: "/docs/activity/view-order/return-product",
-									},
-									{
-										text: "Review Product",
-										link: "/docs/activity/view-order/review-product",
-									},
-									{
-										text: "Search Order",
-										link: "/docs/activity/view-order/search-order",
-									},
-									{
-										text: "View Order Detail",
-										link: "/docs/activity/view-order/view-order-detail",
-									},
-									{
-										text: "View Order",
-										link: "/docs/activity/view-order/view-order",
-									},
-								],
-							},
-							{
-								text: "View Product",
-								collapsed: true,
-								items: [
-									{
-										text: "Add Product To Cart",
-										link: "/docs/activity/view-product/add-product-to-cart",
-									},
-									{
-										text: "Search Product",
-										link: "/docs/activity/view-product/search-product",
-									},
-									{
-										text: "View Product Detail",
-										link: "/docs/activity/view-product/view-product-detail",
-									},
-									{
-										text: "View Product",
-										link: "/docs/activity/view-product/view-product",
-									},
-									{
-										text: "View Product Reviews",
-										link: "/docs/activity/view-product/view-product-reviews",
-									},
-									{
-										text: "View Suggested Product",
-										link: "/docs/activity/view-product/view-suggested-product",
-									},
-								],
-							},
-							{
-								text: "View Shop Report",
-								collapsed: true,
-								items: [
-									{
-										text: "View Shop Report",
-										link: "/docs/activity/view-shop-report/view-shop-report",
-									},
-								],
-							},
-							{
-								text: "View Staff Self Report",
-								collapsed: true,
-								items: [
-									{
-										text: "View Staff Self Report",
-										link: "/docs/activity/view-staff-self-report/view-staff-self-report",
-									},
-								],
-							},
-							{
-								text: "View System Monitoring",
-								collapsed: true,
-								items: [
-									{
-										text: "View System Monitoring",
-										link: "/docs/activity/view-system-monitoring/view-system-monitoring",
 									},
 								],
 							},
