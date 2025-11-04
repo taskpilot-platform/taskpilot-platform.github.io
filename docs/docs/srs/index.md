@@ -1749,34 +1749,6 @@ Below are the main sections of this document:
 | (10), (10.1), (11), (12) | BR266   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 132) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "CustomerReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                                                                                                 |
 | (13)                     | BR267   | **Displaying Rules:** Admin confirms end at step (13).                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
-## 3. Non-functional Requirements
-
-###### Use Case Description
-
-| Name               | View Suggested Products                                                                                  |
-| :----------------- | :------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows customers to view products suggested based on the current product they are viewing. |
-| **Actor**          | Customer                                                                                                 |
-| **Trigger**        | Automatically displayed when viewing product details.                                                    |
-| **Pre-condition**  | Customer's device must be connected to the internet. Customer is viewing a product detail page.          |
-| **Post-condition** | Suggested products are displayed based on recommendation algorithm.                                      |
-
-###### Sequence Flow
-
-[sequence-view-product-view-suggested-product](../sequence/view-product/view-suggested-product)
-
-###### Activities Flow
-
-[activity-view-product-view-suggested-product](../activity/view-product/view-suggested-product)
-
-###### Business Rules
-
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| :------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)      | BR41    | **Querying Rules:** System queries suggested products using recommendation algorithm based on: <br/>1. Same category as current product<br/>2. Frequently bought together<br/>3. Customer browsing history (if signed in)<br/>4. Similar price range<br/>System queries from "PRODUCT" table (Refer to "Product" table in "DB Sheet" file) with SQL: "SELECT \* FROM Product WHERE category = [current_category] AND productID != [current_product] AND status = 'active' ORDER BY similarity_score DESC LIMIT 8". |
-| (3)      | BR42    | **Displaying Rules:** The system displays suggested products section at the bottom of product detail page showing: product thumbnail, name, price, rating, and quick view button. Display is organized in horizontal scrollable carousel with 4 products visible at a time. (Refer to "Suggested Products" section in "View Description" file)                                                                                                                                                                     |
-| (3.2)    | BR43    | **Navigation Rules:** When customer clicks on a suggested product, system redirects to that product's detail page and recursively executes the "View Product Detail" use case for the selected product.                                                                                                                                                                                                                                                                                                            |
-
 ### 2.2 List Description
 
 The Electricilies system utilizes the following main data lists and tables:
