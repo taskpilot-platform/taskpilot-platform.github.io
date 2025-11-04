@@ -44,6 +44,7 @@ repeat
   :(9) Query available seats from database;
 
   :(10) Verify sufficient seats for new quantity;
+  backward: (10.1) Display error notification;
 repeat while (Check quantity valid and sufficient seats?) is (No) not (Yes)
 
 :(11) Update cart item quantity in database;

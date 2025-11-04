@@ -46,6 +46,7 @@ repeat
 
   |S|
   :(11) Verify input data validity;
+  backward: (11.1) Display error notification;
 repeat while (Check all data valid?) is (No) not (Yes)
 
 :(12) Update traveler records in transaction;

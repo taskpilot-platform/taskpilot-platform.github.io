@@ -51,6 +51,7 @@ repeat
 
   |S|
   :(8) Verify day in range and order greater than zero \n and description not empty;
+  backward: (8.1) Display error notification;
 repeat while (Check all data valid?) is (No) not (Yes)
 
 |S|

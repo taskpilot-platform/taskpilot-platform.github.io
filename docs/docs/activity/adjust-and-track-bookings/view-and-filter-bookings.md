@@ -20,10 +20,10 @@ if (Check has bookings?) then (No)
   stop
 else (Yes)
 endif
-
+|S|
 :(3) Display bookings list with action buttons;
 
-repeat
+
   |St|
   :(4) Enter filter criteria;
   :(5) Submit filter;
@@ -39,7 +39,7 @@ repeat
     :(7) Display filtered results;
     |St|
   endif
-repeat while (Check want to filter again?) is (Yes) not (No)
+
 
 :(8) Confirm end;
 

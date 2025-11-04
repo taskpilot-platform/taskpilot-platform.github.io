@@ -40,6 +40,7 @@ repeat
   :(7) Click confirm bookings button;
   |S|
   :(8) Verify passenger data;
+  backward: (8.1) Display error notification;
 repeat while (Check data valid?) is (No) not (Yes)
 
 :(9) Display confirmation page with total amount;

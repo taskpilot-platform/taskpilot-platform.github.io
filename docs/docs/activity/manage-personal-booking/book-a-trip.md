@@ -52,9 +52,10 @@ repeat
       :(12) Display success notification;
       :(13) Notify booking confirmation via email;
 
-      |C|
     endif
   endif
+  :(14) Verify valid data and seats available;
+  backward: (14.1) Display error notification;
 repeat while (Check data valid and seats available?) is (No) not (Yes)
 
 :(14) Confirm end;

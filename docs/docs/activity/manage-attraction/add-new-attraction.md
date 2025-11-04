@@ -22,6 +22,7 @@ repeat
 	 (required fields, category exists, status allowed);
 	:(5) Verify not duplicated
 	 (name + location);
+	 backward: (5.1) Display error notification;
 repeat while (Inputs valid and not duplicated?) is (No) not (Yes)
 
 |S|

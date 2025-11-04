@@ -13,7 +13,7 @@ start
 |S|
 :(2) Display available trips;
 
-repeat
+
   |C|
   :(3) Enter search criteria;
   :(4) Submit search;
@@ -30,7 +30,7 @@ repeat
 
     |C|
   endif
-repeat while (Check want to search again?) is (Yes) not (No)
+
 
 :(7) Confirm end;
 

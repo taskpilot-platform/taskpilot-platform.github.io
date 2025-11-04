@@ -29,6 +29,7 @@ repeat
   :(5) Click save button;
   |S|
   :(6) Verify data valid and email unique;
+  backward: (6.1) Display error notification;
 repeat while (Check data valid?) is (No) not (Yes)
 
 |S|

@@ -22,6 +22,7 @@ repeat
   :(7) Verify trip status and departure date;
   :(8) Verify customer valid and not locked;
   :(9) Verify seats available;
+  backward: (9.1) Display error notification;
 repeat while (Check data valid?) is (No) not (Yes)
 
 :(10) Display confirmation with total price;

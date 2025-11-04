@@ -20,10 +20,10 @@ if (Check has attractions?) then (No)
 	stop
 else (Yes)
 endif
-
+|Sy|
 :(3) Display attractions list;
 
-repeat
+
 	|S|
 	:(4) Enter filter criteria;
 	:(5) Submit filter;
@@ -39,7 +39,7 @@ repeat
 		:(7) Display filtered results;
 		|S|
 	endif
-repeat while (Check want to filter again?) is (Yes) not (No)
+
 
 :(8) Confirm end;
 

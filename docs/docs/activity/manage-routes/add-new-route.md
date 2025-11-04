@@ -20,6 +20,7 @@ repeat
 
   |Sy|
   :(5) Verify data valid;
+  backward: (5.1) Display error notification;
 repeat while (Check data valid?) is (No) not (Yes)
 
 |Sy|

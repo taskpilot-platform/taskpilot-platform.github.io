@@ -21,6 +21,7 @@ repeat
 	|Sy|
 	:(5) Verify data valid;
 	:(6) Verify not duplicated schedule;
+	backward: (6.1) Display error notification;
 repeat while (Check data valid and not duplicated?) is (No) not (Yes)
 
 |Sy|

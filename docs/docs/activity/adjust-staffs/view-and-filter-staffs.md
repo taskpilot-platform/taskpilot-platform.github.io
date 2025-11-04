@@ -20,10 +20,10 @@ if (Check has staffs?) then (No)
   stop
 else (Yes)
 endif
-
+|S|
 :(3) Display staffs list;
 
-repeat
+
   |A|
   :(4) Enter filter criteria \n (keyword, phone, is_lock, gender);
   :(5) Submit filter;
@@ -39,7 +39,7 @@ repeat
     :(7) Display filtered results;
     |A|
   endif
-repeat while (Check want to filter again?) is (Yes) not (No)
+
 
 :(8) Confirm end;
 

@@ -30,6 +30,7 @@ repeat
 	:(5) Click save button;
 	|Sy|
 	:(6) Verify data valid and constraints satisfied;
+	backward: (6.1) Display error notification;
 repeat while (Check data valid and constraints satisfied?) is (No) not (Yes)
 
 |Sy|

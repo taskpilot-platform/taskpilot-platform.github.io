@@ -20,7 +20,7 @@ if (Check booking editable?) then (No)
   stop
 else (Yes)
 endif
-
+|S|
 :(3) Display edit form with current data \n (no_adults, no_children, travelers);
 
 repeat
@@ -29,6 +29,7 @@ repeat
   :(5) Click save button;
   |S|
   :(6) Verify data valid and seats available \n for delta seats;
+  backward: (6.1) Display error notification;
 repeat while (Check data valid and seats available?) is (No) not (Yes)
 
 |S|

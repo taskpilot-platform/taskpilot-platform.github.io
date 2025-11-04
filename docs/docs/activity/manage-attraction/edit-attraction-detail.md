@@ -30,6 +30,7 @@ repeat
 	:(5) Click save button;
 	|Sy|
 	:(6) Verify data valid and not duplicated;
+	backward: (6.1) Display error notification;
 repeat while (Check data valid and not duplicated?) is (No) not (Yes)
 
 |Sy|

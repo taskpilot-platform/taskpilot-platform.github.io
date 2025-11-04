@@ -20,6 +20,7 @@ repeat
 
   |S|
   :(5) Verify data valid \n (username unique, email unique, \n password strong, birthday ≥18 years);
+  backward: (5.1) Display error notification;
 repeat while (Check data valid?) is (No) not (Yes)
 
 |S|

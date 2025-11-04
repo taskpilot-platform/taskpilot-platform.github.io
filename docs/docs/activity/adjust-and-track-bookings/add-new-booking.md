@@ -20,6 +20,7 @@ repeat
   :(6) Click save button;
   |S|
   :(7) Verify trip status, departure date, \n customer valid, seats available;
+  backward: (7.1) Display error notification;
 repeat while (Check data valid?) is (No) not (Yes)
 
 |S|
