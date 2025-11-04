@@ -116,7 +116,7 @@ Below are the main sections of this document:
 | Activity   | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | :--------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | (2)        | BR7     | **Displaying Rules:** The system displays a "Sign Up" screen with registration form fields: [txtBoxUsername] for username (4-20 characters), [txtBoxEmail] for email address, [txtBoxFullName] for full name, [txtBoxPassword] for password with password strength indicator, [txtBoxConfirmPassword] for password confirmation, [chkBoxAgreeTerms] checkbox for terms acceptance, and [btnSignUp] button. (Refer to "Sign Up" view in "View Description" file)                                                                                                                                                                                          |
-| (5)        | BR8     | **Validation Rules:** When user enters registration data, system uses Text_change() method to validate in repeat loop: If [txtBoxUsername].Text.length < 4 OR > 20 OR invalid format → displayFieldError() (Refer to MSG 4). If [txtBoxEmail].Text.matches("[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}") = false → displayFieldError() (Refer to MSG 4). If [txtBoxFullName].Text.length < 2 OR > 100 → displayFieldError() (Refer to MSG 4). If [txtBoxPassword].Text.length < 8 OR missing uppercase/lowercase/digit → displayFieldError() (Refer to MSG 4). If [txtBoxConfirmPassword].Text != [txtBoxPassword].Text → displayFieldError() (Refer to MSG 4). |
+| (5)        | BR8     | **Validation Rules:** When user enters registration data, system uses Text_change() method to validate in repeat loop: If [txtBoxUsername].Text.length < 4 OR > 20 OR invalid format → displayFieldError() (Refer to MSG 1). If [txtBoxEmail].Text.matches("[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}") = false → displayFieldError() (Refer to MSG 1). If [txtBoxFullName].Text.length < 2 OR > 100 → displayFieldError() (Refer to MSG 1). If [txtBoxPassword].Text.length < 8 OR missing uppercase/lowercase/digit → displayFieldError() (Refer to MSG 1). If [txtBoxConfirmPassword].Text != [txtBoxPassword].Text → displayFieldError() (Refer to MSG 1). |
 | (8), (8.1) | BR9     | **Querying Rules:** System queries table "User" (Refer to "User" table in "DB Sheet" file) with SQL: "SELECT COUNT(\*) FROM User WHERE username = [txtBoxUsername].Text OR email = [txtBoxEmail].Text". If COUNT > 0: System moves to step (8.1) to call displayErrorMessage("Username or email already exists.") (Refer to MSG 5) and use case ends. Else: System calls bcryptHash([txtBoxPassword].Text, saltRounds=10), generates user_id via generateUUID(), executes SQL INSERT to create new user with role='CUSTOMER' and cart record.                                                                                                            |
 | (17)       | BR10    | **Displaying Rules:** System calls redirectToSignInPage() to navigate to Sign In page and displays success message "Registration successful!" via displaySuccessMessage() (Refer to MSG 6). System sends welcome email to [txtBoxEmail].Text in background.                                                                                                                                                                                                                                                                                                                                                                                              |
 
@@ -1682,9 +1682,9 @@ Below are the main sections of this document:
 | :----------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | (2)                      | BR250   | **Displaying Rules:** System displays "Booking Report Configuration" form at step (2) with [dropdownDateRange], [datePickerFrom], [datePickerTo], [dropdownStatusFilter], [dropdownRouteFilter], [btnGenerate].                                                                                                                                                                                                                                                                 |
 | (3), (4)                 | BR251   | **Validation Rules:** When admin configures and clicks [btnGenerate] in repeat loop (steps 3-4), system validates: if [datePickerFrom] > [datePickerTo] → error. If date range > 2 years → warning. Else proceed to step (5).                                                                                                                                                                                                                                                   |
-| (5), (5.1), (5.2)        | BR252   | **Querying Rules:** System queries bookings at step (5): "SELECT tb.\*, u.full_name, t.\*, r.route_name FROM Tour_Booking tb JOIN User u, Trip t, Route r WHERE booking_date BETWEEN [from] AND [to] AND (status = [filter] OR [filter] IS NULL) AND (r.route_id = [routeFilter] OR [routeFilter] IS NULL)". If COUNT = 0 → display "No data" (Refer to MSG 127) at step (5.1), end. Else proceed. (Refer to "Tour_Booking", "User", "Trip", "Route" tables in "DB Sheet" file) |
+| (5), (5.1), (5.2)        | BR252   | **Querying Rules:** System queries bookings at step (5): "SELECT tb.\*, u.full_name, t.\*, r.route_name FROM Tour_Booking tb JOIN User u, Trip t, Route r WHERE booking_date BETWEEN [from] AND [to] AND (status = [filter] OR [filter] IS NULL) AND (r.route_id = [routeFilter] OR [routeFilter] IS NULL)". If COUNT = 0 → display "No data" (Refer to MSG 125) at step (5.1), end. Else proceed. (Refer to "Tour_Booking", "User", "Trip", "Route" tables in "DB Sheet" file) |
 | (6), (7)                 | BR253   | **Querying/Displaying Rules:** System calculates statistics and generates pie/bar charts at steps (6-7): totals, status distribution, bookings by route. Displays report with overview cards, charts, data table, export buttons.                                                                                                                                                                                                                                               |
-| (10), (10.1), (11), (12) | BR254   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 128) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "BookingReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                                                      |
+| (10), (10.1), (11), (12) | BR254   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 126) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "BookingReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                                                      |
 | (13)                     | BR255   | **Displaying Rules:** Admin confirms end at step (13).                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 ##### 2.1.13.3 Popular Routes Report
@@ -1713,9 +1713,9 @@ Below are the main sections of this document:
 | :----------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | (2)                      | BR256   | **Displaying Rules:** System displays "Popular Routes Report Configuration" form at step (2) with [dropdownDateRange], [datePickerFrom], [datePickerTo], [numericMinBookings], [btnGenerate].                                                                                                                                                                                                                                                                                                           |
 | (3), (4)                 | BR257   | **Validation Rules:** When admin configures and clicks [btnGenerate] in repeat loop (steps 3-4), system validates: if [datePickerFrom] > [datePickerTo] → error. If date range > 2 years → warning. Else proceed to step (5).                                                                                                                                                                                                                                                                           |
-| (5), (5.1), (5.2)        | BR258   | **Querying Rules:** System queries popular routes at step (5): "SELECT r.\*, COUNT(tb.booking_id) as total_bookings, SUM(tb.total_amount) as total_revenue FROM Route r JOIN Trip t, Tour_Booking tb WHERE tb.booking_date BETWEEN [from] AND [to] GROUP BY r.route_id HAVING total_bookings >= [minBookings] ORDER BY total_bookings DESC". If COUNT = 0 → display "No data" (Refer to MSG 129) at step (5.1), end. Else proceed. (Refer to "Route", "Trip", "Tour_Booking" tables in "DB Sheet" file) |
+| (5), (5.1), (5.2)        | BR258   | **Querying Rules:** System queries popular routes at step (5): "SELECT r.\*, COUNT(tb.booking_id) as total_bookings, SUM(tb.total_amount) as total_revenue FROM Route r JOIN Trip t, Tour_Booking tb WHERE tb.booking_date BETWEEN [from] AND [to] GROUP BY r.route_id HAVING total_bookings >= [minBookings] ORDER BY total_bookings DESC". If COUNT = 0 → display "No data" (Refer to MSG 125) at step (5.1), end. Else proceed. (Refer to "Route", "Trip", "Tour_Booking" tables in "DB Sheet" file) |
 | (6), (7)                 | BR259   | **Querying/Displaying Rules:** System calculates rankings and generates bar/pie charts at steps (6-7): top routes, totals, revenue distribution. Displays report with overview cards, charts, data table, export buttons.                                                                                                                                                                                                                                                                               |
-| (10), (10.1), (11), (12) | BR260   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 130) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "PopularRoutesReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                                                                        |
+| (10), (10.1), (11), (12) | BR260   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 126) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "PopularRoutesReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                                                                        |
 | (13)                     | BR261   | **Displaying Rules:** Admin confirms end at step (13).                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ##### 2.1.13.4 Customer Report
@@ -1744,214 +1744,359 @@ Below are the main sections of this document:
 | :----------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | (2)                      | BR262   | **Displaying Rules:** System displays "Customer Report Configuration" form at step (2) with [dropdownDateRange], [datePickerFrom], [datePickerTo], [dropdownCustomerType] (All, New, Returning), [btnGenerate].                                                                                                                                                                                                                                                                                                             |
 | (3), (4)                 | BR263   | **Validation Rules:** When admin configures and clicks [btnGenerate] in repeat loop (steps 3-4), system validates: if [datePickerFrom] > [datePickerTo] → error. If date range > 2 years → warning. Else proceed to step (5).                                                                                                                                                                                                                                                                                               |
-| (5), (5.1), (5.2)        | BR264   | **Querying Rules:** System queries customers at step (5): "SELECT u.\*, COUNT(tb.booking_id) as total_bookings, SUM(tb.total_amount) as total_spent FROM User u LEFT JOIN Tour_Booking tb ON u.user_id = tb.customer_id WHERE u.role = 'CUSTOMER' AND (tb.booking_date BETWEEN [from] AND [to] OR tb.booking_date IS NULL) GROUP BY u.user_id ORDER BY total_spent DESC". If COUNT = 0 → display "No data" (Refer to MSG 131) at step (5.1), end. Else proceed. (Refer to "User", "Tour_Booking" tables in "DB Sheet" file) |
+| (5), (5.1), (5.2)        | BR264   | **Querying Rules:** System queries customers at step (5): "SELECT u.\*, COUNT(tb.booking_id) as total_bookings, SUM(tb.total_amount) as total_spent FROM User u LEFT JOIN Tour_Booking tb ON u.user_id = tb.customer_id WHERE u.role = 'CUSTOMER' AND (tb.booking_date BETWEEN [from] AND [to] OR tb.booking_date IS NULL) GROUP BY u.user_id ORDER BY total_spent DESC". If COUNT = 0 → display "No data" (Refer to MSG 125) at step (5.1), end. Else proceed. (Refer to "User", "Tour_Booking" tables in "DB Sheet" file) |
 | (6), (7)                 | BR265   | **Querying/Displaying Rules:** System calculates statistics and generates bar/line charts at steps (6-7): top 10 customers by spending, new customer trends, totals, averages. Displays report with overview cards, charts, data table, export buttons.                                                                                                                                                                                                                                                                     |
-| (10), (10.1), (11), (12) | BR266   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 132) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "CustomerReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                                                                                                 |
+| (10), (10.1), (11), (12) | BR266   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 126) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "CustomerReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                                                                                                 |
 | (13)                     | BR267   | **Displaying Rules:** Admin confirms end at step (13).                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 ### 2.2 List Description
 
-The Electricilies system utilizes the following main data lists and tables:
+The TMS (Tourist Management System) utilizes the following main data lists and tables:
 
-| \#  | List Code | List Name             | Description                                                                                                                                                                                               |
-| :-- | :-------- | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | List01    | User                  | This list contains all user accounts in the system including customers, staff, and admins. Information includes user ID, name, email, password hash, role, status, registration date, and last login.     |
-| 2   | List02    | Account               | This list stores authentication credentials and account linking information. It includes account ID, user ID, username, password hash, third-party provider links, account status, and security settings. |
-| 3   | List03    | Product               | This list holds all product information including product ID, name, description, category, price, stock quantity, SKU, brand, status, created date, and modified date.                                    |
-| 4   | List04    | Product Image         | This list stores product images with image ID, product ID, image URL, image order, and upload date. Each product can have multiple images.                                                                |
-| 5   | List05    | Product Specification | This list contains product specifications with specification ID, product ID, specification name, and specification value.                                                                                 |
-| 6   | List06    | Cart                  | This list manages shopping cart items with cart ID, customer ID, product ID, quantity, added date, and cart session ID.                                                                                   |
-| 7   | List07    | Order                 | This list stores order information including order ID, customer ID, order date, order status, total amount, shipping address, billing address, payment method, and tracking number.                       |
-| 8   | List08    | Order Item            | This list contains individual items in each order with order item ID, order ID, product ID, quantity, unit price, and subtotal.                                                                           |
-| 9   | List09    | Review                | This list holds product reviews with review ID, product ID, customer ID, rating (1-5), review title, review text, helpful count, status, and created date.                                                |
-| 10  | List10    | Review Image          | This list stores review images with image ID, review ID, image URL, and upload date.                                                                                                                      |
-| 11  | List11    | Document              | This list contains system documents and guides with document ID, title, category, content, target audience, status, created date, last modified date, and author ID.                                      |
-| 12  | List12    | Document Version      | This list tracks document version history with version ID, document ID, version number, content snapshot, change log, and version date.                                                                   |
-| 13  | List13    | Staff Activity        | This list logs staff activities with activity ID, staff ID, activity type, activity description, timestamp, and affected entity.                                                                          |
-| 14  | List14    | Customer Report       | This list stores aggregated customer statistics and metrics for reporting purposes.                                                                                                                       |
-| 15  | List15    | Staff Report          | This list stores aggregated staff performance statistics and metrics for reporting purposes.                                                                                                              |
-| 16  | List16    | Shop Report           | This list stores aggregated shop-wide statistics including sales, revenue, inventory, and customer metrics.                                                                                               |
-| 17  | List17    | Monitoring Data       | This list contains system monitoring metrics including uptime, response time, error logs, resource usage, and performance data.                                                                           |
-| 18  | List18    | User Audit            | This list tracks user-related administrative actions with audit ID, actor ID, action type, target user ID, timestamp, and change details.                                                                 |
-| 19  | List19    | Account Provider      | This list manages third-party authentication provider linkages with provider ID, user ID, provider name, provider user ID, and linked date.                                                               |
-| 20  | List20    | Product Return        | This list manages product return requests with return ID, order ID, product ID, customer ID, reason, status, request date, and resolution date.                                                           |
-| 21  | List21    | Password Reset Token  | This list stores password reset tokens with token ID, user ID, reset token, expiration time, and used status.                                                                                             |
-| 22  | List22    | Order History         | This list tracks order status changes and events with history ID, order ID, status, event type, timestamp, and notes.                                                                                     |
-| 23  | List23    | Review Audit          | This list logs review moderation actions with audit ID, review ID, staff ID, action type, reason, and timestamp.                                                                                          |
-| 24  | List24    | Document Audit        | This list logs document management actions with audit ID, document ID, admin ID, action type, and timestamp.                                                                                              |
-| 25  | List25    | Account Activity      | This list tracks account-related events including login attempts, password changes, and profile updates with activity ID, user ID, activity type, IP address, device info, timestamp, and status.         |
+| \#  | List Code | List Name                  | Description                                                                                                                                                                                                                      |
+| :-- | :-------- | :------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | List01    | User                       | Contains all user accounts (customers, staff, admins) with user ID, username, email, password hash, full name, phone, address, birthday, gender, role (CUSTOMER/STAFF/ADMIN), status (Active/Locked), created date, updated date |
+| 2   | List02    | Route                      | Stores travel route information including route ID, route name, description, starting location, destination, duration (days), difficulty level, status (Active/Inactive), created date, and modified date                        |
+| 3   | List03    | Attraction                 | Contains tourist attraction details with attraction ID, attraction name, description, location, category, entry fee, operating hours, contact info, images, status, created date, and modified date                              |
+| 4   | List04    | Route_Attraction           | Junction table linking routes to attractions, includes route attraction ID, route ID, attraction ID, day number in itinerary, visit order, duration at attraction, and notes                                                     |
+| 5   | List05    | Trip                       | Holds scheduled trip information with trip ID, route ID, departure date, return date, price per adult, price per child, max capacity, booked seats, trip status (Upcoming/In Progress/Completed/Cancelled), created date         |
+| 6   | List06    | Tour_Booking               | Stores booking records including booking ID, customer ID, trip ID, staff ID (handler), booking date, no. adults, no. children, total amount, booking status (PENDING/CONFIRMED/CANCELLED/COMPLETED), created date, modified date |
+| 7   | List07    | Tour_Booking_Detail        | Contains passenger details for each booking with detail ID, booking ID, traveler name, traveler age, traveler gender, passport number, special requirements, and seat assignment                                                 |
+| 8   | List08    | Invoice                    | Manages payment records with invoice ID, booking ID, issue date, due date, paid date, payment method (Cash/Card/Bank Transfer), payment status (PENDING/PAID/FAILED/REFUNDED), total amount, and transaction reference           |
+| 9   | List09    | Cart                       | Shopping cart management with cart ID, customer ID, created date, and modified date. Each customer has one active cart                                                                                                           |
+| 10  | List10    | Cart_Item                  | Individual items in cart with cart item ID, cart ID, trip ID, no. adults, no. children, added date, and price snapshot                                                                                                           |
+| 11  | List11    | Favorite_Tour              | Tracks customer favorite routes with favorite ID, customer ID, route ID, and added date                                                                                                                                          |
+| 12  | List12    | Booking_Traveler           | Stores traveler information for bookings (alternative to Tour_Booking_Detail) with traveler ID, booking ID, full name, date of birth, passport/ID, nationality, and contact number                                               |
+| 13  | List13    | Route_Schedule             | Daily itinerary details with schedule ID, route ID, day number, activity description, locations visited, meal plans, accommodation info, and special notes                                                                       |
+| 14  | List14    | Booking_History            | Audit trail of booking status changes with history ID, booking ID, previous status, new status, changed by (user ID), change date, and reason/notes                                                                              |
+| 15  | List15    | Revenue_Report             | Aggregated revenue statistics including date, total bookings, total revenue, paid invoices count, pending invoices count, route performance data                                                                                 |
+| 16  | List16    | Popular_Routes_Report      | Route popularity metrics with route ID, route name, total bookings, total revenue, average rating, booking trend, and time period                                                                                                |
+| 17  | List17    | Customer_Statistics        | Customer analytics data including customer ID, total bookings, total spent, last booking date, favorite routes, booking frequency, and customer segment                                                                          |
+| 18  | List18    | Staff_Activity_Log         | Logs staff actions with log ID, staff ID, activity type (Create/Update/Delete), entity type (Booking/Trip/Customer/Staff), entity ID, timestamp, IP address, and details                                                         |
+| 19  | List19    | Password_Reset_Token       | Manages password reset requests with token ID, user ID, reset token hash, expiration time, used status (Yes/No), and created date                                                                                                |
+| 20  | List20    | User_Session               | Tracks active user sessions with session ID, user ID, JWT token hash, device info, IP address, login time, last activity time, and expiration time                                                                               |
+| 21  | List21    | Notification               | System notifications with notification ID, user ID, type (Booking/Payment/System), title, message, read status, sent date, and link                                                                                              |
+| 22  | List22    | Payment_Transaction        | Detailed payment transaction records with transaction ID, invoice ID, payment gateway, transaction reference, amount, currency, status, request time, response time, and error message (if any)                                  |
+| 23  | List23    | Trip_Availability_Calendar | Trip availability data for calendar view with date, route ID, available trips count, total capacity, booked seats, and availability status                                                                                       |
+| 24  | List24    | Route_Review               | Customer reviews for routes (future feature) with review ID, route ID, customer ID, rating (1-5), review text, images, helpful count, status, and created date                                                                   |
+| 25  | List25    | System_Config              | System configuration parameters including config key, config value, data type, description, updated by, and updated date                                                                                                         |
 
 ### 2.3 View Description
 
-The Electricilies system provides the following main views/screens:
+The TMS (Tourist Management System) provides the following main views/screens:
 
-| \#  | View Code | View Name              | Description                                                                                                                                                                                        | User Role              |
-| :-- | :-------- | :--------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------- |
-| 1   | View01    | Sign Up                | Registration form for new customers with fields for username, password, email, full name, and sign-up button.                                                                                      | Guest                  |
-| 2   | View02    | Sign In                | Login form with username/email and password fields, sign-in button, forgot password link, and sign-up link.                                                                                        | Guest                  |
-| 3   | View03    | Home View              | Main landing page displaying featured products, categories, search bar, navigation menu, cart icon, and user account menu.                                                                         | All                    |
-| 4   | View04    | Profile View           | User profile page showing personal information, edit profile button, change password option, account activity link, linked accounts section, and delete account option.                            | Customer, Staff, Admin |
-| 5   | View05    | Product List           | Grid or list view of products with product cards showing thumbnail, name, price, rating, and quick actions. Includes pagination and sorting options.                                               | All                    |
-| 6   | View06    | Product Search         | Search results page with filters sidebar, search criteria display, product grid, sorting options, and result count.                                                                                | All                    |
-| 7   | View07    | Product Detail         | Detailed product page with image gallery, product information, price, availability, quantity selector, add to cart button, specifications table, reviews section, and suggested products carousel. | All                    |
-| 8   | View08    | Cart View              | Shopping cart page listing cart items with product details, quantity selectors, remove buttons, cart summary panel, and checkout button.                                                           | Customer               |
-| 9   | View09    | Checkout View          | Checkout page with delivery information form, payment method selection, order summary, and place order button.                                                                                     | Customer               |
-| 10  | View10    | Order Management       | Order history page listing orders with order cards showing order number, date, status, total, and action buttons. Includes search and filter options.                                              | Customer               |
-| 11  | View11    | Order Detail           | Detailed order page showing order timeline, product list, order summary, shipping information, billing information, and available actions.                                                         | Customer               |
-| 12  | View12    | Product Review         | Review submission form with star rating selector, review title input, review text area, image upload section, and submit button.                                                                   | Customer               |
-| 13  | View13    | Customer Report        | Customer's personal analytics dashboard with charts showing purchase history, spending analysis, and statistics. Includes report type and time range selectors.                                    | Customer               |
-| 14  | View14    | Document Management    | Document listing page organized by categories with document cards, search box, and filter options. For customers, read-only view. For admins, includes create/edit/delete actions.                 | Admin                  |
-| 15  | View15    | Document Detail        | Document content page displaying title, formatted content, last updated date, and related documents. Includes edit options for admin.                                                              | Admin                  |
-| 16  | View16    | Product Management     | Product management dashboard for staff with product table, search box, filters, add product button, and action buttons for each product.                                                           | Staff                  |
-| 17  | View17    | Product Detail (Staff) | Product edit form for staff with fields for all product information, image uploader, specifications editor, and save button.                                                                       | Staff                  |
-| 18  | View18    | User Management        | User management page for staff/admin with user table, search box, filters, and action buttons based on role.                                                                                       | Staff, Admin           |
-| 19  | View19    | User Detail            | User information page showing user details, role selector (admin only), and user statistics.                                                                                                       | Staff, Admin           |
-| 20  | View20    | Staff Self Report      | Staff's personal performance dashboard with activity charts, statistics cards, and productivity metrics.                                                                                           | Staff                  |
-| 21  | View21    | Shop Report            | Comprehensive shop analytics dashboard for admin with multiple charts showing sales, revenue, inventory, and customer metrics. Includes report type and time range selectors.                      | Admin                  |
-| 22  | View22    | System Monitoring      | System health dashboard for admin showing real-time metrics, status indicators, performance charts, error logs, and resource usage.                                                                | Admin                  |
-| 23  | View23    | Confirmation Dialog    | Modal dialog for confirming critical actions with message, cancel button, and confirm button.                                                                                                      | All                    |
-| 24  | View24    | Password Recovery      | Password reset request form with email field and send reset email button.                                                                                                                          | Guest                  |
-| 25  | View25    | Account Activity       | List of account-related events showing timestamp, activity type, IP address, device info, and status.                                                                                              | Customer, Staff, Admin |
+| \#  | View Code | View Name                   | Description                                                                                                                                                                        | User Role              |
+| :-- | :-------- | :-------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------- |
+| 1   | View01    | Sign Up                     | Registration form for new customers with fields for username, password, full name, email, phone, address, birthday, gender, and sign-up button                                     | Guest                  |
+| 2   | View02    | Sign In                     | Login form with username/email and password fields, sign-in button, forgot password link, and sign-up link                                                                         | Guest, All Users       |
+| 3   | View03    | Forgot Password             | Password recovery form with email input field and submit button. Displays confirmation message after submission                                                                    | Guest, All Users       |
+| 4   | View04    | Manage Profile              | User profile page showing personal information with edit profile button, change password section, account activity link, and account management options                            | Customer, Staff, Admin |
+| 5   | View05    | Home (Customer)             | Customer dashboard displaying featured trips, search bar, navigation menu, cart icon, favorite trips shortcut, my bookings link, and promotional banners                           | Customer               |
+| 6   | View06    | Home (Staff)                | Staff dashboard with quick access to booking management, trip management, customer management, and pending tasks/notifications                                                     | Staff                  |
+| 7   | View07    | Home (Admin)                | Admin dashboard with system overview, statistics cards, route management, staff management, reports access, and system health indicators                                           | Admin                  |
+| 8   | View08    | Browse Trips                | Trip listing page with filter sidebar (destination, date range, price, duration, difficulty), trip cards showing route name/price/dates/availability, sort options, and pagination | Customer, Staff        |
+| 9   | View09    | Trip Details                | Detailed trip page showing route information, full itinerary by day, attractions list with details, pricing breakdown, booking form, availability calendar, and add to cart button | Customer, Staff        |
+| 10  | View10    | Shopping Cart               | Cart view listing selected trips with traveler count selectors, price summary, remove buttons, trip modification options, and checkout button                                      | Customer               |
+| 11  | View11    | Checkout                    | Checkout page with customer information confirmation, traveler details form (name/age/passport), payment method selection, booking summary, and complete booking button            | Customer               |
+| 12  | View12    | My Bookings                 | Customer's booking history with filter options (status/date), booking cards showing trip name/dates/status/payment status, and action buttons (view details/pay invoice/cancel)    | Customer               |
+| 13  | View13    | Booking Details             | Detailed booking view showing complete booking information, traveler list, trip itinerary, invoice details, and available actions based on status                                  | Customer               |
+| 14  | View14    | Booking Invoice             | Invoice page displaying invoice number, issue date, payment status, amount breakdown, payment method, and pay now button (if unpaid)                                               | Customer               |
+| 15  | View15    | Edit Passenger Details      | Form for editing traveler information before trip departure, showing editable fields for each passenger with save and cancel buttons                                               | Customer               |
+| 16  | View16    | Favorite Trips              | List view of favorited routes with route cards, filter/sort options, unfavorite button, and quick book buttons                                                                     | Customer               |
+| 17  | View17    | Manage Routes (Admin/Staff) | Route management dashboard with route table, search box, filters, add new route button, and action buttons (view/edit/delete)                                                      | Staff, Admin           |
+| 18  | View18    | Add/Edit Route              | Route creation/edit form with fields for route name, description, start/end locations, duration, difficulty, pricing, status, and save button                                      | Staff, Admin           |
+| 19  | View19    | Route Details (Admin/Staff) | Admin view of route showing full details, associated trips list, booking statistics, and management actions                                                                        | Staff, Admin           |
+| 20  | View20    | Manage Route Schedule       | Itinerary management view displaying day-by-day schedule with add/edit/delete itinerary day buttons                                                                                | Staff, Admin           |
+| 21  | View21    | Add/Edit Itinerary Day      | Form for adding or editing itinerary details for a specific day including activities, attractions, meals, accommodation, and notes                                                 | Staff, Admin           |
+| 22  | View22    | Manage Attractions          | Attraction management page with attraction table, search/filter options, add new attraction button, and action buttons                                                             | Admin                  |
+| 23  | View23    | Add/Edit Attraction         | Attraction form with fields for name, description, location, category, entry fee, operating hours, contact info, image uploader, and save button                                   | Staff, Admin           |
+| 24  | View24    | Manage Trips                | Trip management dashboard showing trip schedule table with filters (route/date/status), add trip button, and action buttons (view/edit/delete/add booking)                         | Staff, Admin           |
+| 25  | View25    | Add/Edit Trip               | Trip creation/edit form with route selector, departure/return date pickers, pricing fields, capacity settings, status selector, and save button                                    | Staff, Admin           |
+| 26  | View26    | Trip Details (Admin/Staff)  | Admin view of trip showing full details, booking list, capacity utilization chart, and management actions                                                                          | Staff, Admin           |
+| 27  | View27    | Manage Bookings (Staff)     | Booking management dashboard with comprehensive booking table, advanced filters (customer/trip/status/date), search box, add booking button, and action buttons                    | Staff, Admin           |
+| 28  | View28    | Add New Booking (Staff)     | Staff booking creation form with customer search/selector, trip selector, traveler details input, payment method, and create booking button                                        | Staff, Admin           |
+| 29  | View29    | Booking Details (Staff)     | Staff view of booking showing complete details, customer info, traveler list, payment status, trip info, and admin actions (edit/cancel/confirm)                                   | Staff, Admin           |
+| 30  | View30    | Edit Booking (Staff)        | Form for staff to modify booking details (before departure) including traveler information and seat adjustments with save button                                                   | Staff                  |
+| 31  | View31    | Manage Customers            | Customer management page with customer table, search box, filters (status/registration date), statistics view, add customer button, and action buttons                             | Staff, Admin           |
+| 32  | View32    | Add/Edit Customer           | Customer account creation/edit form with all personal information fields, role selector (staff only for edit), and save button                                                     | Staff, Admin           |
+| 33  | View33    | Customer Details (Staff)    | Staff view of customer profile showing personal info, booking history, statistics (total bookings/spent), favorite routes, and action buttons                                      | Staff, Admin           |
+| 34  | View34    | Manage Staffs               | Staff management page (admin only) with staff table, search box, filters, add staff button, and action buttons                                                                     | Admin                  |
+| 35  | View35    | Add/Edit Staff              | Staff account creation/edit form with personal information fields, credentials, role settings (if admin), and save button                                                          | Admin                  |
+| 36  | View36    | Staff Details               | Staff profile view showing personal info, work statistics (bookings handled/trips managed/routes created), activity log, and action buttons                                        | Admin                  |
+| 37  | View37    | Revenue Report              | Revenue analytics dashboard with line/bar charts showing revenue trends, booking counts, filters for date range/route, summary cards, and export buttons                           | Admin                  |
+| 38  | View38    | Booking Report              | Booking analytics view with pie chart (status distribution), bar chart (bookings by route), filters, data table, and export options                                                | Admin                  |
+| 39  | View39    | Popular Routes Report       | Route performance dashboard showing ranked routes by bookings/revenue with bar/pie charts, filters, and export buttons                                                             | Admin                  |
+| 40  | View40    | Customer Report             | Customer analytics dashboard with top customers chart, customer trend line chart, statistics cards, filters, and export options                                                    | Admin                  |
+| 41  | View41    | Confirmation Dialog         | Modal dialog for confirming critical actions (delete/cancel) with warning message, cancel button, and confirm button                                                               | All                    |
+| 42  | View42    | Success/Error Message       | Toast notification or alert box displaying success or error messages with auto-dismiss or close button                                                                             | All                    |
+| 43  | View43    | Loading Indicator           | Loading overlay with spinner/progress bar displayed during asynchronous operations                                                                                                 | All                    |
+| 44  | View44    | Calendar View               | Interactive calendar showing trip availability by date with color coding for availability status and quick booking options                                                         | Customer, Staff        |
+| 45  | View45    | Filter Sidebar              | Reusable filter component with date range picker, price range slider, dropdown selectors, checkboxes, apply/reset buttons                                                          | Customer, Staff, Admin |
 
 ## 3. Non-functional Requirements
 
 ### 3.1 User Access and Security
 
-| Function                      | Guest | Customer | Staff | Admin |
-| :---------------------------- | :---: | :------: | :---: | :---: |
-| **Manage Account Functions**  |
-| Sign Up                       |   X   |          |       |       |
-| Sign In                       |   X   |    X     |   X   |   X   |
-| Sign Out                      |       |    X     |   X   |   X   |
-| Edit Profile                  |       |  X(\*)   | X(\*) | X(\*) |
-| Link Account With Third Party |       |  X(\*)   | X(\*) | X(\*) |
-| Delete Account                |       |  X(\*)   | X(\*) | X(\*) |
-| Reset Password                |       |  X(\*)   | X(\*) | X(\*) |
-| View Account Activity         |       |  X(\*)   | X(\*) | X(\*) |
-| Recover Account               |   X   |    X     |   X   |   X   |
-| **View Product Functions**    |
-| View Product                  |   X   |    X     |   X   |   X   |
-| Search Product                |   X   |    X     |   X   |   X   |
-| View Product Detail           |   X   |    X     |   X   |   X   |
-| View Product Reviews          |   X   |    X     |   X   |   X   |
-| View Suggested Products       |   X   |    X     |   X   |   X   |
-| Add Product to Cart           |       |    X     |       |       |
-| **Manage Cart Functions**     |
-| Manage Cart                   |       |  X(\*)   |       |       |
-| Change Product Amount         |       |  X(\*)   |       |       |
-| Remove Product from Cart      |       |  X(\*)   |       |       |
-| Purchase                      |       |  X(\*)   |       |       |
-| **View Order Functions**      |
-| View Order                    |       |  X(\*)   |       |       |
-| Search Order                  |       |  X(\*)   |       |       |
-| View Order Detail             |       |  X(\*)   |       |       |
-| Cancel Order                  |       |  X(\*)   |       |       |
-| Return Product                |       |  X(\*)   |       |       |
-| Review Product                |       |  X(\*)   |       |       |
-| **Other Customer Functions**  |
-| Contact Support               |   X   |    X     |       |       |
-| View Customer Self Report     |       |  X(\*)   |       |       |
-| View Document                 |   X   |    X     |   X   |   X   |
-| **Manage Product Functions**  |
-| Manage Product                |       |          |   X   |   X   |
-| Add Product                   |       |          |   X   |   X   |
-| Update Product                |       |          |   X   |   X   |
-| Delete Product                |       |          |   X   |   X   |
-| Search Product (Staff)        |       |          |   X   |   X   |
-| Delete Review                 |       |          |   X   |   X   |
-| **Manage User Functions**     |
-| Manage User                   |       |          |   X   |   X   |
-| Search User                   |       |          |   X   |   X   |
-| View Customer Report          |       |          |   X   |   X   |
-| Change User Roles             |       |          |       |   X   |
-| Delete User                   |       |          |       |   X   |
-| View Staff Report             |       |          |       |   X   |
-| **Admin Functions**           |
-| View Shop Report              |       |          |       |   X   |
-| View System Monitoring        |       |          |       |   X   |
-| Adjust Document               |       |          |       |   X   |
-| Create Document               |       |          |       |   X   |
-| Update Document               |       |          |       |   X   |
-| Delete Document               |       |          |       |   X   |
-| Search Document (Admin)       |       |          |       |   X   |
-| **Staff Functions**           |
-| View Staff Self Report        |       |          | X(\*) | X(\*) |
+**Note**: X = Available for this role, X(\*) = Available only for own account/data
+
+| Function                                | Guest | Customer | Staff | Admin |
+| :-------------------------------------- | :---: | :------: | :---: | :---: |
+| **Authentication Functions**            |       |          |       |       |
+| Sign In                                 |   X   |    X     |   X   |   X   |
+| Sign Up (Customer Registration)         |   X   |          |       |       |
+| Sign Out                                |       |    X     |   X   |   X   |
+| Forgot Password                         |   X   |    X     |   X   |   X   |
+| Manage Profile                          |       |  X(\*)   | X(\*) | X(\*) |
+| **Browse Trips Functions**              |       |          |       |       |
+| View and Filter Available Trips         |   X   |    X     |   X   |       |
+| View Trip Details                       |   X   |    X     |   X   |       |
+| **Adjust Cart Functions**               |       |          |       |       |
+| Add Trip to Cart                        |       |    X     |       |       |
+| Remove Trip from Cart                   |       |  X(\*)   |       |       |
+| Edit Trip Details in Cart               |       |  X(\*)   |       |       |
+| View and Filter Trips in Cart           |       |  X(\*)   |       |       |
+| **Adjust Favorite Trips Functions**     |       |          |       |       |
+| Favorite/Unfavorite a Trip (Toggle)     |       |    X     |       |       |
+| View and Filter Favorite Trips          |       |  X(\*)   |       |       |
+| **Manage Personal Bookings Functions**  |       |          |       |       |
+| Book a Trip                             |       |    X     |   X   |       |
+| Edit Upcoming Trip's Passenger Details  |       |  X(\*)   |   X   |       |
+| View and Filter Personal Bookings       |       |  X(\*)   |       |       |
+| Checkout Cart                           |       |    X     |       |       |
+| View and Pay Booking Invoice Details    |       |  X(\*)   |       |       |
+| **Manage Routes Functions**             |       |          |       |       |
+| Add New Route                           |       |          |   X   |   X   |
+| View Route Detail                       |       |          |   X   |   X   |
+| Edit Route Detail                       |       |          |   X   |   X   |
+| Delete Route                            |       |          |       |   X   |
+| View and Filter Routes                  |       |          |   X   |   X   |
+| **Manage Route Schedule Functions**     |       |          |       |       |
+| Add New Itinerary                       |       |          |   X   |   X   |
+| View Route Schedule                     |       |          |   X   |   X   |
+| Edit Itinerary                          |       |          |   X   |   X   |
+| Delete Itinerary                        |       |          |       |   X   |
+| **Manage Attraction Functions**         |       |          |       |       |
+| Add New Attraction                      |       |          |       |   X   |
+| View Attraction Detail                  |       |          |   X   |   X   |
+| Edit Attraction Detail                  |       |          |   X   |   X   |
+| Delete Attraction                       |       |          |       |   X   |
+| View and Filter Attractions             |       |          |   X   |   X   |
+| **Manage Trips Functions**              |       |          |       |       |
+| Add New Trip                            |       |          |   X   |   X   |
+| View Trip Details (Management)          |       |          |   X   |   X   |
+| Edit Trip                               |       |          |   X   |   X   |
+| Delete Trip                             |       |          |       |   X   |
+| View and Filter Trips (Management)      |       |          |   X   |   X   |
+| Add New Booking for Trip                |       |          |   X   |   X   |
+| **Adjust and Track Bookings Functions** |       |          |       |       |
+| Add New Booking                         |       |          |   X   |   X   |
+| View Booking Details                    |       |          |   X   |   X   |
+| Edit Pre-Departure Booking              |       |          |   X   |       |
+| Delete Booking                          |       |          |   X   |       |
+| View and Filter Bookings                |       |          |   X   |   X   |
+| View Booking Invoice                    |       |          |   X   |   X   |
+| **Adjust Customers Functions**          |       |          |       |       |
+| Add New Customer                        |       |          |   X   |       |
+| View Customer Details                   |       |          |   X   |       |
+| Edit Customer                           |       |          |   X   |   X   |
+| Delete Customer                         |       |          |   X   |   X   |
+| View and Filter Customers               |       |          |   X   |   X   |
+| **Adjust Staffs Functions**             |       |          |       |       |
+| Add New Staff                           |       |          |       |   X   |
+| View Staff Details                      |       |          |       |   X   |
+| Edit Staff                              |       |          |       |   X   |
+| Delete Staff                            |       |          |       |   X   |
+| View and Filter Staffs                  |       |          |       |   X   |
+| **View Reports Functions**              |       |          |       |       |
+| View Revenue Report                     |       |          |       |   X   |
+| View Booking Report                     |       |          |       |   X   |
+| View Popular Routes Report              |       |          |       |   X   |
+| View Customer Report                    |       |          |       |   X   |
+| Export Reports (PDF/Excel)              |       |          |       |   X   |
 
 **Legend:**
 
-- X: User has full permission to perform the action
-- X(\*): User has permission to perform the action on their own items only
-- X(\*\*): User has permission to perform the action on items sent to them only
+- **X**: User has full permission to perform the function
+- **X(\*)**: User has permission to perform the function on their own account/data only
 
 **Security Requirements:**
 
-- JWT must be expired shortly, no more than 5 minutes
-- HTTPS must be enforced for all connections
-- API endpoints must validate authentication tokens
-- Failed login attempts limited to 3 before temporary account lock (15 minutes)
-- Sensitive data (payment info) must be encrypted at rest
-- SQL injection prevention through parameterized queries
-- XSS protection through input sanitization and output encoding
-- CSRF tokens required for all state-changing operations
-- File upload restrictions: max 5MB for product images, 2MB for review images
-- Rate limiting: max 100 requests per minute per IP address
-- Admin actions must be logged in audit trail
-- User sessions must be invalidated on password change or role change
+1. **Authentication & Authorization:**
+
+   - JWT tokens with 24-hour expiration time
+   - HTTPS must be enforced for all connections in production environment
+   - All API endpoints must validate authentication tokens before processing requests
+   - Role-based access control (RBAC) enforced at both frontend and backend
+   - Failed login attempts limited to 5 before temporary account lock (15 minutes)
+   - Password reset tokens expire after 1 hour
+   - Session tokens must be invalidated on logout
+
+2. **Data Protection:**
+
+   - All passwords must be hashed using bcrypt (min 10 salt rounds)
+   - Sensitive customer data (phone, address, passport) encrypted at rest
+   - Payment information must never be stored directly (use payment gateway references only)
+   - Personal data access must be logged for audit purposes
+   - Database backups encrypted and stored securely
+
+3. **Input Validation & Sanitization:**
+
+   - SQL injection prevention through parameterized queries and ORM
+   - XSS protection through input sanitization and output encoding
+   - CSRF tokens required for all state-changing operations
+   - Input validation on both client and server side
+   - File upload restrictions: max 10MB for route/attraction images
+   - Allowed file types: JPEG, PNG, PDF only
+
+4. **API Security:**
+
+   - Rate limiting: max 100 requests per minute per IP address
+   - API versioning for backward compatibility
+   - Request/Response logging for audit trail
+   - Error messages must not expose sensitive system information
+   - CORS configured to allow only trusted domains
+
+5. **Audit & Monitoring:**
+   - All admin actions must be logged in Staff_Activity_Log table
+   - Critical operations (delete, payment) require confirmation and logging
+   - Booking modifications must maintain history in Booking_History table
+   - System must track user sessions for security analysis
+   - Failed authentication attempts must be logged with IP address
 
 ### 3.2 Performance Requirements
 
-**Response Time:**
+1. **Response Time:**
 
-- Page load time: < 3 seconds for 95% of requests
-- API response time: < 500ms for 90% of requests
-- Database query time: < 200ms for standard queries
-- Search results: < 1 second for product/user/document searches
-- Image loading: < 2 seconds for product images with lazy loading
-- Cart operations: < 300ms for add/update/remove operations
-- Report generation: < 5 seconds for standard reports
+   - Page load time: ≤ 2 seconds for 95% of requests
+   - API response time: ≤ 500ms for simple queries
+   - Complex report generation: ≤ 5 seconds
+   - Search operations: ≤ 1 second
+   - Checkout process: ≤ 3 seconds end-to-end
 
-**Scalability:**
+2. **Throughput:**
 
-- Support minimum 1,000 concurrent users
-- Support minimum 10,000 active customer accounts
-- Support minimum 5,000 staff members
-- Support minimum 50,000 products in catalog
-- Database capable of handling 100,000 orders per year
-- Support minimum 500,000 product reviews
-- Cart operations support 500 concurrent transactions
-- System should scale horizontally with load balancer
+   - System must support at least 1000 concurrent users
+   - Handle at least 10,000 booking transactions per day
+   - Support peak load of 500 requests per second
+   - Database queries optimized with proper indexing
+   - Static assets served via CDN for faster delivery
 
-**Availability:**
+3. **Scalability:**
 
-- 99.5% uptime during business hours (24/7)
-- Scheduled maintenance windows: 2 AM - 4 AM on weekends
-- Maximum unplanned downtime: 4 hours per month
-- Backup systems with < 15 minutes failover time
-- Database replication for high availability
-- Automated health checks every 5 minutes
-- Disaster recovery plan with < 1 hour recovery time
+   - Application must be horizontally scalable
+   - Database design must support sharding if needed
+   - Session management must support distributed deployment
+   - Cache layer (Redis) for frequently accessed data
+   - Load balancing across multiple application servers
 
-**Data Volume:**
+4. **Database Performance:**
 
-- Product images: Max 5MB per image, up to 10 images per product
-- Review images: Max 2MB per image, up to 5 images per review
-- Document content: Max 10MB per document
-- Database growth rate: Estimated 20% annually
-- Daily backup of all transactional data
-- Archive old orders after 2 years (keep for compliance)
-- Log retention: 90 days for application logs, 1 year for audit logs
-- Maximum cart size: 100 items per customer
-- Maximum document file size: 10MB
+   - Database queries optimized with appropriate indexes on:
+     - User: user_id (PK), username, email, role
+     - Route: route_id (PK), status
+     - Trip: trip_id (PK), route_id, departure_date, status
+     - Tour_Booking: booking_id (PK), customer_id, trip_id, booking_date, status
+     - Invoice: invoice_id (PK), booking_id, payment_status
+   - Connection pooling configured with min 10, max 100 connections
+   - Query execution plans monitored and optimized regularly
+   - Database statistics updated automatically
 
-**Caching:**
-
-- Product catalog cached for 5 minutes
-- User session data cached for session duration
-- Static assets cached for 7 days with CDN
-- Database query results cached for frequently accessed data
-- Cache invalidation on data updates
+5. **Caching Strategy:**
+   - Static content cached in browser (images, CSS, JS) for 7 days
+   - API responses cached in Redis with TTL:
+     - Route list: 1 hour
+     - Trip list: 15 minutes
+     - Attraction list: 1 hour
+     - Reports: 5 minutes
+   - Cache invalidation on data updates
 
 ### 3.3 Implementation Requirements
+
+1. **Technology Stack:**
+
+   - **Frontend:** ReactJS with TypeScript, React Router, Redux Toolkit
+   - **Backend:** Java Spring Boot 3.x, Spring Security, Spring Data JPA
+   - **Database:** PostgreSQL 14+ or MySQL 8+
+   - **Cache:** Redis 7+
+   - **Build Tools:** Maven 3.8+, Vite
+   - **Version Control:** Git
+
+2. **Browser Compatibility:**
+
+   - Google Chrome (latest 2 versions)
+   - Mozilla Firefox (latest 2 versions)
+   - Microsoft Edge (latest 2 versions)
+   - Safari (latest 2 versions on macOS/iOS)
+   - Responsive design supporting devices from 320px to 2560px width
+
+3. **Mobile Support:**
+
+   - Progressive Web App (PWA) features
+   - Touch-friendly UI elements
+   - Optimized for mobile data usage
+   - Offline capability for viewing booked trips
+   - Mobile-first responsive design
+
+4. **Deployment:**
+
+   - Containerized deployment using Docker
+   - CI/CD pipeline for automated testing and deployment
+   - Staging environment mirroring production
+   - Blue-green deployment strategy for zero-downtime updates
+   - Environment-specific configuration management
+
+5. **Development Standards:**
+
+   - Code must follow Java coding conventions (Google Java Style Guide)
+   - JavaScript/TypeScript code must follow ESLint rules
+   - Unit test coverage minimum 70%
+   - Integration tests for all critical workflows
+   - API documentation using Swagger/OpenAPI 3.0
+   - Database schema versioning using Flyway or Liquibase
+
+6. **Internationalization & Localization:**
+
+   - Support for multiple languages (initially Vietnamese and English)
+   - Date/time formatting based on user locale
+   - Currency formatting with proper symbols
+   - Translation files externalized from code
+   - RTL support for future expansion
+
+7. **Accessibility:**
+
+   - WCAG 2.1 Level AA compliance
+   - Keyboard navigation support
+   - Screen reader compatibility
+   - Sufficient color contrast ratios (4.5:1 minimum)
+   - Alternative text for all images
+   - Form labels properly associated with inputs
+
+8. **Logging & Monitoring:**
+
+   - Application logging using SLF4J with Logback
+   - Log levels: ERROR, WARN, INFO, DEBUG
+   - Centralized log management system
+   - Real-time error tracking and alerting
+   - Performance metrics collection
+   - User activity analytics
+
+9. **Backup & Recovery:**
+
+   - Daily automated database backups
+   - Backup retention policy: 30 days
+   - Point-in-time recovery capability
+   - Disaster recovery plan with RTO ≤ 4 hours, RPO ≤ 1 hour
+   - Regular backup restoration tests (monthly)
+
+10. **Documentation Requirements:**
+    - API documentation auto-generated from code annotations
+    - User manuals for each user role
+    - Administrator guide for system configuration
+    - Database schema documentation
+    - Deployment and installation guides
+    - Troubleshooting guides
+
+- User sessions must be invalidated on password change or role change
 
 **Technology Stack:**
 
@@ -2004,128 +2149,159 @@ The Electricilies system provides the following main views/screens:
 
 ### 4.1 Archive Function
 
-| List                   | Actor        | Condition                                                                                                                                         |
-| :--------------------- | :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Order                  | Admin        | The Admin is able to archive completed orders older than 2 years. Archived orders remain accessible for compliance but are moved to cold storage. |
-| User                   | Admin        | The Admin is able to archive deleted user accounts after 90 days of deletion. Personal data is anonymized per GDPR requirements.                  |
-| Product                | Staff, Admin | Staff/Admin can archive discontinued products. Archived products are hidden from customer view but retain historical data for reporting.          |
-| Review                 | Staff, Admin | Staff/Admin can archive old reviews (older than 3 years) while maintaining review statistics.                                                     |
-| Document               | Admin        | The Admin is able to archive outdated documents. Archived documents are not visible to users but accessible to admin for historical reference.    |
-| Staff Activity Log     | Admin        | The Admin is able to archive staff activity logs older than 1 year for audit compliance.                                                          |
-| System Monitoring Data | Admin        | The Admin is able to archive system monitoring data older than 90 days to maintain database performance.                                          |
+- Only Admin (and Staff where specified) can initiate archival actions.
+- Archived data is stored in a secure, read-only state and cannot be modified or deleted except by system administrators.
+- Archived records are excluded from standard queries and user interfaces but remain accessible for audit, legal, and compliance review.
+- Data retention periods are reviewed annually to ensure compliance with legal and organizational requirements.
+
+The following archival policy follows the ELE SRS style: concise table listing data sets, responsible actors, and archival conditions/retention notes.
+
+| List/Table             | Actor        | Condition / Retention                                                                                                           |
+| :--------------------- | :----------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| Tour_Booking           | Admin        | Archive completed or cancelled bookings older than 2 years. Retain archived booking records for 5 years for compliance.         |
+| User                   | Admin        | Archive deleted user accounts after 90 days. Personal data anonymized per privacy regulations. Retain anonymized records 3 yrs. |
+| Trip                   | Staff, Admin | Archive trips that ended or were cancelled more than 2 years ago.                                                               |
+| Route                  | Admin        | Archive inactive routes; archived routes are hidden from customer-facing views.                                                 |
+| Attraction             | Admin        | Archive attractions that are no longer active.                                                                                  |
+| Invoice                | Admin        | Archive paid invoices older than 2 years. Retain for 5 years for financial audit.                                               |
+| Staff_Activity_Log     | Admin        | Archive staff activity logs older than 1 year; retain audit logs for minimum 3 years.                                           |
+| Booking_History        | Admin        | Archive booking modification history older than 2 years.                                                                        |
+| System Monitoring Data | Admin        | Archive monitoring data older than 90 days to reduce operational storage and improve performance.                               |
+
+Notes:
+
+- Archived data is stored in secure, read-only storage and excluded from regular application queries and UI lists.
+- Only Admin (and Staff where specified) may trigger archival or retrieval actions; all archival actions produce audit logs.
+- Retention periods are subject to legal and organizational review and will be updated as required.
+
+- Only Admin (and Staff where specified) can initiate archival actions.
+- Archived data is stored in a secure, read-only state and cannot be modified or deleted except by system administrators.
+- Archived records are excluded from standard queries and user interfaces but remain accessible for audit, legal, and compliance review.
+- Data retention periods are reviewed annually to ensure compliance with legal and organizational requirements.
 
 ### 4.2 Security Audit Function
 
-Enable Security Audit Function for "Admin" to track critical system events:
+<!--
+ALTERNATIVE (CHC-style, commented out):
+Uncomment this block and comment out the table below.
 
-- User account creation, modification, and deletion
-- User role changes and permission modifications
-- Failed login attempts and account lockouts
-- Password changes and password reset requests
-- Product creation, modification, and deletion
-- Order modifications and cancellations
-- Review deletions and moderation actions
-- Document creation, modification, and deletion
-- System configuration changes
-- Admin access to sensitive user data
-- API authentication failures
-- Suspicious activity patterns (e.g., rapid requests, unauthorized access attempts)
+Enable Security Audit Function for Admin to track modifications on user permissions and critical data operations across Auth, Booking, Payment, Catalog, Documents, Integrations, and System Operations. Audit logs must be immutable and retained according to policy (at least 1 year online + 2 years archived). Storage is implementation-agnostic (e.g., append-only DB table, append-only file/object storage with object lock, or managed log service).
+-->
 
-All audit logs include: timestamp, actor ID, action type, affected entity, IP address, user agent, and action result. Audit logs are immutable and retained for minimum 1 year for compliance purposes.
+Audit events captured by the system:
 
-### 4.3 Electricilies Sites
+| #   | Area                     | Key events                                                                              | Actor(s)                | Log store                                   | Retention                       |
+| :-- | :----------------------- | :-------------------------------------------------------------------------------------- | :---------------------- | :------------------------------------------ | :------------------------------ |
+| 1   | AuthN/AuthZ              | Login success/fail; lock/unlock; token issue/rotate/revoke; role/permission change      | All, Admin              | WORM-compliant log store (DB/file/service)  | 1 year online + 2 years archive |
+| 2   | User & Staff Management  | Create/update/delete user; password change/reset; MFA setup/reset; role assignment      | Staff, Admin            | WORM log store                              | Same as above                   |
+| 3   | Booking Lifecycle        | Create/hold/pay/cancel/modify booking; seat allocation adjustments                      | Customer, Staff         | WORM log store                              | Same as above                   |
+| 4   | Payment & Invoicing      | Payment initiated/success/failure/refund; invoice generate/send/void                    | System, Customer, Staff | WORM log store                              | Same as above                   |
+| 5   | Catalog & Capacity       | Route/trip/itinerary create/update/delete; price/capacity changes                       | Staff, Admin            | WORM log store                              | Same as above                   |
+| 6   | Data Access & Exports    | PII read/download/export; report execution (filters, scope)                             | Staff, Admin            | WORM log store (+ export register optional) | Same as above                   |
+| 7   | Documents                | Upload/update/delete traveler documents; verification status changes                    | Customer, Staff         | WORM log store                              | Same as above                   |
+| 8   | Integrations & Webhooks  | Incoming/outgoing webhook delivery (status, latency); retries; signature verification   | System                  | WORM log store                              | Same as above                   |
+| 9   | Configuration & Security | System config change; API key/secret rotation; OAuth client config; feature flags       | Admin                   | WORM log store                              | Same as above                   |
+| 10  | System Operations        | Rate-limit triggered; anomalous login patterns; critical errors; backup/restore actions | System, Admin           | WORM log store                              | Same as above                   |
 
-| \#  | Site Name     | Description                                                                                                                                                                                                                                                                                                                                                                   |
-| :-- | :------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Customer Site | This is the main e-commerce website for customers. It provides functionalities to browse products, search products, view product details and reviews, manage shopping cart, place orders, track orders, write reviews, view documents, contact support, and view personal reports.                                                                                            |
-| 2   | Staff Site    | This site is designed for staff members. It enables them to manage products (add, update, delete), moderate product reviews, search products with advanced filters, view and manage users (customers only), view customer reports, and view their own performance reports.                                                                                                    |
-| 3   | Admin Site    | This is the control console for administrators. It provides full access to manage users (including staff), change user roles, view comprehensive shop reports, monitor system health and performance, manage system documents, view staff performance reports, and access all staff functionalities. Admin site includes advanced analytics and system configuration options. |
+Audit record schema (minimum): timestamp (UTC), actor_id/role, ip, user_agent, resource_type/id, action, status/result, correlation_id, metadata (changed fields/diff), checksum/signature.
 
-### 4.4 Electricilies Lists
+Access & integrity: Audit logs are restricted by RBAC (Admin full; Staff scoped to owned/assigned objects) and stored immutably in a WORM-compliant log store. Implementation is agnostic (relational append-only table, append-only file/object storage with object lock, or managed log service) and must provide tamper-evidence and authorized export. Retention aligns with 4.1 (minimum 1 year online + 2 years archive, extendable under legal hold).
 
-Refer to section 2.2 List Description for detailed information about all lists/tables used in the Electricilies system.
+### 4.3 TMS Sites
+
+| #   | Site Name       | Description                                                                                                                                                                                                                                                                                                                                                        |
+| :-- | :-------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Customer Portal | Public-facing portal for customers to browse and filter available trips, view trip details and itineraries, add trips to cart, checkout and pay, manage personal bookings, view and pay invoices, manage favorite routes, and manage personal profile. Includes help center and basic support entry points.                                                        |
+| 2   | Staff Portal    | Internal portal for staff to manage routes, itineraries (route schedules), attractions, and trips; create/view/edit pre-departure bookings; view booking details and invoices; manage customers; and perform operational tasks permitted to staff roles. Staff can also access their self-performance report if enabled by policy.                                 |
+| 3   | Admin Console   | Administrative console for system administrators to manage staff and customers, assign roles, configure system settings, oversee operations, and access analytics. Admin can manage all route/attraction/trip entities, audit activities, and view reports (Revenue, Booking, Popular Routes, Customer). Includes system monitoring and document management tools. |
+
+### 4.4 TMS Lists
+
+Refer to section 2.2 List Description for detailed information about all lists/tables used in the TMS (Tourist Management System). This includes, but is not limited to: User, Route, Attraction, Route_Attraction, Trip, Tour_Booking, Tour_Booking_Detail, Invoice, Cart, Cart_Item, Favorite_Tour, Route_Schedule, Booking_History, Revenue_Report, Popular_Routes_Report, Customer_Statistics, Staff_Activity_Log, Password_Reset_Token, User_Session, Notification, Payment_Transaction, Trip_Availability_Calendar, Route_Review, and System_Config.
 
 ### 4.5 Custom Pages
 
-Custom pages implemented in the Electricilies system:
+Custom pages implemented in the TMS (Tourist Management System):
 
-| \#  | Page Name            | Description                                                      | User Role               |
-| :-- | :------------------- | :--------------------------------------------------------------- | :---------------------- |
-| 1   | Dashboard            | Personalized dashboard showing quick stats and recent activities | Customer, Staff, Admin  |
-| 2   | Analytics Dashboard  | Comprehensive analytics page with customizable widgets           | Admin                   |
-| 3   | Inventory Management | Advanced inventory tracking and low-stock alerts                 | Staff, Admin            |
-| 4   | Bulk Operations      | Interface for bulk product updates and data import/export        | Staff, Admin            |
-| 5   | Notification Center  | Centralized notification management for all system alerts        | All authenticated users |
-| 6   | Order Tracking       | Real-time order tracking with map integration                    | Customer                |
-| 7   | Wishlist             | Product wishlist management for customers                        | Customer                |
-| 8   | Comparison Tool      | Side-by-side product comparison interface                        | Customer                |
-| 9   | Advanced Search      | Advanced search page with multiple filter options                | All                     |
-| 10  | Category Management  | Product category hierarchy management                            | Admin                   |
+| #   | Page Name                    | Description                                                                                                     | User Role              |
+| :-- | :--------------------------- | :-------------------------------------------------------------------------------------------------------------- | :--------------------- |
+| 1   | Customer Dashboard           | Personalized dashboard with featured trips, recommendations, upcoming trips, and quick access to bookings.      | Customer               |
+| 2   | Trip Catalog                 | Advanced browse and filter page for trips (date range, destination, price, duration, seats) with facets.        | Guest, Customer, Staff |
+| 3   | Trip Detail                  | Detailed trip page with itinerary, pricing, seat availability calendar, gallery, and “Add to Cart/Book Now”.    | Guest, Customer, Staff |
+| 4   | Shopping Cart                | Cart management page for adding/removing trips, adjusting travelers, and viewing estimated totals.              | Customer               |
+| 5   | Checkout                     | Booking checkout page for traveler information, contact details, and payment confirmation.                      | Customer               |
+| 6   | My Bookings                  | Booking history and filters (status, date range) with actions: view details, invoice, and modify pre-departure. | Customer               |
+| 7   | Booking Detail & Invoice     | Booking summary, passenger list, payment status, invoice download/email, and support contact.                   | Customer, Staff        |
+| 8   | Favorites                    | Saved routes and trips for quick access and future booking.                                                     | Customer               |
+| 9   | Route & Itinerary Management | CRUD for routes and itinerary days; drag-and-drop visit order and duration editing.                             | Staff, Admin           |
+| 10  | Trip & Capacity Management   | CRUD for trips, pricing tiers, capacity, and blocking dates.                                                    | Staff, Admin           |
+| 11  | Customer & Staff Management  | Search, view, and edit customer/staff profiles with access per role.                                            | Staff, Admin           |
+| 12  | Reports & Monitoring Hub     | Revenue, Booking, Popular Routes, Customer reports; system health and activity audit shortcuts.                 | Admin                  |
 
 ### 4.6 Scheduled Agents
 
-Scheduled jobs and automated tasks in the Electricilies system:
+Scheduled jobs and automated tasks in the TMS (Tourist Management System):
 
-| \#  | Agent Name                    | Schedule                    | Description                                                                        |
-| :-- | :---------------------------- | :-------------------------- | :--------------------------------------------------------------------------------- |
-| 1   | Order Status Sync             | Every 15 minutes            | Synchronizes order status with shipping providers and updates tracking information |
-| 2   | Inventory Alert               | Daily at 8:00 AM            | Checks inventory levels and sends low-stock alerts to staff                        |
-| 3   | Abandoned Cart Reminder       | Daily at 10:00 AM           | Sends email reminders to customers with abandoned carts (older than 24 hours)      |
-| 4   | Review Notification           | Daily at 9:00 AM            | Sends email notifications to customers prompting them to review delivered orders   |
-| 5   | Report Generation             | Daily at 1:00 AM            | Generates and caches daily sales and performance reports                           |
-| 6   | Database Backup               | Daily at 2:00 AM            | Performs full database backup and verification                                     |
-| 7   | Log Cleanup                   | Weekly on Sunday at 3:00 AM | Archives old logs and cleans up temporary data                                     |
-| 10  | Analytics Aggregation         | Daily at 4:00 AM            | Aggregates daily analytics data for reporting                                      |
-| 11  | Product Recommendation Update | Daily at 5:00 AM            | Updates product recommendation algorithm with latest purchase data                 |
-| 12  | Price Update                  | As configured               | Processes scheduled price changes and promotional pricing                          |
+| #   | Agent Name                    | Schedule                    | Description                                                                                                |
+| :-- | :---------------------------- | :-------------------------- | :--------------------------------------------------------------------------------------------------------- |
+| 1   | Trip Availability Sync        | Hourly at :00               | Recomputes available seats per trip from confirmed bookings/cancellations; refreshes cache for trip lists. |
+| 2   | Auto-cancel Unpaid Bookings   | Every 15 minutes            | Cancels bookings pending payment beyond hold time (e.g., 30 minutes); frees seats and notifies customer.   |
+| 3   | Payment Reconciliation        | Daily at 3:00 AM            | Reconciles payment gateway transactions with invoices; retries webhook failures.                           |
+| 4   | Invoice Generation & Delivery | Every hour at :10           | Generates invoices for paid bookings and emails PDFs; retries stalled deliveries.                          |
+| 5   | Pre-departure Reminder        | Daily at 8:00 AM            | Sends reminders 3 days and 24 hours before departure with checklist and contact info.                      |
+| 6   | Post-trip Feedback Request    | Daily at 9:00 AM            | Sends survey/feedback emails 1 day after trip end; aggregates NPS metrics.                                 |
+| 7   | Report Aggregation            | Daily at 1:00 AM            | Aggregates Revenue, Booking, Popular Routes, and Customer reports into summary tables and caches outputs.  |
+| 8   | Database Backup               | Daily at 2:00 AM            | Performs full database backup and integrity verification; rotates backups by retention policy.             |
+| 9   | Log & Audit Cleanup           | Weekly on Sunday at 3:00 AM | Archives logs and prunes expired sessions/tokens per retention policy.                                     |
+| 10  | Cache Warmup (Trips & Routes) | Hourly at :05               | Warms frequently used caches (trip catalog, routes, attractions).                                          |
+| 11  | Session & Token Cleanup       | Hourly at :20               | Deletes expired user sessions and password reset tokens.                                                   |
+| 12  | Data Archival Execution       | Monthly on 1st at 1:30 AM   | Executes archival policy defined in 4.1 for eligible bookings, invoices, and logs.                         |
 
 ### 4.7 Technical Concern
 
 **Scalability Concerns:**
 
-- **High Traffic Events:** System must handle traffic spikes during sales events (Black Friday, Flash Sales). Implement auto-scaling, CDN caching, and queue-based order processing to maintain performance.
-
-- **Large Product Catalog:** With 50,000+ products, search and filtering performance is critical. ParadeDB indexing and optimized database queries with proper indexing are essential.
-
-- **Image Storage:** Large volume of product and review images can impact storage costs and performance. Implement image compression, lazy loading, CDN delivery, and tiered storage (hot/cold) strategy.
+- Seasonal peaks (holidays, campaigns) can cause sharp traffic and booking spikes. Use auto-scaling, CDN caching, and message queues to smooth load.
+- Seat allocation must be consistent under high concurrency. Employ row-level locking or optimistic concurrency for availability updates and enforce idempotency on booking mutations.
+- Rate-limit write-heavy endpoints (booking, payment confirmation) and apply backpressure on downstream services.
 
 **Data Management Concerns:**
 
-- **Data Volume Growth:** 20% annual growth requires capacity planning for database, storage, and backup systems. Implement data archiving strategy for old orders and reviews.
-
-- **Search Performance:** Full-text search across products, documents, and users with complex filters requires optimized ParadeDB configuration and query optimization.
-
-- **Report Generation:** Complex reports with large datasets may impact database performance. Implement report caching, pre-aggregation of metrics, and scheduled report generation during off-peak hours.
+- Itinerary and route versions change over time; maintain versioned itinerary records and booking-to-itinerary references.
+- Time zones and currencies vary by trip; normalize storage (UTC, base currency) and present localized formats per user.
+- PII minimization and selective encryption at rest (passport, phone, email) with strict access auditing.
+- Retention and archival policies (see 4.1) for bookings, invoices, and logs to control data growth.
 
 **Security Concerns:**
 
-- **PCI DSS Compliance:** Payment processing must comply with PCI DSS standards. Use tokenization and never store full credit card data. Implement third-party payment gateway integration (Stripe, PayPal).
-
-- **Data Privacy:** GDPR compliance requires proper consent management, right to be forgotten, data portability, and data encryption. Implement personal data anonymization for archived users.
-
-- **API Security:** Public APIs must be protected against abuse. Implement rate limiting, API key rotation, request validation, and DDoS protection.
+- OAuth2/OIDC with short-lived JWT access tokens and refresh rotation; strict RBAC for Customer/Staff/Admin.
+- PCI DSS-aligned payment flow using tokenization; never store primary card data.
+- CSRF protection for state-changing requests; XSS and SQLi mitigations via encoding/sanitization and parameterized queries.
+- File upload hardening (type/size limits, AV scan if applicable) and comprehensive admin/staff audit trails.
 
 **Performance Concerns:**
 
-- **Database Queries:** Complex queries for reports and analytics can impact database performance. Implement read replicas, query optimization, and appropriate indexing strategy.
+- Index critical fields: Trip(route_id, departure_date, status), Tour_Booking(customer_id, trip_id, status, booking_date), Invoice(booking_id, payment_status).
+- Cache hot queries (trip catalog, route lists, attraction lists, summary reports) with defined TTL and cache-busting on updates.
+- Paginate and stream report data; pre-aggregate nightly for heavy dashboards.
+- Keep availability checks fast with computed seat counts and background reconciliation jobs.
 
-- **Concurrent Users:** Target of 1,000 concurrent users requires horizontal scaling capability. Implement stateless application design, session management in Redis, and load balancing.
+**Reliability & Consistency:**
 
-- **Real-time Updates:** Cart synchronization, inventory updates, and order status require real-time or near-real-time processing. Implement WebSocket connections for live updates and message queue for asynchronous processing.
+- Booking pipeline should be idempotent and resilient (SAGA pattern with compensating actions for payment failures).
+- Prevent double-spend on seats with transactional boundaries and unique idempotency keys.
+- Implement retries with exponential backoff and dead-letter queues for failed async tasks.
 
 **Integration Concerns:**
 
-- **Third-party Services:** Dependencies on external services (payment gateway, shipping providers, email service, support chat) require proper error handling, retry logic, and fallback mechanisms.
+- Payment gateway, email/SMS, and maps/geocoding integrations must include timeout, retry, and circuit breaker policies.
+- Validate and sign incoming webhooks; store webhook delivery logs for audit and troubleshooting.
 
-- **Authentication Provider:** Keycloak integration requires proper configuration, token management, and session synchronization. Implement token refresh mechanism and handle authentication failures gracefully.
+**Observability & Operations:**
 
-**Operational Concerns:**
-
-- **Monitoring and Alerting:** Critical for maintaining 99.5% uptime. Implement comprehensive monitoring for application health, database performance, API response times, error rates, and resource utilization.
-
-- **Deployment Strategy:** Zero-downtime deployments are essential for 24/7 availability. Implement blue-green deployment or rolling updates with health checks.
-
-- **Disaster Recovery:** RTO (Recovery Time Objective) of < 1 hour requires automated backup verification, documented recovery procedures, and regular disaster recovery drills.
+- KPIs: search-to-booking conversion, payment success rate, availability accuracy, average time to book, error rate.
+- Centralized logging, metrics, and tracing with alert thresholds (e.g., payment success < 97% or booking error rate > 1%).
+- Blue-green or rolling deployments with health checks; periodic DR drills and backup restore verification.
 
 ## 5. Appendixes
 
@@ -2168,6 +2344,7 @@ The list below contains all the necessary terms to interpret the document, inclu
 | _SRS_      | **S**oftware **R**equirements **S**pecification                         |
 | _SSL/TLS_  | **S**ecure **S**ockets **L**ayer / **T**ransport **L**ayer **S**ecurity |
 | _TBD_      | **T**o **b**e **d**etermined or **t**o **b**e **d**efined               |
+| _TMS_      | **T**ourist **M**anagement **S**ystem                                   |
 | _UC_       | **U**se **C**ase                                                        |
 | _UI_       | **U**ser **I**nterface                                                  |
 | _URL_      | **U**niform **R**esource **L**ocator                                    |
@@ -2176,66 +2353,140 @@ The list below contains all the necessary terms to interpret the document, inclu
 
 ### 5.2 Mapping to Notes Application
 
-\*\* There is no mapping between the Electricilies application and any source Notes application. \*\*
+\*\* There is no mapping between the TMS (Tourist Management System) application and any source Notes application. \*\*
 
 ### 5.3 Messages
 
-This section describes the details of messages used in business rules including error messages, confirmation messages, success messages, and informational messages.
+This section standardizes UI messages referenced across Use Cases and BR rules. Messages are grouped by domain to align with BRD modules. Codes (MSG n) are referenced throughout Section 2 (e.g., “Refer to MSG n”).
 
-| Message Code | Message Content                                                                                                              | Button |
-| :----------- | :--------------------------------------------------------------------------------------------------------------------------- | :----- |
-| MSG 1        | This field is required. Please provide valid information to proceed.                                                         | Ok     |
-| MSG 2        | This username or email is already registered. Please use a different one.                                                    | Ok     |
-| MSG 3        | Invalid authorization code or verifier. Please try again.                                                                    | Ok     |
-| MSG 4        | Invalid authentication token. Please sign in again.                                                                          | Ok     |
-| MSG 5        | Invalid username/email or password. Please check your credentials and try again.                                             | Ok     |
-| MSG 6        | You have been successfully signed out. Redirecting to sign in page...                                                        | Ok     |
-| MSG 7        | Email address is already registered by another account. Please use a different email.                                        | Ok     |
-| MSG 8        | Phone number is already registered by another account. Please use a different phone.                                         | Ok     |
-| MSG 9        | Profile updated successfully.                                                                                                | Ok     |
-| MSG 10       | This account is already linked to this provider or provider account is linked to another user.                               | Ok     |
-| MSG 11       | Account linked successfully with third-party provider.                                                                       | Ok     |
-| MSG 12       | Cannot delete account. You have pending orders or active subscriptions that must be resolved first.                          | Ok     |
-| MSG 13       | Your account has been deleted successfully. Thank you for using our service.                                                 | Ok     |
-| MSG 14       | Password does not meet requirements. Must be at least 8 characters with uppercase, lowercase, number, and special character. | Ok     |
-| MSG 15       | Current password is incorrect. Please try again.                                                                             | Ok     |
-| MSG 16       | Password updated successfully.                                                                                               | Ok     |
-| MSG 17       | If this email is registered, you will receive a password reset link shortly.                                                 | Ok     |
-| MSG 18       | Password reset email sent successfully. Please check your inbox and follow the instructions.                                 | Ok     |
-| MSG 19       | Invalid quantity. Please enter a valid positive number that does not exceed available stock.                                 | Ok     |
-| MSG 20       | Total quantity exceeds available stock. Please reduce quantity.                                                              | Ok     |
-| MSG 21       | Product added to cart successfully.                                                                                          | Ok     |
-| MSG 22       | Cart updated successfully.                                                                                                   | Ok     |
-| MSG 23       | Product not found in cart.                                                                                                   | Ok     |
-| MSG 24       | Product removed from cart successfully.                                                                                      | Ok     |
-| MSG 25       | Cannot proceed to checkout. Some items in your cart are no longer available or have insufficient stock.                      | Ok     |
-| MSG 26       | Cannot proceed to checkout. One or more products are no longer available.                                                    | Ok     |
-| MSG 27       | Cannot cancel order. Order has already been shipped or is not in cancellable status.                                         | Ok     |
-| MSG 28       | Order cancelled successfully. Refund will be processed within 3-5 business days.                                             | Ok     |
-| MSG 29       | Cannot return product. Product is not eligible for return or return period has expired.                                      | Ok     |
-| MSG 30       | Return request created successfully. Please check your email for return instructions.                                        | Ok     |
-| MSG 31       | Invalid review content. Please ensure all required fields are filled correctly.                                              | Ok     |
-| MSG 32       | Cannot submit review. You have not purchased this product or have already reviewed it.                                       | Ok     |
-| MSG 33       | Thank you for your review! It will be published after moderation.                                                            | Ok     |
-| MSG 34       | Invalid product data. Please check all required fields and try again.                                                        | Ok     |
-| MSG 35       | Cannot save product. SKU already exists or validation failed.                                                                | Ok     |
-| MSG 36       | Product created successfully.                                                                                                | Ok     |
-| MSG 37       | Product updated successfully.                                                                                                | Ok     |
-| MSG 38       | Cannot delete product. Product has pending orders or is in active carts.                                                     | Ok     |
-| MSG 39       | Product deleted successfully.                                                                                                | Ok     |
-| MSG 40       | Review not found.                                                                                                            | Ok     |
-| MSG 41       | Review deleted successfully.                                                                                                 | Ok     |
-| MSG 42       | Invalid role change. Please select a different role.                                                                         | Ok     |
-| MSG 43       | Cannot change user role. User has pending administrative actions.                                                            | Ok     |
-| MSG 44       | User role updated successfully. User will need to sign in again.                                                             | Ok     |
-| MSG 45       | Cannot delete user. User has pending orders or active disputes.                                                              | Ok     |
-| MSG 46       | User deleted successfully.                                                                                                   | Ok     |
-| MSG 47       | Invalid document data. Please check all required fields.                                                                     | Ok     |
-| MSG 48       | Cannot save document. Title already exists in this category or validation failed.                                            | Ok     |
-| MSG 49       | Document created successfully.                                                                                               | Ok     |
-| MSG 50       | Document updated successfully.                                                                                               | Ok     |
-| MSG 51       | Document not found.                                                                                                          | Ok     |
-| MSG 52       | Document deleted successfully.                                                                                               | Ok     |
+| Message Code | Category   | Message Content                                                                                            | Button |
+| :----------- | :--------- | :--------------------------------------------------------------------------------------------------------- | :----- |
+| MSG 1        | Validation | Please correct the highlighted fields.                                                                     | Ok     |
+| MSG 2        | Auth       | Invalid username/email or password. Please try again.                                                      | Ok     |
+| MSG 3        | Auth       | Account temporarily locked due to multiple failed attempts. Try again after 15 minutes or contact support. | Ok     |
+| MSG 4        | Auth       | Welcome back, {username}!                                                                                  | Ok     |
+| MSG 5        | Auth       | Username or email already exists. Please use a different one.                                              | Ok     |
+| MSG 6        | Auth       | Registration successful! Redirecting to Sign In...                                                         | Ok     |
+| MSG 7        | Auth       | If this email is registered, you will receive a password reset link shortly.                               | Ok     |
+| MSG 8        | Auth       | Invalid or expired reset link. Please request a new one.                                                   | Ok     |
+| MSG 9        | Auth       | Password reset successful.                                                                                 | Ok     |
+| MSG 10       | Auth       | Session expired. Please sign in again.                                                                     | Ok     |
+| MSG 11       | Profile    | Email already registered. Please use a different email.                                                    | Ok     |
+| MSG 12       | Profile    | Profile updated successfully.                                                                              | Ok     |
+| MSG 13       | Profile    | Incorrect current password.                                                                                | Ok     |
+| MSG 14       | Profile    | Password changed successfully. Please sign in again.                                                       | Ok     |
+| MSG 15       | Search     | Keyword must be at least 3 characters.                                                                     | Ok     |
+| MSG 16       | Search     | Invalid date range. Please adjust your filters.                                                            | Ok     |
+| MSG 17       | Search     | No trips found matching your criteria.                                                                     | Ok     |
+| MSG 18       | Trip       | Trip not found or no longer available.                                                                     | Ok     |
+| MSG 19       | Cart       | Please sign in to add trips to cart.                                                                       | Ok     |
+| MSG 20       | Cart       | Quantity must be between 1 and 20.                                                                         | Ok     |
+| MSG 21       | Cart       | Insufficient seats available.                                                                              | Ok     |
+| MSG 22       | Cart       | Trip added to cart.                                                                                        | Ok     |
+| MSG 23       | Cart       | Item removed from cart.                                                                                    | Ok     |
+| MSG 24       | Cart       | Your cart is empty. Start exploring tours!                                                                 | Ok     |
+| MSG 25       | Cart       | This trip is no longer available. Please remove from cart.                                                 | Ok     |
+| MSG 26       | Cart       | Quantity updated.                                                                                          | Ok     |
+| MSG 27       | Favorites  | Please sign in to save favorites.                                                                          | Ok     |
+| MSG 28       | Favorites  | Added to favorites!                                                                                        | Ok     |
+| MSG 29       | Favorites  | Removed from favorites.                                                                                    | Ok     |
+| MSG 30       | Favorites  | No favorite trips yet. Start exploring!                                                                    | Ok     |
+| MSG 31       | Filters    | No trips match your filters.                                                                               | Ok     |
+| MSG 32       | Booking    | No bookings yet. Start exploring tours!                                                                    | Ok     |
+| MSG 33       | Booking    | No bookings match your filters.                                                                            | Ok     |
+| MSG 34       | Checkout   | Your cart is empty.                                                                                        | Ok     |
+| MSG 35       | Checkout   | Some trips in your cart are no longer available or have insufficient seats.                                | Ok     |
+| MSG 36       | Checkout   | Please correct traveler information.                                                                       | Ok     |
+| MSG 37       | Checkout   | Bookings created successfully!                                                                             | Ok     |
+| MSG 38       | Booking    | Cannot edit: booking cancelled/completed or departure within 48 hours.                                     | Ok     |
+| MSG 39       | Booking    | Please correct passenger details.                                                                          | Ok     |
+| MSG 40       | Booking    | Passenger details updated successfully!                                                                    | Ok     |
+| MSG 41       | Booking    | Booking not found or access denied.                                                                        | Ok     |
+| MSG 42       | Payment    | Cannot process payment: already paid, cancelled/completed booking, or invoice overdue.                     | Ok     |
+| MSG 43       | Payment    | Payment failed: {gateway_error}.                                                                           | Ok     |
+| MSG 44       | Payment    | Payment successful! Your booking is confirmed.                                                             | Ok     |
+| MSG 45       | Routes     | Please check required fields and attachments.                                                              | Ok     |
+| MSG 46       | Routes     | Route created successfully!                                                                                | Ok     |
+| MSG 47       | Routes     | Route not found.                                                                                           | Ok     |
+| MSG 48       | Routes     | Cannot edit route: not found, archived, or has active trips.                                               | Ok     |
+| MSG 49       | Routes     | Please correct route details and try again.                                                                | Ok     |
+| MSG 50       | Routes     | Route updated successfully!                                                                                | Ok     |
+| MSG 51       | Routes     | Cannot delete route: Route has trips and/or attractions. Remove them first.                                | Ok     |
+| MSG 52       | Routes     | Route deleted successfully!                                                                                | Ok     |
+| MSG 53       | Routes     | No routes found. Add a new route to get started.                                                           | Ok     |
+| MSG 54       | Routes     | No routes match your filters.                                                                              | Ok     |
+| MSG 55       | Itinerary  | Cannot add: route closed/archived or no active attractions available.                                      | Ok     |
+| MSG 56       | Itinerary  | Please correct itinerary details.                                                                          | Ok     |
+| MSG 57       | Itinerary  | Attraction added to schedule!                                                                              | Ok     |
+| MSG 58       | Itinerary  | Route not found.                                                                                           | Ok     |
+| MSG 59       | Itinerary  | No schedule available. Add attractions to create itinerary.                                                | Ok     |
+| MSG 60       | Itinerary  | Cannot edit: Route is closed.                                                                              | Ok     |
+| MSG 61       | Itinerary  | Attraction not found in schedule.                                                                          | Ok     |
+| MSG 62       | Itinerary  | Please correct itinerary changes.                                                                          | Ok     |
+| MSG 63       | Itinerary  | Itinerary updated successfully!                                                                            | Ok     |
+| MSG 64       | Itinerary  | Cannot delete: Route is closed.                                                                            | Ok     |
+| MSG 65       | Itinerary  | Attraction not found in schedule.                                                                          | Ok     |
+| MSG 66       | Itinerary  | Cannot delete: This is the last attraction in schedule. Route must have at least one attraction.           | Ok     |
+| MSG 67       | Itinerary  | Attraction removed from schedule!                                                                          | Ok     |
+| MSG 68       | Attraction | Please check required fields or duplicates.                                                                | Ok     |
+| MSG 69       | Attraction | Attraction created successfully!                                                                           | Ok     |
+| MSG 70       | Attraction | Attraction not found.                                                                                      | Ok     |
+| MSG 71       | Attraction | Attraction not found or has been deleted.                                                                  | Ok     |
+| MSG 72       | Attraction | Please correct attraction details.                                                                         | Ok     |
+| MSG 73       | Attraction | Attraction updated successfully!                                                                           | Ok     |
+| MSG 74       | Attraction | This attraction is used in {X} routes. Set status to INACTIVE instead?                                     | Yes/No |
+| MSG 75       | Attraction | Attraction status set to INACTIVE!                                                                         | Ok     |
+| MSG 76       | Attraction | Attraction deleted successfully!                                                                           | Ok     |
+| MSG 77       | Attraction | No attractions found.                                                                                      | Ok     |
+| MSG 78       | Attraction | No attractions match the filter criteria.                                                                  | Ok     |
+| MSG 79       | Trip       | Please correct trip details.                                                                               | Ok     |
+| MSG 80       | Trip       | Trip created successfully!                                                                                 | Ok     |
+| MSG 81       | Trip       | Trip not found.                                                                                            | Ok     |
+| MSG 82       | Trip       | Trip not found or not editable.                                                                            | Ok     |
+| MSG 83       | Trip       | Please correct trip details.                                                                               | Ok     |
+| MSG 84       | Trip       | Trip updated successfully!                                                                                 | Ok     |
+| MSG 85       | Trip       | Cannot delete: Trip has {X} pending/confirmed bookings. Cancel trip instead?                               | Yes/No |
+| MSG 86       | Trip       | Trip has been canceled!                                                                                    | Ok     |
+| MSG 87       | Trip       | Trip deleted successfully!                                                                                 | Ok     |
+| MSG 88       | Booking    | Trip is not available for booking.                                                                         | Ok     |
+| MSG 89       | Booking    | Booking created successfully! Booking ID: {booking_id}                                                     | Ok     |
+| MSG 90       | Trip       | No trips found.                                                                                            | Ok     |
+| MSG 91       | Trip       | No trips match the filter criteria.                                                                        | Ok     |
+| MSG 92       | Booking    | Trip is not available for booking.                                                                         | Ok     |
+| MSG 93       | Customer   | Customer account is locked.                                                                                | Ok     |
+| MSG 94       | Booking    | Insufficient seats or invalid traveler information.                                                        | Ok     |
+| MSG 95       | Booking    | Booking created successfully! Booking ID: {booking_id}                                                     | Ok     |
+| MSG 96       | Booking    | No bookings found.                                                                                         | Ok     |
+| MSG 97       | Booking    | No bookings match the filter criteria.                                                                     | Ok     |
+| MSG 98       | Booking    | Booking not found.                                                                                         | Ok     |
+| MSG 99       | Invoice    | Invoice not found.                                                                                         | Ok     |
+| MSG 100      | Booking    | Booking not found or cannot be edited.                                                                     | Ok     |
+| MSG 101      | Booking    | Insufficient seats available.                                                                              | Ok     |
+| MSG 102      | Booking    | Booking updated successfully!                                                                              | Ok     |
+| MSG 103      | Booking    | Cannot delete booking.                                                                                     | Ok     |
+| MSG 104      | Booking    | Booking deleted successfully!                                                                              | Ok     |
+| MSG 105      | Customer   | Username or email already exists.                                                                          | Ok     |
+| MSG 106      | Customer   | Customer created successfully!                                                                             | Ok     |
+| MSG 107      | Customer   | No customers found.                                                                                        | Ok     |
+| MSG 108      | Customer   | No customers match the filter criteria.                                                                    | Ok     |
+| MSG 109      | Customer   | Customer not found.                                                                                        | Ok     |
+| MSG 110      | Customer   | Customer not found.                                                                                        | Ok     |
+| MSG 111      | Customer   | Email already registered.                                                                                  | Ok     |
+| MSG 112      | Customer   | Customer updated successfully!                                                                             | Ok     |
+| MSG 113      | Customer   | Cannot delete: Customer has active bookings or unpaid invoices.                                            | Ok     |
+| MSG 114      | Customer   | Customer deleted successfully!                                                                             | Ok     |
+| MSG 115      | Staff      | Username or email already exists.                                                                          | Ok     |
+| MSG 116      | Staff      | Staff created successfully!                                                                                | Ok     |
+| MSG 117      | Staff      | No staffs found.                                                                                           | Ok     |
+| MSG 118      | Staff      | No staffs match the filter criteria.                                                                       | Ok     |
+| MSG 119      | Staff      | Staff not found.                                                                                           | Ok     |
+| MSG 120      | Staff      | Staff not found.                                                                                           | Ok     |
+| MSG 121      | Staff      | Email already registered.                                                                                  | Ok     |
+| MSG 122      | Staff      | Staff updated successfully!                                                                                | Ok     |
+| MSG 123      | Staff      | Cannot delete: Staff has active bookings.                                                                  | Ok     |
+| MSG 124      | Staff      | Staff deleted successfully!                                                                                | Ok     |
+| MSG 125      | Reports    | No data available for the selected period.                                                                 | Ok     |
+| MSG 126      | Reports    | Export failed. Please try again.                                                                           | Ok     |
 
 ### 5.4 Issues List
 
