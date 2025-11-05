@@ -2,6 +2,10 @@
 
 ```plantuml
 @startuml
+skinparam ActivityFontSize 16
+skinparam Padding 4
+skinparam BoxPadding 0
+
 |U|User
 |S|System
 
@@ -19,10 +23,10 @@ if (Check JWT valid?) then (No)
   :(2.2) Confirm end;
   stop
 else (Yes)
+  |S|
+  :(3) Query user data;
+  :(4) Display profile form;
 endif
-
-:(3) Query user data;
-:(4) Display profile form;
 
 |U|
 :(5) Choose action (Update Info / Change Password);
