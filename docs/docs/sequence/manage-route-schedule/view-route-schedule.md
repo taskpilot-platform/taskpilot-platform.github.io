@@ -30,13 +30,13 @@ break Route not found
   RSV -> RSV: Display error message
   activate RSV
   deactivate RSV
-  deactivate A
 end
 
 RSC <-- R: Route data
 deactivate R
-
+activate RSC
 RSC -> RA: Get schedule details
+deactivate RSC
 activate RA
 RA -> RA: Query route attractions with details
 activate RA
@@ -51,16 +51,17 @@ deactivate AT
 
 break Schedule not found
   RSC <-- RA: Empty schedule
+  activate RSC
   RSV <-- RSC: No schedule notification
   deactivate RSC
   RSV -> RSV: Display message and suggest adding
   activate RSV
   deactivate RSV
-  deactivate A
 end
 
 RSC <-- RA: Schedule data with attractions
 deactivate RA
+activate RSC
 
 RSV <-- RSC: Route and schedule data
 deactivate RSC
@@ -83,7 +84,7 @@ opt Actor is Admin
   deactivate RSV
 end
 
-A -> A: View schedule details
+A -> RSV: View schedule details
 deactivate A
 deactivate RSV
 
