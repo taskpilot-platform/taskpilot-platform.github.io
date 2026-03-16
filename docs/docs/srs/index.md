@@ -74,7 +74,7 @@ Below are the main sections of this document:
 
 ###### Sequence Flow
 
-[sequence-auth-sign-in](../sequence/auth/sign-in)
+[sequence-auth-sign-in](../sequence/auth/sign-in-tms)
 
 ###### Activities Flow
 
@@ -105,7 +105,7 @@ Below are the main sections of this document:
 
 ###### Sequence Flow
 
-[sequence-auth-sign-up](../sequence/auth/sign-up)
+[sequence-auth-sign-up](../sequence/auth/sign-up-tms)
 
 ###### Activities Flow
 
@@ -166,7 +166,7 @@ Below are the main sections of this document:
 
 ###### Sequence Flow
 
-[sequence-auth-manage-profile](../sequence/auth/manage-profile)
+[sequence-auth-manage-profile](../sequence/auth/manage-profile-tms)
 
 ###### Activities Flow
 
@@ -1982,7 +1982,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
 **Security Requirements:**
 
 1. **Authentication & Authorization:**
-
    - JWT tokens with 24-hour expiration time
    - HTTPS must be enforced for all connections in production environment
    - All API endpoints must validate authentication tokens before processing requests
@@ -1992,7 +1991,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - Session tokens must be invalidated on logout
 
 2. **Data Protection:**
-
    - All passwords must be hashed using bcrypt (min 10 salt rounds)
    - Sensitive customer data (phone, address, passport) encrypted at rest
    - Payment information must never be stored directly (use payment gateway references only)
@@ -2000,7 +1998,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - Database backups encrypted and stored securely
 
 3. **Input Validation & Sanitization:**
-
    - SQL injection prevention through parameterized queries and ORM
    - XSS protection through input sanitization and output encoding
    - CSRF tokens required for all state-changing operations
@@ -2009,7 +2006,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - Allowed file types: JPEG, PNG, PDF only
 
 4. **API Security:**
-
    - Rate limiting: max 100 requests per minute per IP address
    - API versioning for backward compatibility
    - Request/Response logging for audit trail
@@ -2026,7 +2022,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
 ### 3.2 Performance Requirements
 
 1. **Response Time:**
-
    - Page load time: ≤ 2 seconds for 95% of requests
    - API response time: ≤ 500ms for simple queries
    - Complex report generation: ≤ 5 seconds
@@ -2034,7 +2029,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - Checkout process: ≤ 3 seconds end-to-end
 
 2. **Throughput:**
-
    - System must support at least 1000 concurrent users
    - Handle at least 10,000 booking transactions per day
    - Support peak load of 500 requests per second
@@ -2042,7 +2036,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - Static assets served via CDN for faster delivery
 
 3. **Scalability:**
-
    - Application must be horizontally scalable
    - Database design must support sharding if needed
    - Session management must support distributed deployment
@@ -2050,7 +2043,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - Load balancing across multiple application servers
 
 4. **Database Performance:**
-
    - Database queries optimized with appropriate indexes on:
      - User: user_id (PK), username, email, role
      - Route: route_id (PK), status
@@ -2073,7 +2065,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
 ### 3.3 Implementation Requirements
 
 1. **Technology Stack:**
-
    - **Frontend:** ReactJS with TypeScript, React Router, Redux Toolkit
    - **Backend:** Java Spring Boot 3.x, Spring Security, Spring Data JPA
    - **Database:** PostgreSQL 14+ or MySQL 8+
@@ -2082,7 +2073,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - **Version Control:** Git
 
 2. **Browser Compatibility:**
-
    - Google Chrome (latest 2 versions)
    - Mozilla Firefox (latest 2 versions)
    - Microsoft Edge (latest 2 versions)
@@ -2090,7 +2080,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - Responsive design supporting devices from 320px to 2560px width
 
 3. **Mobile Support:**
-
    - Progressive Web App (PWA) features
    - Touch-friendly UI elements
    - Optimized for mobile data usage
@@ -2098,7 +2087,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - Mobile-first responsive design
 
 4. **Deployment:**
-
    - Containerized deployment using Docker
    - CI/CD pipeline for automated testing and deployment
    - Staging environment mirroring production
@@ -2106,7 +2094,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - Environment-specific configuration management
 
 5. **Development Standards:**
-
    - Code must follow Java coding conventions (Google Java Style Guide)
    - JavaScript/TypeScript code must follow ESLint rules
    - Unit test coverage minimum 70%
@@ -2115,7 +2102,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - Database schema versioning using Flyway or Liquibase
 
 6. **Internationalization & Localization:**
-
    - Support for multiple languages (initially Vietnamese and English)
    - Date/time formatting based on user locale
    - Currency formatting with proper symbols
@@ -2123,7 +2109,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - RTL support for future expansion
 
 7. **Accessibility:**
-
    - WCAG 2.1 Level AA compliance
    - Keyboard navigation support
    - Screen reader compatibility
@@ -2132,7 +2117,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - Form labels properly associated with inputs
 
 8. **Logging & Monitoring:**
-
    - Application logging using SLF4J with Logback
    - Log levels: ERROR, WARN, INFO, DEBUG
    - Centralized log management system
@@ -2141,7 +2125,6 @@ The TMS (Tourist Management System) provides the following main views/screens:
    - User activity analytics
 
 9. **Backup & Recovery:**
-
    - Daily automated database backups
    - Backup retention policy: 30 days
    - Point-in-time recovery capability

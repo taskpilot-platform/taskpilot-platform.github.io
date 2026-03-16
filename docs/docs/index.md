@@ -34,29 +34,29 @@ Bảo mật qua JWT authentication. Mỗi user quản lý profile và danh sách
 
 ## 4. Đối tượng sử dụng
 
-| Actor | Vai trò | Use Cases |
-|---|---|---|
-| **Project Manager** (pm) | Điều phối nguồn lực, giao việc, giám sát tổng quan, sử dụng AI auto-assign | [Use Case Diagram](./use-case/staff.html) |
-| **Member** (mem) | Theo dõi task được giao, cập nhật tiến độ, sử dụng AI chat | [Use Case Diagram](./use-case/customer.html) |
-| **Administrator** (ad) | Quản trị hệ thống, tài khoản, cấu hình AI weights | [Use Case Diagram](./use-case/admin.html) |
+| Actor                    | Vai trò                                                                    | Use Cases                                    |
+| ------------------------ | -------------------------------------------------------------------------- | -------------------------------------------- |
+| **Project Manager** (pm) | Điều phối nguồn lực, giao việc, giám sát tổng quan, sử dụng AI auto-assign | [Use Case Diagram](./use-case/staff.html)    |
+| **Member** (mem)         | Theo dõi task được giao, cập nhật tiến độ, sử dụng AI chat                 | [Use Case Diagram](./use-case/customer.html) |
+| **Administrator** (ad)   | Quản trị hệ thống, tài khoản, cấu hình AI weights                          | [Use Case Diagram](./use-case/admin.html)    |
 
 ## 5. Tổng quan Use Cases
 
 Hệ thống gồm **59 use cases** thuộc **11 subsystems**:
 
-| # | Subsystem | Use Cases | Actor |
-|---|---|---|---|
-| I | Authentication | Login, Register, Forgot/Reset Password | ad, pm, mem |
-| II | User Profile | View/Update Profile, Delete Account | ad, pm, mem |
-| III | User Skills | View/Add/Update/Delete Personal Skills | pm, mem |
-| IV | System Admin | System Settings, Skill Directory, User Management | ad |
-| V | Project Management | Create/View/Update/Join/Leave/Archive Projects | pm, mem |
-| VI | Project Members | View/Add/Update/Remove Members | pm, mem |
-| VII | Sprint Management | View/Create/Update/Start/Delete Sprints | pm, mem |
-| VIII | Task Management | Kanban, Backlog, Workload, CRUD Tasks, Assign | pm, mem |
-| IX | Interaction | View/Write/Edit/Delete Comments | pm, mem |
-| X | Notification | Receive/Mark-as-Read Notifications | ad, pm, mem |
-| XI | AI Assistant | Chat Sessions, Chat with AI, Logs, Auto-Assignment | pm, mem |
+| #    | Subsystem          | Use Cases                                          | Actor       |
+| ---- | ------------------ | -------------------------------------------------- | ----------- |
+| I    | Authentication     | Login, Register, Forgot/Reset Password             | ad, pm, mem |
+| II   | User Profile       | View/Update Profile, Delete Account                | ad, pm, mem |
+| III  | User Skills        | View/Add/Update/Delete Personal Skills             | pm, mem     |
+| IV   | System Admin       | System Settings, Skill Directory, User Management  | ad          |
+| V    | Project Management | Create/View/Update/Join/Leave/Archive Projects     | pm, mem     |
+| VI   | Project Members    | View/Add/Update/Remove Members                     | pm, mem     |
+| VII  | Sprint Management  | View/Create/Update/Start/Delete Sprints            | pm, mem     |
+| VIII | Task Management    | Kanban, Backlog, Workload, CRUD Tasks, Assign      | pm, mem     |
+| IX   | Interaction        | View/Write/Edit/Delete Comments                    | pm, mem     |
+| X    | Notification       | Receive/Mark-as-Read Notifications                 | ad, pm, mem |
+| XI   | AI Assistant       | Chat Sessions, Chat with AI, Logs, Auto-Assignment | pm, mem     |
 
 📋 [Danh sách chi tiết Use Cases](/docs/usecase-list)
 
@@ -73,9 +73,10 @@ Hệ thống gồm **59 use cases** thuộc **11 subsystems**:
 - **Frontend**: React (Kanban Board, Dashboard, Chat UI)
 
 Chi tiết:
-- [Database Schema](/docs/database)
-- [Function List](/docs/function-list)
-- [SRS](/docs/srs)
+
+- [Database Schema](/docs/database/)
+- [Function List](/docs/function-list/)
+- [SRS](/docs/srs/)
 
 ## Notes
 
