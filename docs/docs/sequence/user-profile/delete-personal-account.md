@@ -12,6 +12,7 @@ entity USERS as US
 U -> PV: Click "Delete Account"
 activate U
 activate PV
+
 PV -> PV: Display confirmation dialog\n"Are you sure? This action cannot be undone."
 activate PV
 deactivate PV
@@ -19,17 +20,9 @@ deactivate PV
 U -> PV: Enter current password for confirmation
 U -> PV: Click "Confirm Delete"
 deactivate U
+
 PV -> UC: Send delete account request
 activate UC
-UC -> UC: Extract user_id from JWT token
-activate UC
-deactivate UC
-
-UC -> US: Verify current password
-activate US
-US -> US: Query password_hash by user_id
-activate US
-deactivate US
 
 break Password incorrect
   UC <-- US: Error
@@ -52,9 +45,11 @@ deactivate US
 
 PV <-- UC: Success notification
 deactivate UC
-PV -> PV: Clear JWT token and session
+
+PV -> PV: Clear session
 activate PV
 deactivate PV
+
 PV -> PV: Redirect to landing page\nwith "Account deleted" message
 activate PV
 deactivate PV

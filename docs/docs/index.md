@@ -1,101 +1,85 @@
 <!-- # Docs -->
 
-# Use Case Diagrams
+# TaskPilot - Hệ thống Quản lý Dự án Thông minh với AI Agent
 
-Tài liệu này mô tả các use case diagrams cho hệ thống Tourist Management System (TMS), bao gồm các actor chính và chức năng của họ.
+## 1. Giới thiệu
 
-## Actors
+**TaskPilot** là hệ thống quản lý dự án (Project Management) tích hợp Trợ lý ảo AI (AI Agent) được xây dựng trên nền tảng Java Spring Boot theo kiến trúc Modular Monolith. Hệ thống hỗ trợ quy trình phát triển Agile/Scrum và nâng cao hiệu suất quản lý thông qua khả năng tự động hóa thông minh.
 
-Hệ thống TMS có 3 loại actor chính:
+## 2. Mục tiêu
 
-### 1. [Customer](./use-case/customer.html)
+Nghiên cứu và triển khai AI Agent đóng vai trò trợ lý ảo với các khả năng:
 
-Khách hàng sử dụng hệ thống để:
+- **Hiểu ngữ nghĩa (NLU)**: Phân tích câu lệnh đa dạng của người dùng để trích xuất ý định (Intent)
+- **Thực thi hành động (Function Calling)**: Tự động gọi các hàm nghiệp vụ để tra cứu hoặc cập nhật dữ liệu
+- **Gợi ý thông minh (Recommendation)**: Đề xuất nhân sự phù hợp cho công việc dựa trên dữ liệu thực tế
 
-- Xem và tìm kiếm sản phẩm du lịch
-- Quản lý giỏ hàng
-- Đặt tour và thanh toán
-- Đánh giá và review
-- Quản lý tài khoản cá nhân
+## 3. Phạm vi đề tài
 
-### 2. [Staff](./use-case/staff.html)
+### Quản lý dự án và công việc linh hoạt
 
-Nhân viên quản lý các hoạt động hàng ngày:
+Hệ thống cung cấp không gian làm việc số hóa toàn diện, nơi Project Manager có thể khởi tạo dự án, thiết lập mốc thời gian và mời thành viên tham gia. Mỗi công việc (Task) được gắn các thuộc tính chi tiết: assignee, reporter, deadline, priority, tags, difficulty level và required skills.
 
-- Quản lý người dùng
-- Quản lý sản phẩm du lịch
-- Xử lý đơn đặt tour
-- Kiểm duyệt đánh giá
-- Xem báo cáo thống kê
+### Trực quan hóa tiến độ với Kanban và Dashboard
 
-### 3. [Admin](./use-case/admin.html)
+Giao diện Kanban Board tương tác cho phép kéo thả task giữa 4 cột trạng thái (TODO → IN_PROGRESS → REVIEW → DONE). Dashboard tổng hợp biểu đồ thống kê về số lượng tác vụ và tiến độ hoàn thành.
 
-Quản trị viên có quyền cao nhất:
+### Tương tác thông minh qua AI Agent
 
-- Quản lý toàn bộ người dùng và nhân viên
-- Quản lý sản phẩm và danh mục
-- Xử lý đơn đặt tour và hoàn tiền
-- Quản lý hệ thống
-- Xem báo cáo tổng hợp
-- Cấu hình hệ thống
+Tính năng trọng tâm cho phép người dùng ra lệnh bằng ngôn ngữ tự nhiên qua khung chat. AI phân tích ý định → tự động thực thi hành động (tạo task, tìm kiếm, cập nhật status). AI sử dụng thuật toán thông minh phân tích kỹ năng và workload để đề xuất nhân sự phù hợp.
 
-## Use Case Hierarchy
+### Quản lý hồ sơ năng lực và Cấu hình hệ thống
 
-```
-TMS System
-├── Authentication & Authorization
-│   ├── Login/Logout
-│   ├── Register
-│   └── Password Management
-│
-├── Product Management
-│   ├── View Products (All roles)
-│   ├── CRUD Products (Staff, Admin)
-│   └── Category Management (Admin)
-│
-├── Booking Management
-│   ├── Create Booking (Customer)
-│   ├── View Bookings (All roles)
-│   ├── Update Status (Staff, Admin)
-│   └── Process Refund (Staff, Admin)
-│
-├── Review Management
-│   ├── CRUD Review (Customer)
-│   ├── Moderate Reviews (Staff, Admin)
-│   └── Manage Policies (Admin)
-│
-├── User Management
-│   ├── View Users (Staff, Admin)
-│   ├── Update User Status (Staff, Admin)
-│   └── Full CRUD (Admin)
-│
-├── Staff Management
-│   └── Full CRUD (Admin only)
-│
-├── Reporting
-│   ├── Basic Reports (Staff)
-│   └── Comprehensive Analytics (Admin)
-│
-└── System Configuration
-    └── Settings & Config (Admin only)
-```
+Bảo mật qua JWT authentication. Mỗi user quản lý profile và danh sách skills — nguồn dữ liệu đầu vào cho AI matching. Admin có quyền tinh chỉnh trọng số thuật toán gợi ý.
 
-## Permission Matrix
+## 4. Đối tượng sử dụng
 
-| Feature         | Customer | Staff        | Admin   |
-| --------------- | -------- | ------------ | ------- |
-| View Products   | ✅       | ✅           | ✅      |
-| Manage Cart     | ✅       | ❌           | ❌      |
-| Create Booking  | ✅       | ❌           | ❌      |
-| Manage Products | ❌       | ✅           | ✅      |
-| Manage Users    | ❌       | 👁️ View Only | ✅      |
-| Manage Staff    | ❌       | ❌           | ✅      |
-| View Reports    | ❌       | ✅ Basic     | ✅ Full |
-| System Config   | ❌       | ❌           | ✅      |
+| Actor | Vai trò | Use Cases |
+|---|---|---|
+| **Project Manager** (pm) | Điều phối nguồn lực, giao việc, giám sát tổng quan, sử dụng AI auto-assign | [Use Case Diagram](./use-case/staff.html) |
+| **Member** (mem) | Theo dõi task được giao, cập nhật tiến độ, sử dụng AI chat | [Use Case Diagram](./use-case/customer.html) |
+| **Administrator** (ad) | Quản trị hệ thống, tài khoản, cấu hình AI weights | [Use Case Diagram](./use-case/admin.html) |
+
+## 5. Tổng quan Use Cases
+
+Hệ thống gồm **59 use cases** thuộc **11 subsystems**:
+
+| # | Subsystem | Use Cases | Actor |
+|---|---|---|---|
+| I | Authentication | Login, Register, Forgot/Reset Password | ad, pm, mem |
+| II | User Profile | View/Update Profile, Delete Account | ad, pm, mem |
+| III | User Skills | View/Add/Update/Delete Personal Skills | pm, mem |
+| IV | System Admin | System Settings, Skill Directory, User Management | ad |
+| V | Project Management | Create/View/Update/Join/Leave/Archive Projects | pm, mem |
+| VI | Project Members | View/Add/Update/Remove Members | pm, mem |
+| VII | Sprint Management | View/Create/Update/Start/Delete Sprints | pm, mem |
+| VIII | Task Management | Kanban, Backlog, Workload, CRUD Tasks, Assign | pm, mem |
+| IX | Interaction | View/Write/Edit/Delete Comments | pm, mem |
+| X | Notification | Receive/Mark-as-Read Notifications | ad, pm, mem |
+| XI | AI Assistant | Chat Sessions, Chat with AI, Logs, Auto-Assignment | pm, mem |
+
+📋 [Danh sách chi tiết Use Cases](/docs/usecase-list)
+
+## 6. Use Case Diagram tổng quát
+
+→ [System Overview Diagram](./use-case/system.html)
+
+## 7. Kiến trúc kỹ thuật
+
+- **Backend**: Java Spring Boot (Modular Monolith)
+- **Database**: PostgreSQL (13 tables)
+- **Authentication**: JWT Token
+- **AI Engine**: NLU + Function Calling + Heuristic Recommendation
+- **Frontend**: React (Kanban Board, Dashboard, Chat UI)
+
+Chi tiết:
+- [Database Schema](/docs/database)
+- [Function List](/docs/function-list)
+- [SRS](/docs/srs)
 
 ## Notes
 
-- Tất cả use case diagrams sử dụng PlantUML với theme `mars`
-- Mỗi diagram có `diagram id` để tránh storage leaks
-- Use cases được nhóm theo chức năng và quyền hạn
-- Chi tiết các sequence/activity diagrams cho từng use case xem tại `/sequence` và `/activity`
+- Sequence diagrams sử dụng PlantUML
+- Mỗi diagram có `diagram id` duy nhất
+- Use cases được nhóm theo subsystem
+- Chi tiết sequence diagrams tại [Sequence](/docs/sequence/auth/login)

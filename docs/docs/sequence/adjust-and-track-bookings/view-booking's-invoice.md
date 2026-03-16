@@ -21,7 +21,6 @@ B -> B: Query invoice details
 activate B
 deactivate B
 
-
 alt Invoice not found
   BC <-- B: No invoice
   BDV <-- BC: Error notification

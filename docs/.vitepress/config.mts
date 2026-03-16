@@ -258,6 +258,10 @@ export default defineConfig({
 									text: "Delete Sprint",
 									link: "/docs/sequence/sprint-management/delete-sprint",
 								},
+								{
+									text: "UCS-Sprint-Management",
+									link: "/docs/sequence/sprint-management/UCS-sprint-management",
+								},
 							],
 						},
 						{
@@ -300,6 +304,10 @@ export default defineConfig({
 									text: "Delete Task",
 									link: "/docs/sequence/task-management/delete-task",
 								},
+								{
+									text: "UCS-Task-Management",
+									link: "/docs/sequence/task-management/UCS-task-management",
+								},
 							],
 						},
 						{
@@ -322,6 +330,10 @@ export default defineConfig({
 									text: "Delete Comment",
 									link: "/docs/sequence/interaction-communication/delete-comment",
 								},
+								{
+									text: "UCS-Interaction",
+									link: "/docs/sequence/interaction-communication/UCS-interaction-communication",
+								},
 							],
 						},
 						{
@@ -335,6 +347,10 @@ export default defineConfig({
 								{
 									text: "Mark Notification as Read",
 									link: "/docs/sequence/notification-management/mark-notification-as-read",
+								},
+								{
+									text: "UCS-Notification",
+									link: "/docs/sequence/notification-management/UCS-notification-management",
 								},
 							],
 						},
@@ -361,6 +377,10 @@ export default defineConfig({
 								{
 									text: "Request AI Auto-Assignment",
 									link: "/docs/sequence/ai-assistant/request-ai-auto-assignment",
+								},
+								{
+									text: "UCS-AI-Assistant",
+									link: "/docs/sequence/ai-assistant/UCS-ai-assistant",
 								},
 							],
 						},

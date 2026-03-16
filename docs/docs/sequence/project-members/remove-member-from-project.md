@@ -21,22 +21,6 @@ deactivate U
 
 MLV -> PMC: Send remove request
 activate PMC
-PMC -> PMC: Verify user has MANAGER role\nor is removing self
-activate PMC
-deactivate PMC
-
-break Not authorized
-  MLV <-- PMC: Access denied
-  MLV -> MLV: Display "Not authorized" error
-  activate MLV
-  deactivate MLV
-end
-
-PMC -> PM: Check target is not the only MANAGER
-activate PM
-PM -> PM: Count managers in project
-activate PM
-deactivate PM
 
 break Removing only MANAGER
   PMC <-- PM: Cannot remove

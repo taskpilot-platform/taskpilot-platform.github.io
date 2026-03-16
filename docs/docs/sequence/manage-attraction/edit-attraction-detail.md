@@ -61,7 +61,6 @@ ATR -> ATR: Check category
 activate ATR
 deactivate ATR
 
-
 break Category not found
   AC <-- ATR: Error notification
   EAV <-- AC: Error notification
@@ -75,7 +74,6 @@ AC -> ATR: Check duplicate
 ATR -> ATR: Query existing attraction
 activate ATR
 deactivate ATR
-
 
 break Duplicate found
   AC <-- ATR: Error notification

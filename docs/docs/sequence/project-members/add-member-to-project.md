@@ -42,7 +42,7 @@ US -> US: Query by email
 activate US
 deactivate US
 
-break User not found
+break Error or Not Found / Invalid
   PMC <-- US: Not found
   AMV <-- PMC: Error notification
   AMV -> AMV: Display "User not found" error
@@ -52,12 +52,6 @@ end
 
 PMC <-- US: User found
 deactivate US
-
-PMC -> PM: Check if already a member
-activate PM
-PM -> PM: Query by project_id and user_id
-activate PM
-deactivate PM
 
 break Already a member
   PMC <-- PM: Already exists

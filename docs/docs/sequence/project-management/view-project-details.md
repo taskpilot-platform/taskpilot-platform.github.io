@@ -15,9 +15,6 @@ activate U
 activate PDV
 PDV -> PC: Request project details (project_id)
 activate PC
-PC -> PC: Extract user_id from JWT token
-activate PC
-deactivate PC
 
 PC -> PM: Check user is member of project
 activate PM

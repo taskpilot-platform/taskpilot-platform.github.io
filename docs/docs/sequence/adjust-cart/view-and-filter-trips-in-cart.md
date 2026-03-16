@@ -24,7 +24,6 @@ deactivate CA
 CC --> CV: Cart data
 deactivate CC
 
-
 opt Cart empty
   CV -> CV: Display empty cart message
   activate CV

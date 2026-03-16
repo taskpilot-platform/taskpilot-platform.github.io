@@ -49,12 +49,6 @@ end
 PC <-- P: Project found
 deactivate P
 
-PC -> PM: Check if already a member
-activate PM
-PM -> PM: Query by project_id and user_id
-activate PM
-deactivate PM
-
 break Already a member
   PC <-- PM: Already exists
   JPV <-- PC: Error notification

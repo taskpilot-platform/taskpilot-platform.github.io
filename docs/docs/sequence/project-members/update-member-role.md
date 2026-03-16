@@ -21,16 +21,6 @@ deactivate PMR
 
 MDV -> PMC: Send update role request
 activate PMC
-PMC -> PMC: Verify user has MANAGER role
-activate PMC
-deactivate PMC
-
-break Not a manager
-  MDV <-- PMC: Access denied
-  MDV -> MDV: Display "Only managers can\nchange roles" error
-  activate MDV
-  deactivate MDV
-end
 
 PMC -> PM: Update member role
 activate PM

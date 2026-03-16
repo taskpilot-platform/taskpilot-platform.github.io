@@ -31,16 +31,6 @@ end
 
 PDV -> PC: Send update request
 activate PC
-PC -> PC: Verify user has MANAGER role
-activate PC
-deactivate PC
-
-break Not a manager
-  PDV <-- PC: Access denied
-  PDV -> PDV: Display "Only managers can edit" error
-  activate PDV
-  deactivate PDV
-end
 
 PC -> P: Update project information
 activate P

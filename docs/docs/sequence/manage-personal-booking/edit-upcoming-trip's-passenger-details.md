@@ -21,7 +21,6 @@ B -> B: Query booking details
 activate B
 deactivate B
 
-
 break Not editable
   BC <-- B: Error notification
   BDV <-- BC: Error notification

@@ -8,16 +8,12 @@ actor User as U
 boundary ProjectListView as PLV
 control ProjectController as PC
 entity PROJECT_MEMBERS as PM
-entity PROJECTS as P
 
 U -> PLV: Access projects page
 activate U
 activate PLV
 PLV -> PC: Request joined projects
 activate PC
-PC -> PC: Extract user_id from JWT token
-activate PC
-deactivate PC
 PC -> PM: Query projects where user is member
 activate PM
 PM -> PM: Query by user_id (join projects)

@@ -56,7 +56,6 @@ B -> B: Query available seats
 activate B
 deactivate B
 
-
 break Insufficient seats
   BC <-- B: Error notification
   BFV <-- BC: Error notification

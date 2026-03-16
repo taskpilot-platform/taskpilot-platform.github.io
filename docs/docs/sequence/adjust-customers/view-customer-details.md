@@ -10,7 +10,6 @@ boundary CustomerDetailView as CDV
 control CustomerController as CC
 entity USER as U
 entity TOUR_BOOKING as TB
-entity ROUTE as R
 entity FAVORITE_TOUR as FT
 
 St -> CLV: Select customer from list

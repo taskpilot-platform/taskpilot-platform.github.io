@@ -14,11 +14,14 @@ entity USER_SKILLS as USK
 U -> SLV: Click "Add Skill"
 activate U
 activate SLV
+
 SLV -> ASV: Navigate to add skill form
 deactivate SLV
 activate ASV
+
 ASV -> USC: Request available skills
 activate USC
+
 USC -> SK: Query all system skills
 activate SK
 SK -> SK: Query skill list
@@ -26,8 +29,10 @@ activate SK
 deactivate SK
 USC <-- SK: Skills list
 deactivate SK
+
 ASV <-- USC: Available skills dropdown
 deactivate USC
+
 ASV -> ASV: Display add skill form\n(skill dropdown, level 1-5)
 activate ASV
 deactivate ASV
@@ -35,6 +40,7 @@ deactivate ASV
 U -> ASV: Select skill and set level
 U -> ASV: Click "Save"
 deactivate U
+
 ASV -> ASV: Validate data
 activate ASV
 deactivate ASV
@@ -47,9 +53,6 @@ end
 
 ASV -> USC: Send add skill request
 activate USC
-USC -> USC: Extract user_id from JWT token
-activate USC
-deactivate USC
 
 USC -> USK: Check if skill already exists
 activate USK
@@ -78,6 +81,7 @@ deactivate USK
 
 ASV <-- USC: Success notification
 deactivate USC
+
 ASV -> ASV: Display success message
 activate ASV
 deactivate ASV

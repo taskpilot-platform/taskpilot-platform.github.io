@@ -21,7 +21,6 @@ B -> B: Query cart with trips
 activate B
 deactivate B
 
-
 break Cart empty
   BC <-- B: Empty cart
   CV <-- BC: Error notification

@@ -21,16 +21,6 @@ deactivate PM
 
 PDV -> PC: Send close/archive request
 activate PC
-PC -> PC: Verify user has MANAGER role
-activate PC
-deactivate PC
-
-break Not a manager
-  PDV <-- PC: Access denied
-  PDV -> PDV: Display "Only managers can close" error
-  activate PDV
-  deactivate PDV
-end
 
 PC -> P: Update project status
 activate P

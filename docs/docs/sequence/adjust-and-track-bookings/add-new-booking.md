@@ -50,7 +50,6 @@ break Insufficient seats
   deactivate ABV
 end
 
-
 BC <-- B: Seats available
 activate BC
 BC -> B: Create booking

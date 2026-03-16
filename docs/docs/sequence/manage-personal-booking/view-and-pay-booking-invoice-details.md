@@ -46,7 +46,6 @@ I -> I: Validate invoice
 activate I
 deactivate I
 
-
 break Already paid
   BC <-- I: Error notification
   BDV <-- BC: Error notification
@@ -76,7 +75,6 @@ activate I
 I -> I: Handle payment gateway
 activate I
 deactivate I
-
 
 alt Payment successful
   BC <-- I: Success notification

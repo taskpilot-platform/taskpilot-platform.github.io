@@ -10,8 +10,6 @@ boundary StaffDetailView as SDV
 control StaffController as SC
 entity USER as U
 entity TOUR_BOOKING as TB
-entity TRIP as T
-entity ROUTE as R
 
 A -> SLV: Select staff from list
 activate A

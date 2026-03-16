@@ -13,9 +13,11 @@ entity SKILLS as SK
 A -> SDV: Click "Add Skill"
 activate A
 activate SDV
+
 SDV -> ASV: Navigate to add skill form
 deactivate SDV
 activate ASV
+
 ASV -> ASV: Display add skill form (name)
 activate ASV
 deactivate ASV
@@ -23,6 +25,7 @@ deactivate ASV
 A -> ASV: Enter skill name
 A -> ASV: Click "Save"
 deactivate A
+
 ASV -> ASV: Validate data
 activate ASV
 deactivate ASV
@@ -35,6 +38,7 @@ end
 
 ASV -> AC: Send add skill request
 activate AC
+
 AC -> SK: Check if skill name already exists
 activate SK
 SK -> SK: Query by name
@@ -62,6 +66,7 @@ deactivate SK
 
 ASV <-- AC: Success notification
 deactivate AC
+
 ASV -> ASV: Display success message
 activate ASV
 deactivate ASV

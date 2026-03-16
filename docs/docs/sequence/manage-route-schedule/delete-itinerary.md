@@ -48,7 +48,6 @@ RA -> RA: Count route attractions
 activate RA
 deactivate RA
 
-
 break Last attraction
   RSC <-- RA: Error notification
   RSV <-- RSC: Error notification

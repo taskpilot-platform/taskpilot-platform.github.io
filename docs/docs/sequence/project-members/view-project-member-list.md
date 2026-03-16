@@ -16,37 +16,19 @@ activate MLV
 MLV -> PMC: Request member list (project_id)
 activate PMC
 
-PMC -> PMC: Extract user_id from JWT token
-activate PMC
-deactivate PMC
-
-PMC -> PM: Check permission (user_id, project_id)
+PMC -> PM: Query all members of project
 activate PM
-PMC <-- PM: is_member (boolean)
+PM -> PM: Query by project_id (join users)
+activate PM
+deactivate PM
+PMC <-- PM: Members data
 deactivate PM
 
-alt is_member == true
-    PMC -> PM: Query all members of project
-    activate PM
-    PM -> PM: Query by project_id (join users)
-    activate PM
-    deactivate PM
-    PMC <-- PM: Members data
-    deactivate PM
-    
-    MLV <-- PMC: Member list
-    
-    MLV -> MLV: Display member list\n(name, email, role, performance_score)
-    activate MLV
-    deactivate MLV
-    
-else is_member == false
-    MLV <-- PMC: 403 Forbidden / Unauthorized
-    
-    MLV -> MLV: Display access denied message
-    activate MLV
-    deactivate MLV
-end
+MLV <-- PMC: Member list
+
+MLV -> MLV: Display member list\n(name, email, role, performance_score)
+activate MLV
+deactivate MLV
 
 deactivate PMC
 deactivate MLV

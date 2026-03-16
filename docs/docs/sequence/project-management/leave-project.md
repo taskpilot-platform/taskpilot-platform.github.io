@@ -21,9 +21,6 @@ deactivate U
 
 PDV -> PC: Send leave request
 activate PC
-PC -> PC: Extract user_id from JWT token
-activate PC
-deactivate PC
 
 PC -> PM: Check user role in project
 activate PM
