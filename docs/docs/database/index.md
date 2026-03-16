@@ -8,15 +8,15 @@ vars: {
 	}
 }
 
-**.shape: sql_table
-
 system_settings: {
+	shape: sql_table
 	key_name: varchar {constraint: PK}
 	value_json: jsonb
 	description: text
 }
 
 users: {
+	shape: sql_table
 	id: bigint {constraint: PK}
 	email: varchar {constraint: UNQ}
 	full_name: varchar
@@ -30,17 +30,20 @@ users: {
 }
 
 skills: {
+	shape: sql_table
 	id: bigint {constraint: PK}
 	name: varchar {constraint: UNQ}
 }
 
 user_skills: {
+	shape: sql_table
 	user_id: bigint {constraint: [PK, FK]}
 	skill_id: bigint {constraint: [PK, FK]}
 	level: int
 }
 
 projects: {
+	shape: sql_table
 	id: bigint {constraint: PK}
 	name: varchar
 	description: text
@@ -52,6 +55,7 @@ projects: {
 }
 
 project_members: {
+	shape: sql_table
 	project_id: bigint {constraint: [PK, FK]}
 	user_id: bigint {constraint: [PK, FK]}
 	role: project_role {constraint: "enum(MANAGER,MEMBER)"}
@@ -60,6 +64,7 @@ project_members: {
 }
 
 sprints: {
+	shape: sql_table
 	id: bigint {constraint: PK}
 	project_id: bigint {constraint: FK}
 	name: varchar
@@ -71,6 +76,7 @@ sprints: {
 }
 
 tasks: {
+	shape: sql_table
 	id: bigint {constraint: PK}
 	project_id: bigint {constraint: FK}
 	parent_id: bigint {constraint: FK}
@@ -92,6 +98,7 @@ tasks: {
 }
 
 comments: {
+	shape: sql_table
 	id: bigint {constraint: PK}
 	task_id: bigint {constraint: FK}
 	user_id: bigint {constraint: FK}
@@ -100,6 +107,7 @@ comments: {
 }
 
 notifications: {
+	shape: sql_table
 	id: bigint {constraint: PK}
 	user_id: bigint {constraint: FK}
 	title: varchar
@@ -111,6 +119,7 @@ notifications: {
 }
 
 ai_logs: {
+	shape: sql_table
 	id: bigint {constraint: PK}
 	project_id: bigint {constraint: FK}
 	user_id: bigint {constraint: FK}
@@ -125,6 +134,7 @@ ai_logs: {
 }
 
 chat_sessions: {
+	shape: sql_table
 	id: bigint {constraint: PK}
 	user_id: bigint {constraint: FK}
 	title: varchar
@@ -132,6 +142,7 @@ chat_sessions: {
 }
 
 chat_messages: {
+	shape: sql_table
 	id: bigint {constraint: PK}
 	session_id: bigint {constraint: FK}
 	sender: chat_sender {constraint: "enum(USER,ASSISTANT,SYSTEM)"}
