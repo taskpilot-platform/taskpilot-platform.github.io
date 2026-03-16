@@ -80,7 +80,7 @@ tasks: {
 	status: task_status {constraint: "enum(TODO,IN_PROGRESS,REVIEW,DONE)"}
 	priority: priority_level {constraint: "enum(LOW,MEDIUM,HIGH,URGENT)"}
 	position: float
-	tags: text[]
+	tags: "text[]"
 	difficulty_level: int
 	required_skills: jsonb
 	assignee_id: bigint {constraint: FK}
