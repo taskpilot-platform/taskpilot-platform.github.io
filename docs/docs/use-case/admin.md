@@ -1,129 +1,62 @@
-# Use Case Admin
+# Use Case Diagram - Administrator
 
 ```plantuml
 @startuml
 left to right direction
-actor Admin
-
-rectangle "Tourist Management System" {
-
-  usecase UC01 as "Manage Routes"
-  usecase UC02 as "View and Filter Routes"
-  usecase UC03 as "Add Route"
-  usecase UC04 as "View Route Detail"
-  usecase UC05 as "Edit Route Detail"
-  usecase UC06 as "Delete Route"
-
-  usecase UC07 as "Manage Route Schedule"
-  usecase UC08 as "View Route Schedule"
-  usecase UC09 as "Add Itinerary"
-  usecase UC10 as "Edit Itinerary"
-  usecase UC11 as "Delete Itinerary"
-
-  usecase UC12 as "Manage Attraction"
-  usecase UC17 as "View and Filter Attractions"
-  usecase UC13 as "Add Attraction"
-  usecase UC14 as "View Attraction Detail"
-  usecase UC15 as "Edit Attraction Detail"
-  usecase UC16 as "Delete Attraction"
-
-
-
-
-  usecase UC18 as "Manage Trips"
-  usecase UC19 as "View and Filter Trips"
-  usecase UC20 as "Add Trip"
-  usecase UC21 as "View Trip Detail"
-  usecase UC22 as "Edit Trip"
-  usecase UC23 as "Add Booking for Trip"
-  usecase UC24 as "Delete Trip"
-
-
-  usecase UC25 as "Adjust Customers"
-  usecase UC26 as "View and Filter Customers"
-  usecase UC27 as "Add Customer "
-  usecase UC28 as "View Customer Detail"
-  usecase UC29 as "Edit Customer"
-  usecase UC30 as "Delete Customer"
-
-  usecase UC31 as "Adjust Staffs"
-  usecase UC32 as "View and Filter Staffs"
-  usecase UC33 as "Add Staff"
-  usecase UC34 as "View Staff Detail"
-  usecase UC35 as "Edit Staff"
-  usecase UC36 as "Delete Staff"
-
-  usecase UC37 as "View Reports"
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor LightYellow
+  BorderColor DarkSlateGray
 }
 
+actor "Administrator" as AD
 
-Admin -- UC01
-Admin -- UC07
-Admin -- UC12
-Admin -- UC18
+rectangle "TaskPilot System" {
 
-Admin -- UC25
-Admin -- UC31
-Admin -- UC37
+  package "Authentication" {
+    usecase "Login / Sign In" as UC_LOGIN
+    usecase "Forgot Password" as UC_FORGOT
+    usecase "Reset Password" as UC_RESET
+  }
 
+  package "System Administration" {
+    usecase "Configure System\nParameters (AI weights)" as UC_CFG
+    usecase "View System Skill\nDirectory" as UC_VIEW_SK
+    usecase "Add System Skill" as UC_ADD_SK
+    usecase "Edit System Skill" as UC_EDIT_SK
+    usecase "Delete System Skill" as UC_DEL_SK
+    usecase "View Global User List" as UC_VIEW_US
+    usecase "Add System User" as UC_ADD_US
+    usecase "Edit System User" as UC_EDIT_US
+    usecase "Delete System User" as UC_DEL_US
+  }
 
-UC01 <.. UC02 : <<extend>>
-UC01 <.. UC03 : <<extend>>
-UC01 <.. UC04 : <<extend>>
-UC01 <.. UC05 : <<extend>>
-UC01 <.. UC06 : <<extend>>
-UC03 ..> UC02 : <<include>>
-UC04 ..> UC02 : <<include>>
-UC05 ..> UC02 : <<include>>
-UC06 ..> UC02 : <<include>>
+  package "Notification" {
+    usecase "Receive Notification" as UC_NOTI
+    usecase "Mark Notification\nas Read" as UC_MARK
+  }
 
-UC07 <.. UC08 : <<extend>>
-UC07 <.. UC09 : <<extend>>
-UC07 <.. UC10 : <<extend>>
-UC07 <.. UC11 : <<extend>>
+  ' === Include ===
+  UC_RESET ..> UC_FORGOT : <<include>>
+  UC_ADD_SK ..> UC_VIEW_SK : <<include>>
+  UC_EDIT_SK ..> UC_VIEW_SK : <<include>>
+  UC_DEL_SK ..> UC_VIEW_SK : <<include>>
+  UC_ADD_US ..> UC_VIEW_US : <<include>>
+  UC_EDIT_US ..> UC_VIEW_US : <<include>>
+  UC_DEL_US ..> UC_VIEW_US : <<include>>
 
-UC12 <.. UC13 : <<extend>>
-UC12 <.. UC14 : <<extend>>
-UC12 <.. UC15 : <<extend>>
-UC12 <.. UC16 : <<extend>>
-UC12 <.. UC17 : <<extend>>
-UC13 ..> UC17 : <<include>>
-UC14 ..> UC17 : <<include>>
-UC15 ..> UC17 : <<include>>
-UC16 ..> UC17 : <<include>>
+  ' === Extend ===
+  UC_FORGOT ..> UC_LOGIN : <<extend>>
+  UC_MARK ..> UC_NOTI : <<extend>>
+}
 
-UC18 <.. UC19 : <<extend>>
-UC18 <.. UC20 : <<extend>>
-UC18 <.. UC21 : <<extend>>
-UC18 <.. UC22 : <<extend>>
-UC18 <.. UC23 : <<extend>>
-UC18 <.. UC24 : <<extend>>
-UC20 ..> UC19 : <<include>>
-UC21 ..> UC19 : <<include>>
-UC22 ..> UC19 : <<include>>
-UC23 ..> UC19 : <<include>>
-UC24 ..> UC19 : <<include>>
-
-
-UC25 <.. UC26 : <<extend>>
-UC25 <.. UC27 : <<extend>>
-UC25 <.. UC28 : <<extend>>
-UC25 <.. UC29 : <<extend>>
-UC25 <.. UC30 : <<extend>>
-UC27 ..> UC26 : <<include>>
-UC28 ..> UC26 : <<include>>
-UC29 ..> UC26 : <<include>>
-UC30 ..> UC26 : <<include>>
-
-UC31 <.. UC32 : <<extend>>
-UC31 <.. UC33 : <<extend>>
-UC31 <.. UC34 : <<extend>>
-UC31 <.. UC35 : <<extend>>
-UC31 <.. UC36 : <<extend>>
-UC33 ..> UC32 : <<include>>
-UC34 ..> UC32 : <<include>>
-UC35 ..> UC32 : <<include>>
-UC36 ..> UC32 : <<include>>
+AD -- UC_LOGIN
+AD -- UC_FORGOT
+AD -- UC_RESET
+AD -- UC_CFG
+AD -- UC_VIEW_SK
+AD -- UC_VIEW_US
+AD -- UC_NOTI
 
 @enduml
 ```

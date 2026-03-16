@@ -1,86 +1,98 @@
-# Use Case Staff
+# Use Case Diagram - Project Manager
 
 ```plantuml
 @startuml
 left to right direction
-actor Staff
-
-rectangle "Tourist Management System" {
-  usecase UC01 as "View Routes"
-  usecase UC02 as "View and Filter Routes"
-  usecase UC03 as "View Route Detail"
-
-  usecase UC04 as "View Route Schedule"
-
-  usecase UC05 as "View Attraction"
-  usecase UC06 as "View and Filter Attractions"
-  usecase UC07 as "View Attraction Detail"
-
-  usecase UC08 as "View Trips"
-  usecase UC09 as "View and Filter Trips"
-  usecase UC10 as "View Trip Detail"
-  usecase UC11 as "Add New Booking for Trip"
-
-  usecase UC12 as "Adjust and Track Bookings"
-  usecase UC13 as "View and Filter Bookings"
-  usecase UC14 as "Add New Booking"
-  usecase UC15 as "View Booking Detail"
-  usecase UC16 as "Edit Pre-Departure Booking"
-  usecase UC17 as "Delete Booking"
-  usecase UC18 as "View Booking Invoice"
-
-  usecase UC19 as "Adjust Customers"
-  usecase UC20 as "View and Filter Customers"
-  usecase UC21 as "Add New Customer"
-  usecase UC22 as "View Customer Details"
-  usecase UC23 as "Edit Customer"
-  usecase UC24 as "Delete Customer"
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor LightYellow
+  BorderColor DarkSlateGray
 }
 
-Staff -- UC01
-Staff -- UC04
-Staff -- UC05
-Staff -- UC08
-Staff -- UC12
-Staff -- UC19
+actor "Project Manager" as PM
 
-UC01 <.. UC02 : <<extend>>
-UC01 <.. UC03 : <<extend>>
-UC03 ..> UC02 : <<include>>
+rectangle "TaskPilot System" {
 
-UC05 <.. UC06 : <<extend>>
-UC05 <.. UC07 : <<extend>>
-UC07 ..> UC06 : <<include>>
+  package "Authentication" {
+    usecase "Login / Sign In" as UC_LOGIN
+    usecase "Register / Sign Up" as UC_REG
+    usecase "Forgot Password" as UC_FORGOT
+    usecase "Reset Password" as UC_RESET
+  }
 
-UC08 <.. UC09 : <<extend>>
-UC08 <.. UC10 : <<extend>>
-UC08 <.. UC11 : <<extend>>
-UC10 ..> UC09 : <<include>>
-UC11 ..> UC09 : <<include>>
+  package "Profile & Skills" {
+    usecase "View / Update Profile" as UC_PROFILE
+    usecase "Delete Account" as UC_DEL_ACC
+    usecase "Manage Personal Skills" as UC_SKILLS
+  }
 
-UC12 <.. UC13 : <<extend>>
-UC12 <.. UC14 : <<extend>>
-UC12 <.. UC15 : <<extend>>
-UC12 <.. UC16 : <<extend>>
-UC12 <.. UC17 : <<extend>>
-UC12 <.. UC18 : <<extend>>
-UC14 ..> UC13 : <<include>>
-UC15 ..> UC13 : <<include>>
-UC16 ..> UC13 : <<include>>
-UC17 ..> UC13 : <<include>>
-UC18 ..> UC13 : <<include>>
+  package "Project Management" {
+    usecase "Create New Project" as UC_CREATE_P
+    usecase "View Joined Projects" as UC_VIEW_P
+    usecase "Update Project Info" as UC_UPDATE_P
+    usecase "Join Project (Link/Code)" as UC_JOIN_P
+    usecase "Leave Project" as UC_LEAVE_P
+    usecase "Close / Archive Project" as UC_CLOSE_P
+  }
 
-UC19 <.. UC20 : <<extend>>
-UC19 <.. UC21 : <<extend>>
-UC19 <.. UC22 : <<extend>>
-UC19 <.. UC23 : <<extend>>
-UC19 <.. UC24 : <<extend>>
-UC21 ..> UC20 : <<include>>
-UC22 ..> UC20 : <<include>>
-UC23 ..> UC20 : <<include>>
-UC24 ..> UC20 : <<include>>
+  package "Member Management" {
+    usecase "View Member List" as UC_VIEW_M
+    usecase "Add Member" as UC_ADD_M
+    usecase "Update Member Role" as UC_ROLE_M
+    usecase "Remove Member" as UC_DEL_M
+  }
+
+  package "Sprint & Task" {
+    usecase "Manage Sprints" as UC_SPRINT
+    usecase "Manage Tasks" as UC_TASK
+    usecase "Kanban Board (D&D)" as UC_KANBAN
+    usecase "Assign Assignee\n& Reporter" as UC_ASSIGN
+  }
+
+  package "AI & Communication" {
+    usecase "Chat with AI" as UC_CHAT
+    usecase "AI Auto-Assignment" as UC_AI
+    usecase "Manage Comments" as UC_COMMENT
+    usecase "Notifications" as UC_NOTI
+  }
+
+  ' === Include ===
+  UC_RESET ..> UC_FORGOT : <<include>>
+  UC_KANBAN ..> UC_TASK : <<include>>
+  UC_AI ..> UC_CHAT : <<include>>
+  UC_ADD_M ..> UC_VIEW_M : <<include>>
+  UC_ROLE_M ..> UC_VIEW_M : <<include>>
+  UC_DEL_M ..> UC_VIEW_M : <<include>>
+
+  ' === Extend ===
+  UC_FORGOT ..> UC_LOGIN : <<extend>>
+  UC_DEL_ACC ..> UC_PROFILE : <<extend>>
+  UC_CLOSE_P ..> UC_VIEW_P : <<extend>>
+  UC_ASSIGN ..> UC_TASK : <<extend>>
+  UC_AI ..> UC_TASK : <<extend>>
+  UC_COMMENT ..> UC_TASK : <<extend>>
+}
+
+PM -- UC_LOGIN
+PM -- UC_REG
+PM -- UC_PROFILE
+PM -- UC_SKILLS
+PM -- UC_CREATE_P
+PM -- UC_VIEW_P
+PM -- UC_UPDATE_P
+PM -- UC_JOIN_P
+PM -- UC_LEAVE_P
+PM -- UC_VIEW_M
+PM -- UC_SPRINT
+PM -- UC_TASK
+PM -- UC_KANBAN
+PM -- UC_ASSIGN
+PM -- UC_CHAT
+PM -- UC_AI
+PM -- UC_COMMENT
+PM -- UC_NOTI
 
 @enduml
 ```
 
-<!-- diagram id="use-case-staff" -->
+<!-- diagram id="use-case-project-manager" -->

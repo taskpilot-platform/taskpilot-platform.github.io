@@ -1,63 +1,90 @@
-# Use Case Customer
+# Use Case Diagram - Project Member
 
 ```plantuml
 @startuml
 left to right direction
-actor Customer
-
-rectangle "Tourist Management System" {
-  usecase UC01 as "Manage Personal Bookings"
-  usecase UC02 as "Book a Trip"
-  usecase UC03 as "Edit Upcoming Trip's\nPassenger Details"
-  usecase UC04 as "View and Filter\nPersonal Bookings"
-  usecase UC05 as "View and Pay\nBooking Invoice Details"
-
-  usecase UC06 as "Browse Trips"
-  usecase UC07 as "View and Filter\nAvailable Trips"
-  usecase UC08 as "View Trip Details"
-
-  usecase UC09 as "Adjust Cart"
-  usecase UC10 as "Add Trip to Cart"
-  usecase UC11 as "Remove Trip from Cart"
-  usecase UC12 as "Edit Cart Details"
-  usecase UC13 as "View and Filter\nTrips in Cart"
-
-  usecase UC14 as "Adjust Favorite Trips"
-  usecase UC15 as "Favorite a Trip"
-  usecase UC16 as "Unfavorite a Trip"
-  usecase UC17 as "View and Filter\nFavorite Trips"
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor LightYellow
+  BorderColor DarkSlateGray
 }
 
-Customer -- UC01
-Customer -- UC06
-Customer -- UC09
-Customer -- UC14
+actor "Member" as MEM
 
-UC01 <.. UC02 : <<extend>>
-UC01 <.. UC03 : <<extend>>
-UC01 <.. UC04 : <<extend>>
-UC01 <.. UC05 : <<extend>>
-UC02 ..> UC07 : <<include>>
-UC03 ..> UC04 : <<include>>
+rectangle "TaskPilot System" {
 
-UC06 <.. UC07 : <<extend>>
-UC06 <.. UC08 : <<extend>>
-UC08 ..> UC07 : <<include>>
+  package "Authentication" {
+    usecase "Login / Sign In" as UC_LOGIN
+    usecase "Register / Sign Up" as UC_REG
+    usecase "Forgot Password" as UC_FORGOT
+    usecase "Reset Password" as UC_RESET
+  }
 
-UC09 <.. UC10 : <<extend>>
-UC09 <.. UC11 : <<extend>>
-UC09 <.. UC12 : <<extend>>
-UC09 <.. UC13 : <<extend>>
-UC10 ..> UC07 : <<include>>
-UC12 ..> UC13 : <<include>>
+  package "Profile & Skills" {
+    usecase "View / Update Profile" as UC_PROFILE
+    usecase "Delete Account" as UC_DEL_ACC
+    usecase "Manage Personal Skills" as UC_SKILLS
+  }
 
-UC14 <.. UC15 : <<extend>>
-UC14 <.. UC16 : <<extend>>
-UC14 <.. UC17 : <<extend>>
-UC15 ..> UC07 : <<include>>
-UC16 ..> UC17 : <<include>>
+  package "Project" {
+    usecase "View Joined Projects" as UC_VIEW_P
+    usecase "View Project Details" as UC_DETAIL_P
+    usecase "Join Project (Link/Code)" as UC_JOIN_P
+    usecase "Leave Project" as UC_LEAVE_P
+  }
+
+  package "Member" {
+    usecase "View Member List" as UC_VIEW_M
+    usecase "View Member Details" as UC_DETAIL_M
+    usecase "Add Member" as UC_ADD_M
+    usecase "Remove Member (self)" as UC_REMOVE_M
+  }
+
+  package "Sprint & Task" {
+    usecase "Manage Sprints" as UC_SPRINT
+    usecase "Manage Tasks" as UC_TASK
+    usecase "Kanban Board (D&D)" as UC_KANBAN
+    usecase "View Backlog" as UC_BACKLOG
+  }
+
+  package "Communication" {
+    usecase "Manage Comments" as UC_COMMENT
+    usecase "Notifications" as UC_NOTI
+    usecase "Chat with AI" as UC_CHAT
+    usecase "View AI Chat History" as UC_HISTORY
+  }
+
+  ' === Include ===
+  UC_RESET ..> UC_FORGOT : <<include>>
+  UC_KANBAN ..> UC_TASK : <<include>>
+  UC_DETAIL_M ..> UC_VIEW_M : <<include>>
+  UC_ADD_M ..> UC_VIEW_M : <<include>>
+
+  ' === Extend ===
+  UC_FORGOT ..> UC_LOGIN : <<extend>>
+  UC_DEL_ACC ..> UC_PROFILE : <<extend>>
+  UC_LEAVE_P ..> UC_VIEW_P : <<extend>>
+  UC_COMMENT ..> UC_TASK : <<extend>>
+  UC_BACKLOG ..> UC_TASK : <<extend>>
+}
+
+MEM -- UC_LOGIN
+MEM -- UC_REG
+MEM -- UC_PROFILE
+MEM -- UC_SKILLS
+MEM -- UC_VIEW_P
+MEM -- UC_DETAIL_P
+MEM -- UC_JOIN_P
+MEM -- UC_VIEW_M
+MEM -- UC_SPRINT
+MEM -- UC_TASK
+MEM -- UC_KANBAN
+MEM -- UC_COMMENT
+MEM -- UC_NOTI
+MEM -- UC_CHAT
+MEM -- UC_HISTORY
 
 @enduml
 ```
 
-<!-- diagram id="use-case-customer" -->
+<!-- diagram id="use-case-member" -->
