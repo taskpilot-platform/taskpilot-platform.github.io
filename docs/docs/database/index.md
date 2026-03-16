@@ -1,4 +1,5 @@
-#database
+# Database
+
 ```d2
 vars: {
 	d2-config: {
@@ -8,133 +9,153 @@ vars: {
 }
 
 **.shape: sql_table
-explanation.shape: rectangle
 
-User: {
-	id: int {constraint: PK}
-	username: varchar {constraint: UNQ}
-	password: varchar
-	is_lock: boolean
-	full_name: varchar
+system_settings: {
+	key_name: varchar {constraint: PK}
+	value_json: jsonb
+	description: text
+}
+
+users: {
+	id: bigint {constraint: PK}
 	email: varchar {constraint: UNQ}
-	phone_number: varchar
-	address: varchar
-	birthday: date
-	gender: enum('M','F','O')
-	role: enum('CUSTOMER','STAFF','ADMIN')
+	full_name: varchar
+	password_hash: varchar
+	avatar_url: text
+	role: system_role {constraint: "enum(ADMIN,USER)"}
+	status: user_status {constraint: "enum(AVAILABLE,BUSY,OOO)"}
+	current_workload: int
+	created_at: timestamp
+	updated_at: timestamp
 }
 
-Category: {
-	id: int {constraint: PK}
-	name: varchar
-	status: enum('ACTIVE','INACTIVE','DELETED')
+skills: {
+	id: bigint {constraint: PK}
+	name: varchar {constraint: UNQ}
 }
 
-Attraction: {
-	id: int {constraint: PK}
+user_skills: {
+	user_id: bigint {constraint: [PK, FK]}
+	skill_id: bigint {constraint: [PK, FK]}
+	level: int
+}
+
+projects: {
+	id: bigint {constraint: PK}
 	name: varchar
 	description: text
-	location: varchar
-	category_id: int {constraint: FK}
-	status: enum('ACTIVE','INACTIVE','DELETED')
+	status: project_status {constraint: "enum(PLANNING,ACTIVE,COMPLETED,ARCHIVED)"}
+	heuristic_mode: heuristic_mode {constraint: "enum(BALANCED,URGENT,TRAINING)"}
+	start_date: date
+	end_date: date
+	created_at: timestamp
 }
 
-Route: {
-	id: int {constraint: PK}
+project_members: {
+	project_id: bigint {constraint: [PK, FK]}
+	user_id: bigint {constraint: [PK, FK]}
+	role: project_role {constraint: "enum(MANAGER,MEMBER)"}
+	performance_score: float
+	joined_at: timestamp
+}
+
+sprints: {
+	id: bigint {constraint: PK}
+	project_id: bigint {constraint: FK}
 	name: varchar
-	start_location: varchar
-	end_location: varchar
-	duration_days: int
-	image: varchar
-	status: enum('OPEN','ONGOING','CLOSED')
+	goal: text
+	status: sprint_status {constraint: "enum(PLANNING,ACTIVE,COMPLETED)"}
+	heuristic_mode: heuristic_mode
+	start_date: date
+	end_date: date
 }
 
-Route_Attraction: {
-	id: int {constraint: PK}
-	route_id: int {constraint: FK}
-	attraction_id: int {constraint: FK}
-	day: int
-	order_in_day: int
-	activity_description: text
+tasks: {
+	id: bigint {constraint: PK}
+	project_id: bigint {constraint: FK}
+	parent_id: bigint {constraint: FK}
+	sprint_id: bigint {constraint: FK}
+	title: varchar
+	description: text
+	status: task_status {constraint: "enum(TODO,IN_PROGRESS,REVIEW,DONE)"}
+	priority: priority_level {constraint: "enum(LOW,MEDIUM,HIGH,URGENT)"}
+	position: float
+	tags: text[]
+	difficulty_level: int
+	required_skills: jsonb
+	assignee_id: bigint {constraint: FK}
+	reporter_id: bigint {constraint: FK}
+	start_date: timestamp
+	due_date: timestamp
+	created_at: timestamp
+	updated_at: timestamp
 }
 
-Trip: {
-	id: int {constraint: PK}
-	route_id: int {constraint: FK}
-	departure_date: date
-	return_date: date
-	price: decimal
-	total_seats: int
-	booked_seats: int
-	pick_up_time: time
-	pick_up_location: varchar
-	status: enum('SCHEDULED','ONGOING','FINISHED','CANCELED')
+comments: {
+	id: bigint {constraint: PK}
+	task_id: bigint {constraint: FK}
+	user_id: bigint {constraint: FK}
+	content: text
+	created_at: timestamp
 }
 
-Cart: {
-	id: int {constraint: PK}
-	user_id: int {constraint: FK}
+notifications: {
+	id: bigint {constraint: PK}
+	user_id: bigint {constraint: FK}
+	title: varchar
+	message: text
+	type: notification_type {constraint: "enum(SYSTEM,ASSIGNED,DEADLINE_NEAR)"}
+	is_read: boolean
+	link_action: varchar
+	created_at: timestamp
 }
 
-Cart_Item: {
-	id: int {constraint: PK}
-	cart_id: int {constraint: FK}
-	trip_id: int {constraint: FK}
-	quantity: int
-	price: decimal
+ai_logs: {
+	id: bigint {constraint: PK}
+	project_id: bigint {constraint: FK}
+	user_id: bigint {constraint: FK}
+	chat_message_id: bigint {constraint: FK}
+	request: text
+	response: text
+	reasoning: text
+	action_taken: varchar
+	tool_output: jsonb
+	human_feedback: varchar
+	created_at: timestamp
 }
 
-Favorite_Tour: {
-	user_id: int {constraint: [PK, FK]}
-	route_id: int {constraint: [PK, FK]}
+chat_sessions: {
+	id: bigint {constraint: PK}
+	user_id: bigint {constraint: FK}
+	title: varchar
+	created_at: timestamp
 }
 
-Tour_Booking: {
-	id: int {constraint: PK}
-	trip_id: int {constraint: FK}
-	user_id: int {constraint: FK}
-	seats_booked: int
-	total_price: decimal
-	status: enum('PENDING','CONFIRMED','CANCELED','COMPLETED')
+chat_messages: {
+	id: bigint {constraint: PK}
+	session_id: bigint {constraint: FK}
+	sender: chat_sender {constraint: "enum(USER,ASSISTANT,SYSTEM)"}
+	content: text
+	created_at: timestamp
 }
 
-Tour_Booking_Detail: {
-	id: int {constraint: PK}
-	booking_id: int {constraint: FK}
-	no_adults: int
-	no_children: int
-}
-
-Booking_Traveler: {
-	id: int {constraint: PK}
-	booking_id: int {constraint: FK}
-	full_name: varchar
-	gender: enum('M','F','O')
-	date_of_birth: date
-	identity_doc: varchar
-}
-
-Invoice: {
-	id: int {constraint: PK}
-	booking_id: int {constraint: FK}
-	total_amount: decimal
-	payment_status: enum('UNPAID','PAID','REFUNDED')
-	payment_method: varchar
-}
-
-Attraction.category_id -> Category.id
-Route_Attraction.route_id -> Route.id
-Route_Attraction.attraction_id -> Attraction.id
-Trip.route_id -> Route.id
-Cart.user_id -> User.id
-Cart_Item.cart_id -> Cart.id
-Cart_Item.trip_id -> Trip.id
-Favorite_Tour.user_id -> User.id
-Favorite_Tour.route_id -> Route.id
-Tour_Booking.trip_id -> Trip.id
-Tour_Booking.user_id -> User.id
-Tour_Booking_Detail.booking_id -> Tour_Booking.id
-Booking_Traveler.booking_id -> Tour_Booking.id
-Invoice.booking_id -> Tour_Booking.id
+user_skills.user_id -> users.id
+user_skills.skill_id -> skills.id
+project_members.project_id -> projects.id
+project_members.user_id -> users.id
+sprints.project_id -> projects.id
+tasks.project_id -> projects.id
+tasks.parent_id -> tasks.id
+tasks.sprint_id -> sprints.id
+tasks.assignee_id -> users.id
+tasks.reporter_id -> users.id
+comments.task_id -> tasks.id
+comments.user_id -> users.id
+notifications.user_id -> users.id
+ai_logs.project_id -> projects.id
+ai_logs.user_id -> users.id
+ai_logs.chat_message_id -> chat_messages.id
+chat_sessions.user_id -> users.id
+chat_messages.session_id -> chat_sessions.id
 
 ```
