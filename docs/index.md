@@ -3,8 +3,8 @@
 layout: home
 
 hero:
-  name: TMS
-  tagline: Documentation for Tourist Management System
+  name: TaskPilot
+  tagline: Documentation for TaskPilot
   image: ./logo.png
   actions:
     - theme: brand

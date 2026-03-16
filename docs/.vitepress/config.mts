@@ -34,729 +34,326 @@ export default defineConfig({
 			{
 				text: "Docs",
 				items: [
-					{
-						text: "Use Case",
-						collapsed: true,
-						items: [
-							{
-								text: "User",
-								link: "/docs/use-case/user",
-							},
-							{
-								text: "Customer",
-								link: "/docs/use-case/customer",
-							},
-							{
-								text: "Staff",
-								link: "/docs/use-case/staff",
-							},
-							{
-								text: "Admin",
-								link: "/docs/use-case/admin",
-							},
-						],
-					},
-					{
-						text: "Sequence",
-						collapsed: true,
-						items: [
-							{
-								text: "Adjust and Track Bookings",
-								collapsed: true,
-								items: [
-									{
-										text: "Add New Booking",
-										link: "/docs/sequence/adjust-and-track-bookings/add-new-booking",
-									},
-									{
-										text: "Delete Booking",
-										link: "/docs/sequence/adjust-and-track-bookings/delete-booking",
-									},
-									{
-										text: "Edit Pre-departure Booking",
-										link: "/docs/sequence/adjust-and-track-bookings/edit-pre-departure-booking",
-									},
-									{
-										text: "View and Filter Bookings",
-										link: "/docs/sequence/adjust-and-track-bookings/view-and-filter-bookings",
-									},
-									{
-										text: "View Booking Details",
-										link: "/docs/sequence/adjust-and-track-bookings/view-booking-details",
-									},
-									{
-										text: "View Booking's Invoice",
-										link: "/docs/sequence/adjust-and-track-bookings/view-booking's-invoice",
-									},
-									{
-										text: "UCS-Adjust-and-Track-Bookings",
-										link: "/docs/sequence/adjust-and-track-bookings/UCS-adjust-and-track-bookings",
-									},
-								],
-							},
-							{
-								text: "Adjust Cart",
-								collapsed: true,
-								items: [
-									{
-										text: "Add Trip to Cart",
-										link: "/docs/sequence/adjust-cart/add-trip-to-cart",
-									},
-									{
-										text: "Edit Trip Details",
-										link: "/docs/sequence/adjust-cart/edit-trip-details",
-									},
-									{
-										text: "Remove Trip from Cart",
-										link: "/docs/sequence/adjust-cart/remove-trip-from-cart",
-									},
-									{
-										text: "View and Filter Trips in Cart",
-										link: "/docs/sequence/adjust-cart/view-and-filter-trips-in-cart",
-									},
-								],
-							},
-							{
-								text: "Adjust Customers",
-								collapsed: true,
-								items: [
-									{
-										text: "Add New Customer",
-										link: "/docs/sequence/adjust-customers/add-new-customer",
-									},
-									{
-										text: "Delete Customer",
-										link: "/docs/sequence/adjust-customers/delete-customer",
-									},
-									{
-										text: "Edit Customer",
-										link: "/docs/sequence/adjust-customers/edit-customer",
-									},
-									{
-										text: "View Customer Details",
-										link: "/docs/sequence/adjust-customers/view-customer-details",
-									},
-									{
-										text: "View and Filter Customers",
-										link: "/docs/sequence/adjust-customers/view-and-filter-customers",
-									},
-									{
-										text: "UCS-Adjust-Customers",
-										link: "/docs/sequence/adjust-customers/UCS-adjust-customers",
-									},
-								],
-							},
-							{
-								text: "Adjust Favorite Trips",
-								collapsed: true,
-								items: [
-									{
-										text: "Toggle Favorite Trip",
-										link: "/docs/sequence/adjust-favorite-trips/toggle-favorite-trip",
-									},
-									{
-										text: "View and Filter Favorite Trips",
-										link: "/docs/sequence/adjust-favorite-trips/view-and-filter-favorite-trips",
-									},
-								],
-							},
-							{
-								text: "Adjust Staffs",
-								collapsed: true,
-								items: [
-									{
-										text: "Add New Staff",
-										link: "/docs/sequence/adjust-staffs/add-new-staff",
-									},
-									{
-										text: "Delete Staff",
-										link: "/docs/sequence/adjust-staffs/delete-staff",
-									},
-									{
-										text: "Edit Staff",
-										link: "/docs/sequence/adjust-staffs/edit-staff",
-									},
-									{
-										text: "View Staff Details",
-										link: "/docs/sequence/adjust-staffs/view-staff-details",
-									},
-									{
-										text: "View and Filter Staffs",
-										link: "/docs/sequence/adjust-staffs/view-and-filter-staffs",
-									},
-									{
-										text: "UCS-Adjust-Staffs",
-										link: "/docs/sequence/adjust-staffs/UCS-adjust-staffs",
-									},
-								],
-							},
-							{
-								text: "Auth",
-								collapsed: true,
-								items: [
-									{ text: "Sign In", link: "/docs/sequence/auth/sign-in" },
-									{ text: "Sign Up", link: "/docs/sequence/auth/sign-up" },
-									{
-										text: "Forgot Password",
-										link: "/docs/sequence/auth/forgot-password",
-									},
-									{
-										text: "Manage Profile",
-										link: "/docs/sequence/auth/manage-profile",
-									},
-									{ text: "UCS-Auth", link: "/docs/sequence/auth/UCS-auth" },
-								],
-							},
-							{
-								text: "Browse Trips",
-								collapsed: true,
-								items: [
-									{
-										text: "View and Filter Available Trips",
-										link: "/docs/sequence/browse-trips/view-and-filter-available-trips",
-									},
-									{
-										text: "View Trip Details",
-										link: "/docs/sequence/browse-trips/view-trip-details",
-									},
-								],
-							},
-							{
-								text: "Manage Attraction",
-								collapsed: true,
-								items: [
-									{
-										text: "Add New Attraction",
-										link: "/docs/sequence/manage-attraction/add-new-attraction",
-									},
-									{
-										text: "Delete Attraction",
-										link: "/docs/sequence/manage-attraction/delete-attraction",
-									},
-									{
-										text: "Edit Attraction Detail",
-										link: "/docs/sequence/manage-attraction/edit-attraction-detail",
-									},
-									{
-										text: "View Attraction Detail",
-										link: "/docs/sequence/manage-attraction/view-attraction-detail",
-									},
-									{
-										text: "View and Filter Attractions",
-										link: "/docs/sequence/manage-attraction/view-and-filter-attractions",
-									},
-									{
-										text: "UCS-Manage-Attraction",
-										link: "/docs/sequence/manage-attraction/UCS-manage-attraction",
-									},
-								],
-							},
-							{
-								text: "Manage Personal Booking",
-								collapsed: true,
-								items: [
-									{
-										text: "Book a Trip",
-										link: "/docs/sequence/manage-personal-booking/book-a-trip",
-									},
-									{
-										text: "Checkout Cart",
-										link: "/docs/sequence/manage-personal-booking/checkout-cart",
-									},
-									{
-										text: "Edit Upcoming Trip's Passenger Details",
-										link: "/docs/sequence/manage-personal-booking/edit-upcoming-trip's-passenger-details",
-									},
-									{
-										text: "View and Filter Personal Bookings",
-										link: "/docs/sequence/manage-personal-booking/view-and-filter-personal-bookings",
-									},
-									{
-										text: "View and Pay Booking Invoice Details",
-										link: "/docs/sequence/manage-personal-booking/view-and-pay-booking-invoice-details",
-									},
-									{
-										text: "UCS-Manage-Personal-Booking",
-										link: "/docs/sequence/manage-personal-booking/UCS-manage-personal-booking",
-									},
-								],
-							},
-							{
-								text: "Manage Route Schedule",
-								collapsed: true,
-								items: [
-									{
-										text: "Add Itinerary",
-										link: "/docs/sequence/manage-route-schedule/add-itinerary",
-									},
-									{
-										text: "Delete Itinerary",
-										link: "/docs/sequence/manage-route-schedule/delete-itinerary",
-									},
-									{
-										text: "Edit Itinerary",
-										link: "/docs/sequence/manage-route-schedule/edit-itinerary",
-									},
-									{
-										text: "View Route Schedule",
-										link: "/docs/sequence/manage-route-schedule/view-route-schedule",
-									},
-									{
-										text: "UCS-Manage-Route-Schedule",
-										link: "/docs/sequence/manage-route-schedule/UCS-manage-route-schedule",
-									},
-								],
-							},
-							{
-								text: "Manage Routes",
-								collapsed: true,
-								items: [
-									{
-										text: "Add New Route",
-										link: "/docs/sequence/manage-routes/add-new-route",
-									},
-									{
-										text: "Delete Route",
-										link: "/docs/sequence/manage-routes/delete-route",
-									},
-									{
-										text: "Edit Route Details",
-										link: "/docs/sequence/manage-routes/edit-route-details",
-									},
-									{
-										text: "View Route Detail",
-										link: "/docs/sequence/manage-routes/view-route-detail",
-									},
-									{
-										text: "View and Filter Routes",
-										link: "/docs/sequence/manage-routes/view-and-filter-routes",
-									},
-									{
-										text: "UCS-Manage-Routes",
-										link: "/docs/sequence/manage-routes/UCS-manage-routes",
-									},
-								],
-							},
-							{
-								text: "Manage Trips",
-								collapsed: true,
-								items: [
-									{
-										text: "Add New Booking for Trip",
-										link: "/docs/sequence/manage-trips/add-new-booking-for-trip",
-									},
-									{
-										text: "Add New Trip",
-										link: "/docs/sequence/manage-trips/add-new-trip",
-									},
-									{
-										text: "Delete Trip",
-										link: "/docs/sequence/manage-trips/delete-trip",
-									},
-									{
-										text: "Edit Trip",
-										link: "/docs/sequence/manage-trips/edit-trip",
-									},
-									{
-										text: "View Trip Details",
-										link: "/docs/sequence/manage-trips/view-trip-details",
-									},
-									{
-										text: "View and Filter Trips",
-										link: "/docs/sequence/manage-trips/view-and-filter-trips",
-									},
-									{
-										text: "UCS-Manage-Trips",
-										link: "/docs/sequence/manage-trips/UCS-manage-trips",
-									},
-								],
-							},
-							{
-								text: "View Reports",
-								collapsed: true,
-								items: [
-									{
-										text: "Revenue Report",
-										link: "/docs/sequence/view-reports/revenue-report",
-									},
-									{
-										text: "Booking Report",
-										link: "/docs/sequence/view-reports/booking-report",
-									},
-									{
-										text: "Popular Routes Report",
-										link: "/docs/sequence/view-reports/popular-routes-report",
-									},
-									{
-										text: "Customer Report",
-										link: "/docs/sequence/view-reports/customer-report",
-									},
-									{
-										text: "Export Report",
-										link: "/docs/sequence/view-reports/export-report",
-									},
-									{
-										text: "UCS-View-Reports",
-										link: "/docs/sequence/view-reports/UCS-view-reports",
-									},
-								],
-							},
-						],
-					},
-					{
-						text: "Activity",
-						collapsed: true,
-						items: [
-							{
-								text: "Adjust Cart",
-								collapsed: true,
-								items: [
-									{
-										text: "Add Trip to Cart",
-										link: "/docs/activity/adjust-cart/add-trip-to-cart",
-									},
-									{
-										text: "Edit Trip Details",
-										link: "/docs/activity/adjust-cart/edit-trip-details",
-									},
-									{
-										text: "Remove Trip from Cart",
-										link: "/docs/activity/adjust-cart/remove-trip-from-cart",
-									},
-									{
-										text: "View and Filter Trips in Cart",
-										link: "/docs/activity/adjust-cart/view-and-filter-trips-in-cart",
-									},
-									{
-										text: "UCS-Adjust-Cart",
-										link: "/docs/activity/adjust-cart/UCS-adjust-cart",
-									},
-								],
-							},
-							{
-								text: "Adjust Favorite Trips",
-								collapsed: true,
-								items: [
-									{
-										text: "Toggle Favorite Trip",
-										link: "/docs/activity/adjust-favorite-trips/toggle-favorite-trip",
-									},
-									{
-										text: "View and Filter Favorite Trips",
-										link: "/docs/activity/adjust-favorite-trips/view-and-filter-favorite-trips",
-									},
-								],
-							},
-							{
-								text: "Auth",
-								collapsed: true,
-								items: [
-									{ text: "Sign In", link: "/docs/activity/auth/sign-in" },
-									{ text: "Sign Up", link: "/docs/activity/auth/sign-up" },
-									{
-										text: "Forgot Password",
-										link: "/docs/activity/auth/forgot-password",
-									},
-									{
-										text: "Manage Profile",
-										link: "/docs/activity/auth/manage-profile",
-									},
-								],
-							},
-							{
-								text: "Browse Trips",
-								collapsed: true,
-								items: [
-									{
-										text: "View and Filter Available Trips",
-										link: "/docs/activity/browse-trips/view-and-filter-available-trips",
-									},
-									{
-										text: "View Trip Details",
-										link: "/docs/activity/browse-trips/view-trip-details",
-									},
-								],
-							},
-							{
-								text: "Manage Personal Booking",
-								collapsed: true,
-								items: [
-									{
-										text: "Book a Trip",
-										link: "/docs/activity/manage-personal-booking/book-a-trip",
-									},
-									{
-										text: "Checkout Cart",
-										link: "/docs/activity/manage-personal-booking/checkout-cart",
-									},
-									{
-										text: "Edit Upcoming Trip's Passenger Details",
-										link: "/docs/activity/manage-personal-booking/edit-upcoming-trip's-passenger-details",
-									},
-									{
-										text: "View and Filter Personal Bookings",
-										link: "/docs/activity/manage-personal-booking/view-and-filter-personal-bookings",
-									},
-									{
-										text: "View and Pay Booking Invoice Details",
-										link: "/docs/activity/manage-personal-booking/view-and-pay-booking-invoice-details",
-									},
-									{
-										text: "UCS-Manage-Personal-Booking",
-										link: "/docs/activity/manage-personal-booking/UCS-manage-personal-booking",
-									},
-								],
-							},
-							{
-								text: "Manage Routes",
-								collapsed: true,
-								items: [
-									{
-										text: "Add New Route",
-										link: "/docs/activity/manage-routes/add-new-route",
-									},
-									{
-										text: "Delete Route",
-										link: "/docs/activity/manage-routes/delete-route",
-									},
-									{
-										text: "Edit Route Details",
-										link: "/docs/activity/manage-routes/edit-route-details",
-									},
-									{
-										text: "View and Filter Routes",
-										link: "/docs/activity/manage-routes/view-and-filter-routes",
-									},
-									{
-										text: "View Route Detail",
-										link: "/docs/activity/manage-routes/view-route-detail",
-									},
-									{
-										text: "UCS-Manage-Routes",
-										link: "/docs/activity/manage-routes/UCS-manage-routes",
-									},
-								],
-							},
-							{
-								text: "Manage Route Schedule",
-								collapsed: true,
-								items: [
-									{
-										text: "Add Itinerary",
-										link: "/docs/activity/manage-route-schedule/add-itinerary",
-									},
-									{
-										text: "Delete Itinerary",
-										link: "/docs/activity/manage-route-schedule/delete-itinerary",
-									},
-									{
-										text: "Edit Itinerary",
-										link: "/docs/activity/manage-route-schedule/edit-itinerary",
-									},
-									{
-										text: "View Route Schedule",
-										link: "/docs/activity/manage-route-schedule/view-route-schedule",
-									},
-									{
-										text: "UCS-Manage-Route-Schedule",
-										link: "/docs/activity/manage-route-schedule/UCS-manage-route-schedule",
-									},
-								],
-							},
-							{
-								text: "Manage Attraction",
-								collapsed: true,
-								items: [
-									{
-										text: "Add New Attraction",
-										link: "/docs/activity/manage-attraction/add-new-attraction",
-									},
-									{
-										text: "Delete Attraction",
-										link: "/docs/activity/manage-attraction/delete-attraction",
-									},
-									{
-										text: "Edit Attraction Detail",
-										link: "/docs/activity/manage-attraction/edit-attraction-detail",
-									},
-									{
-										text: "View Attraction Detail",
-										link: "/docs/activity/manage-attraction/view-attraction-detail",
-									},
-									{
-										text: "View and Filter Attractions",
-										link: "/docs/activity/manage-attraction/view-and-filter-attractions",
-									},
-									{
-										text: "UCS-Manage-Attraction",
-										link: "/docs/activity/manage-attraction/UCS-manage-attraction",
-									},
-								],
-							},
-							{
-								text: "Adjust Customers",
-								collapsed: true,
-								items: [
-									{
-										text: "Add New Customer",
-										link: "/docs/activity/adjust-customers/add-new-customer",
-									},
-									{
-										text: "Delete Customer",
-										link: "/docs/activity/adjust-customers/delete-customer",
-									},
-									{
-										text: "Edit Customer",
-										link: "/docs/activity/adjust-customers/edit-customer",
-									},
-									{
-										text: "View Customer Details",
-										link: "/docs/activity/adjust-customers/view-customer-details",
-									},
-									{
-										text: "View and Filter Customers",
-										link: "/docs/activity/adjust-customers/view-and-filter-customers",
-									},
-									{
-										text: "UCS-Adjust-Customers",
-										link: "/docs/activity/adjust-customers/UCS-adjust-customers",
-									},
-								],
-							},
-							{
-								text: "Adjust Staffs",
-								collapsed: true,
-								items: [
-									{
-										text: "Add New Staff",
-										link: "/docs/activity/adjust-staffs/add-new-staff",
-									},
-									{
-										text: "Delete Staff",
-										link: "/docs/activity/adjust-staffs/delete-staff",
-									},
-									{
-										text: "Edit Staff",
-										link: "/docs/activity/adjust-staffs/edit-staff",
-									},
-									{
-										text: "View Staff Details",
-										link: "/docs/activity/adjust-staffs/view-staff-details",
-									},
-									{
-										text: "View and Filter Staffs",
-										link: "/docs/activity/adjust-staffs/view-and-filter-staffs",
-									},
-									{
-										text: "UCS-Adjust-Staffs",
-										link: "/docs/activity/adjust-staffs/UCS-adjust-staffs",
-									},
-								],
-							},
-							{
-								text: "Manage Trips",
-								collapsed: true,
-								items: [
-									{
-										text: "Add New Trip",
-										link: "/docs/activity/manage-trips/add-new-trip",
-									},
-									{
-										text: "Add New Booking for Trip",
-										link: "/docs/activity/manage-trips/add-new-booking-for-trip",
-									},
-									{
-										text: "Delete Trip",
-										link: "/docs/activity/manage-trips/delete-trip",
-									},
-									{
-										text: "Edit Trip",
-										link: "/docs/activity/manage-trips/edit-trip",
-									},
-									{
-										text: "View Trip Details",
-										link: "/docs/activity/manage-trips/view-trip-details",
-									},
-									{
-										text: "View and Filter Trips",
-										link: "/docs/activity/manage-trips/view-and-filter-trips",
-									},
-									{
-										text: "UCS-Manage-Trips",
-										link: "/docs/activity/manage-trips/UCS-manage-trips",
-									},
-								],
-							},
-							{
-								text: "Adjust and Track Bookings",
-								collapsed: true,
-								items: [
-									{
-										text: "Add New Booking",
-										link: "/docs/activity/adjust-and-track-bookings/add-new-booking",
-									},
-									{
-										text: "Delete Booking",
-										link: "/docs/activity/adjust-and-track-bookings/delete-booking",
-									},
-									{
-										text: "Edit Pre-Departure Booking",
-										link: "/docs/activity/adjust-and-track-bookings/edit-pre-departure-booking",
-									},
-									{
-										text: "View Booking Details",
-										link: "/docs/activity/adjust-and-track-bookings/view-booking-details",
-									},
-									{
-										text: "View and Filter Bookings",
-										link: "/docs/activity/adjust-and-track-bookings/view-and-filter-bookings",
-									},
-									{
-										text: "View Booking's Invoice",
-										link: "/docs/activity/adjust-and-track-bookings/view-booking's-invoice",
-									},
-									{
-										text: "UCS-Adjust-and-Track-Bookings",
-										link: "/docs/activity/adjust-and-track-bookings/UCS-adjust-and-track-bookings",
-									},
-								],
-							},
-							{
-								text: "View Reports",
-								collapsed: true,
-								items: [
-									{
-										text: "Revenue Report",
-										link: "/docs/activity/view-reports/revenue-report",
-									},
-									{
-										text: "Booking Report",
-										link: "/docs/activity/view-reports/booking-report",
-									},
-									{
-										text: "Popular Routes Report",
-										link: "/docs/activity/view-reports/popular-routes-report",
-									},
-									{
-										text: "Customer Report",
-										link: "/docs/activity/view-reports/customer-report",
-									},
-								],
-							},
-						],
-					},
-					{
-						text: "Database",
-						link: "/docs/database",
-					},
-					{
-						text: "Function Lists",
-						link: "/docs/function-list",
-					},
-					{
-						text: "SRS",
-						link: "/docs/srs",
-					},
+				{
+					text: "Sequence",
+					collapsed: true,
+					items: [
+						{
+							text: "Authentication (Auth)",
+							collapsed: true,
+							items: [
+								{
+									text: "Login / Sign In",
+									link: "/docs/sequence/auth/login",
+								},
+								{
+									text: "Register / Sign Up",
+									link: "/docs/sequence/auth/register",
+								},
+								{
+									text: "Forgot Password",
+									link: "/docs/sequence/auth/forgot-password",
+								},
+								{
+									text: "Reset Password",
+									link: "/docs/sequence/auth/reset-password",
+								},
+							],
+						},
+						{
+							text: "User Profile",
+							collapsed: true,
+							items: [
+								{
+									text: "Update Personal Information",
+									link: "/docs/sequence/user-profile/update-personal-information",
+								},
+								{
+									text: "View User Profile",
+									link: "/docs/sequence/user-profile/view-user-profile",
+								},
+								{
+									text: "Delete Personal Account",
+									link: "/docs/sequence/user-profile/delete-personal-account",
+								},
+							],
+						},
+						{
+							text: "User Skills",
+							collapsed: true,
+							items: [
+								{
+									text: "View Personal Skill List",
+									link: "/docs/sequence/user-skills/view-personal-skill-list",
+								},
+								{
+									text: "View Personal Skill Details",
+									link: "/docs/sequence/user-skills/view-personal-skill-details",
+								},
+								{
+									text: "Add Personal Skill",
+									link: "/docs/sequence/user-skills/add-personal-skill",
+								},
+								{
+									text: "Update Personal Skill",
+									link: "/docs/sequence/user-skills/update-personal-skill",
+								},
+								{
+									text: "Delete Personal Skill",
+									link: "/docs/sequence/user-skills/delete-personal-skill",
+								},
+							],
+						},
+						{
+							text: "System Administration (Admin)",
+							collapsed: true,
+							items: [
+								{
+									text: "Configure System Parameters",
+									link: "/docs/sequence/admin/configure-system-parameters",
+								},
+								{
+									text: "View System Skill Directory",
+									link: "/docs/sequence/admin/view-system-skill-directory",
+								},
+								{
+									text: "Add System Skill",
+									link: "/docs/sequence/admin/add-system-skill",
+								},
+								{
+									text: "Edit System Skill",
+									link: "/docs/sequence/admin/edit-system-skill",
+								},
+								{
+									text: "Delete System Skill",
+									link: "/docs/sequence/admin/delete-system-skill",
+								},
+								{
+									text: "View Global User List",
+									link: "/docs/sequence/admin/view-global-user-list",
+								},
+								{
+									text: "Add System User",
+									link: "/docs/sequence/admin/add-system-user",
+								},
+								{
+									text: "Edit System User",
+									link: "/docs/sequence/admin/edit-system-user",
+								},
+								{
+									text: "Delete System User",
+									link: "/docs/sequence/admin/delete-system-user",
+								},
+							],
+						},
+						{
+							text: "Project Management",
+							collapsed: true,
+							items: [
+								{
+									text: "View Joined Projects",
+									link: "/docs/sequence/project-management/view-joined-projects",
+								},
+								{
+									text: "Create New Project",
+									link: "/docs/sequence/project-management/create-new-project",
+								},
+								{
+									text: "View Project Details / Summary",
+									link: "/docs/sequence/project-management/view-project-details",
+								},
+								{
+									text: "Update Project Information",
+									link: "/docs/sequence/project-management/update-project-information",
+								},
+								{
+									text: "Join Project (via Link/Code)",
+									link: "/docs/sequence/project-management/join-project",
+								},
+								{
+									text: "Leave Project",
+									link: "/docs/sequence/project-management/leave-project",
+								},
+								{
+									text: "Close / Archive Project",
+									link: "/docs/sequence/project-management/close-archive-project",
+								},
+							],
+						},
+						{
+							text: "Project Members",
+							collapsed: true,
+							items: [
+								{
+									text: "View Project Member List",
+									link: "/docs/sequence/project-members/view-project-member-list",
+								},
+								{
+									text: "View Member Details",
+									link: "/docs/sequence/project-members/view-member-details",
+								},
+								{
+									text: "Add Member to Project",
+									link: "/docs/sequence/project-members/add-member-to-project",
+								},
+								{
+									text: "Update Member Role",
+									link: "/docs/sequence/project-members/update-member-role",
+								},
+								{
+									text: "Remove Member from Project",
+									link: "/docs/sequence/project-members/remove-member-from-project",
+								},
+							],
+						},
+						{
+							text: "Sprint Management (Agile)",
+							collapsed: true,
+							items: [
+								{
+									text: "View Sprint List",
+									link: "/docs/sequence/sprint-management/view-sprint-list",
+								},
+								{
+									text: "View Sprint Details",
+									link: "/docs/sequence/sprint-management/view-sprint-details",
+								},
+								{
+									text: "Create New Sprint",
+									link: "/docs/sequence/sprint-management/create-new-sprint",
+								},
+								{
+									text: "Update Sprint Information",
+									link: "/docs/sequence/sprint-management/update-sprint-information",
+								},
+								{
+									text: "Start / Complete Sprint",
+									link: "/docs/sequence/sprint-management/start-complete-sprint",
+								},
+								{
+									text: "Delete Sprint",
+									link: "/docs/sequence/sprint-management/delete-sprint",
+								},
+							],
+						},
+						{
+							text: "Task Management",
+							collapsed: true,
+							items: [
+								{
+									text: "View Kanban Board",
+									link: "/docs/sequence/task-management/view-kanban-board",
+								},
+								{
+									text: "View Backlog",
+									link: "/docs/sequence/task-management/view-backlog",
+								},
+								{
+									text: "View Workload",
+									link: "/docs/sequence/task-management/view-workload",
+								},
+								{
+									text: "View Task Details",
+									link: "/docs/sequence/task-management/view-task-details",
+								},
+								{
+									text: "Create New Task / Sub-task",
+									link: "/docs/sequence/task-management/create-new-task",
+								},
+								{
+									text: "Update Task Information",
+									link: "/docs/sequence/task-management/update-task-information",
+								},
+								{
+									text: "Update Task Status (Drag & Drop)",
+									link: "/docs/sequence/task-management/update-task-status",
+								},
+								{
+									text: "Assign Assignee & Reporter",
+									link: "/docs/sequence/task-management/assign-assignee-reporter",
+								},
+								{
+									text: "Delete Task",
+									link: "/docs/sequence/task-management/delete-task",
+								},
+							],
+						},
+						{
+							text: "Interaction & Communication",
+							collapsed: true,
+							items: [
+								{
+									text: "View Comments",
+									link: "/docs/sequence/interaction-communication/view-comments",
+								},
+								{
+									text: "Write Comment",
+									link: "/docs/sequence/interaction-communication/write-comment",
+								},
+								{
+									text: "Edit Comment",
+									link: "/docs/sequence/interaction-communication/edit-comment",
+								},
+								{
+									text: "Delete Comment",
+									link: "/docs/sequence/interaction-communication/delete-comment",
+								},
+							],
+						},
+						{
+							text: "Notification Management",
+							collapsed: true,
+							items: [
+								{
+									text: "Receive Notification",
+									link: "/docs/sequence/notification-management/receive-notification",
+								},
+								{
+									text: "Mark Notification as Read",
+									link: "/docs/sequence/notification-management/mark-notification-as-read",
+								},
+							],
+						},
+						{
+							text: "AI Assistant",
+							collapsed: true,
+							items: [
+								{
+									text: "Create New AI Chat Session",
+									link: "/docs/sequence/ai-assistant/create-new-ai-chat-session",
+								},
+								{
+									text: "Chat with AI",
+									link: "/docs/sequence/ai-assistant/chat-with-ai",
+								},
+								{
+									text: "View AI Chat History",
+									link: "/docs/sequence/ai-assistant/view-ai-chat-history",
+								},
+								{
+									text: "View AI Activity Logs",
+									link: "/docs/sequence/ai-assistant/view-ai-activity-logs",
+								},
+								{
+									text: "Request AI Auto-Assignment",
+									link: "/docs/sequence/ai-assistant/request-ai-auto-assignment",
+								},
+							],
+						},
+					],
+				},
+				{
+					text: "Database",
+					link: "/docs/database",
+				},
+				{
+					text: "Function Lists",
+					link: "/docs/function-list",
+				},
+				{
+					text: "SRS",
+					link: "/docs/srs",
+				},
 				],
 			},
 		],
