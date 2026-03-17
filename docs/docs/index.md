@@ -1,48 +1,48 @@
 <!-- # Docs -->
 
-# TaskPilot - Hệ thống Quản lý Dự án Thông minh với AI Agent
+# TaskPilot - Intelligent Project Management System with an AI Agent
 
-## 1. Giới thiệu
+## 1. Introduction
 
-**TaskPilot** là hệ thống quản lý dự án (Project Management) tích hợp Trợ lý ảo AI (AI Agent) được xây dựng trên nền tảng Java Spring Boot theo kiến trúc Modular Monolith. Hệ thống hỗ trợ quy trình phát triển Agile/Scrum và nâng cao hiệu suất quản lý thông qua khả năng tự động hóa thông minh.
+**TaskPilot** is a project management system that integrates an AI virtual assistant (AI Agent), built on Java Spring Boot with a Modular Monolith architecture. The platform supports Agile/Scrum workflows and improves management efficiency through intelligent automation.
 
-## 2. Mục tiêu
+## 2. Objectives
 
-Nghiên cứu và triển khai AI Agent đóng vai trò trợ lý ảo với các khả năng:
+This project focuses on researching and implementing an AI Agent that serves as a virtual assistant with the following capabilities:
 
-- **Hiểu ngữ nghĩa (NLU)**: Phân tích câu lệnh đa dạng của người dùng để trích xuất ý định (Intent)
-- **Thực thi hành động (Function Calling)**: Tự động gọi các hàm nghiệp vụ để tra cứu hoặc cập nhật dữ liệu
-- **Gợi ý thông minh (Recommendation)**: Đề xuất nhân sự phù hợp cho công việc dựa trên dữ liệu thực tế
+- **Natural Language Understanding (NLU)**: Interpret diverse user commands and extract intent.
+- **Action Execution (Function Calling)**: Automatically invoke business functions to query or update data.
+- **Intelligent Recommendation**: Suggest suitable team members for tasks based on real project data.
 
-## 3. Phạm vi đề tài
+## 3. Scope
 
-### Quản lý dự án và công việc linh hoạt
+### Flexible Project and Task Management
 
-Hệ thống cung cấp không gian làm việc số hóa toàn diện, nơi Project Manager có thể khởi tạo dự án, thiết lập mốc thời gian và mời thành viên tham gia. Mỗi công việc (Task) được gắn các thuộc tính chi tiết: assignee, reporter, deadline, priority, tags, difficulty level và required skills.
+The platform provides a complete digital workspace where Project Managers can create projects, set timelines, and invite members. Each task is tracked with detailed attributes such as assignee, reporter, deadline, priority, tags, difficulty level, and required skills.
 
-### Trực quan hóa tiến độ với Kanban và Dashboard
+### Progress Visualization with Kanban and Dashboard
 
-Giao diện Kanban Board tương tác cho phép kéo thả task giữa 4 cột trạng thái (TODO → IN_PROGRESS → REVIEW → DONE). Dashboard tổng hợp biểu đồ thống kê về số lượng tác vụ và tiến độ hoàn thành.
+An interactive Kanban Board allows drag-and-drop task movement across 4 status columns (TODO -> IN_PROGRESS -> REVIEW -> DONE). The Dashboard provides summary charts for task volume and completion progress.
 
-### Tương tác thông minh qua AI Agent
+### Smart Interaction Through the AI Agent
 
-Tính năng trọng tâm cho phép người dùng ra lệnh bằng ngôn ngữ tự nhiên qua khung chat. AI phân tích ý định → tự động thực thi hành động (tạo task, tìm kiếm, cập nhật status). AI sử dụng thuật toán thông minh phân tích kỹ năng và workload để đề xuất nhân sự phù hợp.
+The core feature enables users to issue natural-language commands in a chat interface. The AI analyzes intent and automatically performs actions such as creating tasks, searching data, and updating status. It also applies a smart matching algorithm that combines skill fit and workload to recommend assignees.
 
-### Quản lý hồ sơ năng lực và Cấu hình hệ thống
+### Skill Profile Management and System Configuration
 
-Bảo mật qua JWT authentication. Mỗi user quản lý profile và danh sách skills — nguồn dữ liệu đầu vào cho AI matching. Admin có quyền tinh chỉnh trọng số thuật toán gợi ý.
+Security is implemented with JWT authentication. Each user manages their own profile and skills, which act as key input for AI-based matching. Administrators can tune recommendation algorithm weights.
 
-## 4. Đối tượng sử dụng
+## 4. User Roles
 
-| Actor                    | Vai trò                                                                    | Use Cases                                    |
-| ------------------------ | -------------------------------------------------------------------------- | -------------------------------------------- |
-| **Project Manager** (pm) | Điều phối nguồn lực, giao việc, giám sát tổng quan, sử dụng AI auto-assign | [Use Case Diagram](./use-case/staff.html)    |
-| **Member** (mem)         | Theo dõi task được giao, cập nhật tiến độ, sử dụng AI chat                 | [Use Case Diagram](./use-case/customer.html) |
-| **Administrator** (ad)   | Quản trị hệ thống, tài khoản, cấu hình AI weights                          | [Use Case Diagram](./use-case/admin.html)    |
+| Actor                    | Vai trò                                                                  | Use Cases                                  |
+| ------------------------ | ------------------------------------------------------------------------ | ------------------------------------------ |
+| **Project Manager** (pm) | Coordinate resources, assign tasks, monitor delivery, use AI auto-assign | [Use Case Diagram](./use-case/pm.html)     |
+| **Member** (mem)         | Track assigned tasks, update progress, interact with AI chat             | [Use Case Diagram](./use-case/member.html) |
+| **Administrator** (ad)   | Manage system settings, accounts, and AI weight configuration            | [Use Case Diagram](./use-case/admin.html)  |
 
-## 5. Tổng quan Use Cases
+## 5. Use Case Overview
 
-Hệ thống gồm **59 use cases** thuộc **11 subsystems**:
+The system includes **59 use cases** across **11 subsystems**:
 
 | #    | Subsystem          | Use Cases                                          | Actor       |
 | ---- | ------------------ | -------------------------------------------------- | ----------- |
@@ -58,13 +58,13 @@ Hệ thống gồm **59 use cases** thuộc **11 subsystems**:
 | X    | Notification       | Receive/Mark-as-Read Notifications                 | ad, pm, mem |
 | XI   | AI Assistant       | Chat Sessions, Chat with AI, Logs, Auto-Assignment | pm, mem     |
 
-📋 [Danh sách chi tiết Use Cases](/docs/usecase-list)
+📋 [Detailed Use Case List](/docs/usecase-list)
 
-## 6. Use Case Diagram tổng quát
+## 6. System Use Case Diagram
 
 → [System Overview Diagram](./use-case/system.html)
 
-## 7. Kiến trúc kỹ thuật
+## 7. Technical Architecture
 
 - **Backend**: Java Spring Boot (Modular Monolith)
 - **Database**: PostgreSQL (13 tables)
@@ -72,7 +72,7 @@ Hệ thống gồm **59 use cases** thuộc **11 subsystems**:
 - **AI Engine**: NLU + Function Calling + Heuristic Recommendation
 - **Frontend**: React (Kanban Board, Dashboard, Chat UI)
 
-Chi tiết:
+Related documentation:
 
 - [Database Schema](/docs/database/)
 - [Function List](/docs/function-list/)
@@ -80,7 +80,7 @@ Chi tiết:
 
 ## Notes
 
-- Sequence diagrams sử dụng PlantUML
-- Mỗi diagram có `diagram id` duy nhất
-- Use cases được nhóm theo subsystem
-- Chi tiết sequence diagrams tại [Sequence](/docs/sequence/auth/login)
+- Sequence diagrams are written in PlantUML.
+- Each diagram has a unique `diagram id`.
+- Use cases are grouped by subsystem.
+- Sequence details are available in [Sequence](/docs/sequence/auth/login).
