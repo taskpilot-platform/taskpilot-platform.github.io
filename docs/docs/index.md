@@ -34,7 +34,7 @@ Security is implemented with JWT authentication. Each user manages their own pro
 
 ## 4. User Roles
 
-| Actor                    | Vai trò                                                                  | Use Cases                                  |
+| Actor                    | Responsibility                                                           | Use Cases                                  |
 | ------------------------ | ------------------------------------------------------------------------ | ------------------------------------------ |
 | **Project Manager** (pm) | Coordinate resources, assign tasks, monitor delivery, use AI auto-assign | [Use Case Diagram](./use-case/pm.html)     |
 | **Member** (mem)         | Track assigned tasks, update progress, interact with AI chat             | [Use Case Diagram](./use-case/member.html) |
