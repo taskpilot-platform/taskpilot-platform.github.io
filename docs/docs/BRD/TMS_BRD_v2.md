@@ -96,6 +96,7 @@ Target deployment: Web Application using ReactJS (Frontend) and Java Spring Boot
 
 #### 2.3.1 Diagram {#231-diagram}
 
+<!--
 **a. System Use Case**
 
 Refer to [Use Case Diagrams](../use-case/user.md)
@@ -110,7 +111,7 @@ Refer to [Staff Use Case Diagram](../use-case/staff.md)
 
 **d. Admin Use Case**
 
-Refer to [Admin Use Case Diagram](../use-case/admin.md)
+Refer to [Admin Use Case Diagram](../use-case/admin.md) -->
 
 #### 2.3.2 Description of Actors {#232-description-of-actors}
 

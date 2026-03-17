@@ -103,7 +103,7 @@ The domain model illustrates the core business entities and their relationships 
 
 #### 2.3.1 Diagram {#231-diagram}
 
-**a. System Use Case - Overview**
+<!-- **a. System Use Case - Overview**
 
 Refer to [Use Case Diagrams](../use-case/user.md) in the documentation.
 
@@ -117,7 +117,7 @@ Refer to [Staff Use Case Diagram](../use-case/staff.md)
 
 **d. Admin Use Case**
 
-Refer to [Admin Use Case Diagram](../use-case/admin.md)
+Refer to [Admin Use Case Diagram](../use-case/admin.md) -->
 
 #### 2.3.2 Description of Actors {#232-description-of-actors}
 
