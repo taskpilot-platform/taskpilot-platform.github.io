@@ -7,26 +7,36 @@
 
 |U|
 start
-:(1) Click "Add Member";
+:(1) Access Project Members page;
 
 |S|
-:(2) Display form (user email);
+:(2) Display member list with "Add Member" button;
+
+|U|
+:(3) Click "Add Member";
+
+|S|
+:(4) Display form (user email, role selection);
 
 repeat
   |U|
-  :(3) Enter user email;
-  :(4) Click "Add";
+  :(5) Enter user email;
+  :(6) Click "Add";
 
   |S|
-  :(5) Query user and check \n not already a member;
-  backward: (5.1) Display error notification;
-repeat while (Valid?) is (No) not (Yes)
+  :(6.1) Check email format valid;
+  :(6.2) Query user by email;
+  :(6.3) Check user not already in project;
+  backward: (6a) Display specific error \n (invalid format / user not found / \n already a member);
+repeat while (All checks passed?) is (No) not (Yes)
 
-:(6) Insert project_member record (role=MEMBER);
-:(7) Notify success;
+:(7) Insert project_member record (role=MEMBER);
+:(7.1) Update project member count;
+:(8) Send project invitation notification to user;
+:(9) Notify success and refresh member list;
 
 |U|
-:(8) Confirm end;
+:(10) Confirm end;
 
 stop
 @enduml

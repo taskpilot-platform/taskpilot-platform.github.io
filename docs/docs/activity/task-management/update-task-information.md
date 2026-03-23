@@ -10,23 +10,33 @@ start
 :(1) Click "Edit" on a task;
 
 |S|
-:(2) Display edit form \n (title, description, priority, \n sprint, required_skills);
+:(2) Query current task details;
+
+if (Task found?) then (No)
+  :(2.1) Display "Task not found" error;
+  |U|
+  stop
+else (Yes)
+endif
+
+:(3) Display edit form \n (title, description, priority, sprint, \n tags, difficulty, required_skills) \n with current data pre-filled;
 
 repeat
   |U|
-  :(3) Modify task information;
-  :(4) Click "Save";
+  :(4) Modify task information;
+  :(5) Click "Save";
 
   |S|
-  :(5) Validate task data;
-  backward: (5.1) Display validation error;
+  :(6) Validate task data;
+  backward: (6.1) Display validation error;
 repeat while (Data valid?) is (No) not (Yes)
 
-:(6) Update task record;
-:(7) Notify success;
+:(7) Update task record;
+:(7.1) Notify task watchers of changes;
+:(8) Notify success;
 
 |U|
-:(8) Confirm end;
+:(9) Confirm end;
 
 stop
 @enduml

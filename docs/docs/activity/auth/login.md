@@ -42,11 +42,21 @@ if (Password correct?) then (No)
 else (Yes)
 endif
 
-:(8) Generate JWT token;
-:(9) Redirect to home page;
+:(8) Check account lock status;
+
+if (Account locked?) then (Yes)
+  :(8.1) Display "Account locked. Please contact support" error;
+  |U|
+  :(8.2) Confirm end;
+  stop
+else (No)
+endif
+
+:(9) Generate JWT token;
+:(10) Redirect to home page;
 
 |U|
-:(10) Confirm end;
+:(11) Confirm end;
 
 stop
 @enduml

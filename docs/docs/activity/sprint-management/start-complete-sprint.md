@@ -20,17 +20,28 @@ if (Is Manager?) then (No)
 else (Yes)
 endif
 
-:(3) Display confirmation dialog;
+:(3) Query current sprint status;
+:(4) Verify valid status transition \n (PLANNING→IN_PROGRESS, IN_PROGRESS→COMPLETED);
+
+if (Transition valid?) then (No)
+  :(4.1) Display "Invalid status transition" error;
+  |U|
+  :(4.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(5) Display confirmation dialog;
 
 |U|
-:(4) Click "Confirm";
+:(6) Click "Confirm";
 
 |S|
-:(5) Update sprint status \n (IN_PROGRESS or COMPLETED);
-:(6) Notify success;
+:(7) Update sprint status \n (IN_PROGRESS or COMPLETED);
+:(8) Notify success;
 
 |U|
-:(7) Confirm end;
+:(9) Confirm end;
 
 stop
 @enduml

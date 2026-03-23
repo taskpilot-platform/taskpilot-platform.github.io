@@ -2,31 +2,41 @@
 
 ```plantuml
 @startuml
+
 |A|Admin
 |S|System
 
 |A|
 start
-:(1) Click "Add Skill";
+:(1) Select function Skill Directory;
 
 |S|
-:(2) Display form (skill name);
+:(2) Display skill directory with "Add Skill" button;
+
+|A|
+:(3) Click "Add Skill";
+
+|S|
+:(4) Display form (skill_name field, required);
 
 repeat
   |A|
-  :(3) Enter skill name;
-  :(4) Click "Save";
+  :(5) Enter skill name;
+  :(6) Click "Save";
 
   |S|
-  :(5) Validate not empty and check uniqueness;
-  backward: (5.1) Display validation error;
-repeat while (Data valid?) is (No) not (Yes)
+  :(7) Validate name not empty;
+  :(7.2) Check skill name uniqueness;
+  backward: (7.1) Display validation error;
+repeat while (All valid?) is (No) not (Yes)
 
-:(6) Insert skill record;
-:(7) Notify success and redirect to list;
+:(8) Insert skill record;
+:(8.1) Index skill for search and assignment;
+:(9) Notify success;
+:(9.1) Refresh skill list in directory;
 
 |A|
-:(8) Confirm end;
+:(10) Confirm end;
 
 stop
 @enduml

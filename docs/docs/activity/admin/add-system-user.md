@@ -2,32 +2,41 @@
 
 ```plantuml
 @startuml
+
 |A|Admin
 |S|System
 
 |A|
 start
-:(1) Click "Add User";
+:(1) Access User Management;
 
 |S|
-:(2) Display form (email, full name, password, role);
+:(2) Display user list with "Add User" button;
+
+|A|
+:(3) Click "Add User";
+
+|S|
+:(4) Display form (email, full name, password, role);
 
 repeat
   |A|
-  :(3) Enter user information;
-  :(4) Click "Save";
+  :(5) Enter user information;
+  :(6) Click "Save";
 
   |S|
-  :(5) Validate format and check email uniqueness;
-  backward: (5.1) Display validation error;
+  :(7) Validate format and check email uniqueness;
+  backward: (7.1) Display validation error;
 repeat while (Data valid?) is (No) not (Yes)
 
-:(6) Hash password;
-:(7) Insert user (status=AVAILABLE, workload=0);
-:(8) Notify success;
+:(8) Hash password;
+:(8.1) Verify password hash integrity;
+:(9) Insert user (status=AVAILABLE, workload=0);
+:(10) Send welcome email with credentials;
+:(11) Notify success and display new user in list;
 
 |A|
-:(9) Confirm end;
+:(12) Confirm end;
 
 stop
 @enduml

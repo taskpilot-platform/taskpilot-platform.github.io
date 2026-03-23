@@ -7,26 +7,36 @@
 
 |U|
 start
-:(1) Select Write Comment on task;
+:(1) Click "Write Comment" on task details page;
 
 |S|
-:(2) Display comment input;
+:(2) Verify user is a project member;
+
+if (Is member?) then (No)
+  :(2.1) Display "Access denied" error;
+  |U|
+  stop
+else (Yes)
+endif
+
+:(3) Display comment input area;
 
 repeat
   |U|
-  :(3) Enter comment text;
-  :(4) Click "Submit";
+  :(4) Enter comment text;
+  :(5) Click "Submit";
 
   |S|
-  :(5) Validate comment not empty;
-  backward: (5.1) Display validation error;
+  :(6) Validate comment not empty;
+  backward: (6.1) Display validation error;
 repeat while (Content valid?) is (No) not (Yes)
 
-:(6) Insert comment record;
-:(7) Notify success and display new comment;
+:(7) Insert comment record;
+:(8) Send notification to task assignee/reporter;
+:(9) Notify success and display new comment;
 
 |U|
-:(8) Confirm end;
+:(10) Confirm end;
 
 stop
 @enduml

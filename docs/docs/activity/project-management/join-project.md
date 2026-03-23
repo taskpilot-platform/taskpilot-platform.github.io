@@ -7,26 +7,36 @@
 
 |U|
 start
-:(1) Access Join Project page;
+:(1) Access Projects page;
 
 |S|
-:(2) Display form (invite link/code);
+:(2) Display "Join Project" option;
+
+|U|
+:(3) Select Join Project;
+
+|S|
+:(4) Display form (invite link/code);
 
 repeat
   |U|
-  :(3) Enter invite code;
-  :(4) Click "Join";
+  :(5) Enter invite code;
+  :(6) Click "Join";
 
   |S|
-  :(5) Validate code and check \n if user is already a member;
-  backward: (5.1) Display error notification;
-repeat while (Valid and not member?) is (No) not (Yes)
+  :(6.1) Validate invite code format;
+  :(6.2) Query project by invite code;
+  :(6.3) Check user is not already a member;
+  backward: (6a) Display specific error \n (invalid format / project not found / \n already a member);
+repeat while (All checks passed?) is (No) not (Yes)
 
-:(6) Insert user into project_members (role=MEMBER);
-:(7) Notify success and redirect to project page;
+:(7) Insert user into project_members (role=MEMBER);
+:(7.1) Update user's project membership count;
+:(8) Send project join notification to project manager;
+:(9) Notify success and redirect to project page;
 
 |U|
-:(8) Confirm end;
+:(10) Confirm end;
 
 stop
 @enduml

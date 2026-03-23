@@ -2,32 +2,41 @@
 
 ```plantuml
 @startuml
+
 |U|User
 |S|System
 
 |U|
 start
-:(1) Click "Create Project";
+:(1) Access Projects page;
 
 |S|
-:(2) Display form \n (name, description, start/end date, heuristic_mode);
+:(2) Display project list with "Create Project" button;
+
+|U|
+:(3) Click "Create Project";
+
+|S|
+:(4) Display form \n (name, description, start/end date, heuristic_mode);
 
 repeat
   |U|
-  :(3) Enter project information;
-  :(4) Click "Create";
+  :(5) Enter project information;
+  :(6) Click "Create";
 
   |S|
-  :(5) Validate name not empty;
-  backward: (5.1) Display validation error;
+  :(7) Validate name not empty \n and start date before end date;
+  backward: (7.1) Display validation error;
 repeat while (Data valid?) is (No) not (Yes)
 
-:(6) Insert project (status=ACTIVE);
-:(7) Add creator as MANAGER in project_members;
-:(8) Notify success and redirect to project list;
+:(8) Insert project (status=ACTIVE);
+:(8.1) Initialize empty sprint backlog;
+:(9) Add creator as MANAGER in project_members;
+:(10) Generate default invite code for project;
+:(11) Notify success and redirect to new project page;
 
 |U|
-:(9) Confirm end;
+:(12) Confirm end;
 
 stop
 @enduml

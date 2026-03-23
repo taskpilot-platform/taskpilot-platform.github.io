@@ -11,6 +11,14 @@ start
 
 |S|
 :(2) Query available system skills \n not yet added by user;
+
+if (Has available skills?) then (No)
+  :(2.1) Display "You have added all available skills" notification;
+  |U|
+  stop
+else (Yes)
+endif
+
 :(3) Display form (skill dropdown, level 1-5);
 
 repeat
@@ -24,6 +32,7 @@ repeat
 repeat while (Data valid?) is (No) not (Yes)
 
 :(7) Insert new user_skill record;
+:(7.1) Update user's skill profile summary;
 :(8) Notify success;
 
 |U|

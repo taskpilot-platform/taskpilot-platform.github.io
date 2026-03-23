@@ -2,31 +2,41 @@
 
 ```plantuml
 @startuml
+
 |U|User
 |S|System
 
 |U|
 start
-:(1) Click "Create Task";
+:(1) Access project task board or backlog;
 
 |S|
-:(2) Display form \n (title, description, status, priority, \n assignee, sprint, required_skills, \n parent_task for sub-task);
+:(2) Display task list with "Create Task" button;
+
+|U|
+:(3) Click "Create Task";
+
+|S|
+:(4) Display form \n (title, description, status, priority, \n assignee, sprint, required_skills, \n parent_task for sub-task);
 
 repeat
   |U|
-  :(3) Enter task information;
-  :(4) Click "Create";
+  :(5) Enter task information;
+  :(6) Click "Create";
 
   |S|
-  :(5) Validate title not empty;
-  backward: (5.1) Display validation error;
+  :(7) Validate title not empty;
+  backward: (7.1) Display validation error;
 repeat while (Data valid?) is (No) not (Yes)
 
-:(6) Insert task record;
-:(7) Notify success;
+:(8) Insert task record;
+:(8.1) Set initial task history entry;
+:(9) If assignee selected: update assignee's \n current_workload (+1);
+:(10) Send notification to assignee if assigned;
+:(11) Notify success and display task \n in Kanban/Backlog;
 
 |U|
-:(8) Confirm end;
+:(12) Confirm end;
 
 stop
 @enduml

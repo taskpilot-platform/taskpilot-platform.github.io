@@ -7,26 +7,42 @@
 
 |U|
 start
-:(1) Select active chat session;
+:(1) Open AI Assistant;
 
 |S|
-:(2) Display chat history;
+:(2) Load available chat sessions;
+
+|U|
+if (Create new session?) then (Yes)
+  :(2.1) Click "New Chat";
+  |S|
+  :(2.2) Create new chat session record;
+else (No)
+  :(2.3) Select existing session;
+endif
+
+|S|
+:(3) Load session context \n (previous messages in session);
+:(4) Display chat history and input area;
 
 repeat
   |U|
-  :(3) Enter message;
-  :(4) Click "Send";
+  :(5) Enter message;
+  :(6) Click "Send";
 
   |S|
-  :(5) Validate message not empty;
-  backward: (5.1) Display "Message cannot be empty" error;
-  :(6) Send to AI API and wait for response;
-  :(7) Display AI response;
+  :(7) Validate message not empty;
+  backward: (7.1) Display "Message cannot be empty" error;
+  :(8) Save user message to chat_messages;
+  :(9) Send to AI API \n (with session context and \n project context if relevant);
+  :(10) Receive AI response and save to \n chat_messages;
+  :(11) Display AI response;
   |U|
-  :(8) Read AI response;
+  :(12) Read AI response;
 repeat while (Continue chatting?) is (Yes) not (No)
 
-:(9) Confirm end;
+|U|
+:(13) Confirm end;
 
 stop
 @enduml

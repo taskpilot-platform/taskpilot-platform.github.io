@@ -10,23 +10,33 @@ start
 :(1) Click "Edit" on a skill;
 
 |S|
-:(2) Display edit form with current name;
+:(2) Query skill details by skill_id;
+
+if (Skill found?) then (No)
+  :(2.1) Display "Skill not found" error;
+  |A|
+  stop
+else (Yes)
+endif
+
+:(3) Display edit form with current name;
 
 repeat
   |A|
-  :(3) Modify skill name;
-  :(4) Click "Save";
+  :(4) Modify skill name;
+  :(5) Click "Save";
 
   |S|
-  :(5) Validate not empty and check uniqueness;
-  backward: (5.1) Display validation error;
+  :(6) Validate not empty and check uniqueness;
+  backward: (6.1) Display validation error;
 repeat while (Data valid?) is (No) not (Yes)
 
-:(6) Update skill record;
-:(7) Notify success;
+:(7) Update skill record;
+:(7.1) Propagate name update to task skill references;
+:(8) Notify success and refresh skill list;
 
 |A|
-:(8) Confirm end;
+:(9) Confirm end;
 
 stop
 @enduml
