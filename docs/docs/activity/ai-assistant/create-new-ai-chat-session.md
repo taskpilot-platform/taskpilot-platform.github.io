@@ -7,22 +7,30 @@
 
 |U|
 start
-:(1) Select AI Assistant section;
+:(1) Select AI Assistant from menu;
 
 |S|
 :(2) Query existing chat sessions for user \n (ordered by created_at DESC);
-:(3) Display session list \n with "New Session" button;
+:(3) Display session list \n (session title, date, message count) \n with "New Chat" button;
 
 |U|
-:(4) Click "New Session";
+:(4) Click "New Chat";
 
 |S|
-:(5) Create new chat_session record \n (user_id, auto-generated title, created_at);
-:(6) Display new empty chat interface \n (session title editable);
+:(5) Query user's active projects \n (for optional project context);
+:(6) Display new session form \n (optional: link to a project for context);
 
 |U|
-:(7) Start typing a message;
-:(8) Confirm end;
+:(7) Optionally select a project context;
+:(8) Click "Start";
+
+|S|
+:(9) Create new chat_session record \n (user_id, project_id if selected, \n auto-generated title, created_at);
+:(10) Display new empty chat interface \n (session title editable, project context shown);
+
+|U|
+:(11) View new chat session;
+:(12) Confirm end;
 
 stop
 @enduml

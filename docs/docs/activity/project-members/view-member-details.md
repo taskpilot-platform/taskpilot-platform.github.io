@@ -7,10 +7,10 @@
 
 |U|
 start
-:(1) Click on a member;
+:(1) Click on a member from member list;
 
 |S|
-:(2) Query member info by user_id \n (name, email, role, performance_score, \n current_workload, joined_at);
+:(2) Query member info \n (name, email, role, performance_score, \n current_workload, joined_at) \n by project_id + target_user_id;
 
 if (Member found?) then (No)
   :(2.1) Display "Member not found" error;
@@ -20,10 +20,9 @@ if (Member found?) then (No)
 else (Yes)
 endif
 
-|S|
 :(3) Query member's skills \n (join user_skills + skills table);
-:(4) Query member's current tasks in project \n (count by status: TODO/IN_PROGRESS/REVIEW/DONE);
-:(5) Display member details \n (name, email, role, performance_score, \n skills list, task statistics, joined_at);
+:(4) Query member's current tasks in project \n (count by status: TODO / IN_PROGRESS / REVIEW / DONE);
+:(5) Display member details \n (name, email, role, performance_score, \n current_workload, skills list, \n task count by status, joined_at, \n update role / remove member buttons if MANAGER);
 
 |U|
 :(6) View member details;
