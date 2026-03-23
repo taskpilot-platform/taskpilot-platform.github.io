@@ -13,15 +13,31 @@ start
 :(2) Display notification list;
 
 |U|
-:(3) Click on notification \n or "Mark all as read";
+if (Action?) then (Click specific notification)
+  |S|
+  :(3a) Fetch notification record;
+  :(4a) Verify user owns notification \n (notification.user_id = current user);
 
-|S|
-:(4) Update notification is_read = true;
-:(5) Update notification badge count;
+  if (User is owner?) then (No)
+    :(4a.1) Display "Access denied" error;
+    |U|
+    :(4a.2) Confirm end;
+    stop
+  else (Yes)
+  endif
+
+  |S|
+  :(5a) Update notification is_read = true;
+  :(6a) Navigate to link_action target;
+else ("Mark all as read")
+  |S|
+  :(3b) Update all user's notifications \n (is_read = true);
+  :(4b) Update notification badge to zero;
+endif
 
 |U|
-:(6) View updated notifications;
-:(7) Confirm end;
+:(7) View updated notifications;
+:(8) Confirm end;
 
 stop
 @enduml

@@ -10,7 +10,7 @@ start
 :(1) Select Profile from menu;
 
 |S|
-:(2) Query user info by user_id;
+:(2) Query user info by user_id \n (name, email, avatar, role, status, current_workload);
 
 if (User found?) then (No)
   :(2.1) Display "User not found" error;
@@ -20,11 +20,14 @@ if (User found?) then (No)
 else (Yes)
 endif
 
-:(3) Display profile \n (name, email, avatar, role, status, workload);
+|S|
+:(3) Query user's skill list \n (join user_skills + skills table);
+:(4) Query user's active project memberships \n (projects where user is member, status != CLOSED);
+:(5) Display profile \n (name, email, avatar, role, status, \n current_workload, skills list, active projects);
 
 |U|
-:(4) View profile details;
-:(5) Confirm end;
+:(6) View profile details;
+:(7) Confirm end;
 
 stop
 @enduml

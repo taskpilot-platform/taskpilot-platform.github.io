@@ -10,7 +10,7 @@ start
 :(1) Click on a sprint;
 
 |S|
-:(2) Query sprint details;
+:(2) Query sprint details \n (name, goal, status, heuristic_mode, \n start_date, end_date);
 
 if (Sprint found?) then (No)
   :(2.1) Display "Sprint not found" error;
@@ -20,12 +20,14 @@ if (Sprint found?) then (No)
 else (Yes)
 endif
 
-:(3) Query sprint's tasks;
-:(4) Display sprint details \n (name, status, dates, task list);
+|S|
+:(3) Query sprint's tasks \n (list + count by status: \n TODO/IN_PROGRESS/REVIEW/DONE);
+:(4) Calculate sprint progress \n (percentage of tasks with status DONE);
+:(5) Display sprint details \n (name, goal, status, heuristic_mode, \n dates, task list, progress percentage);
 
 |U|
-:(5) View sprint details;
-:(6) Confirm end;
+:(6) View sprint details;
+:(7) Confirm end;
 
 stop
 @enduml

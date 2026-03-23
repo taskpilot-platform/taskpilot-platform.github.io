@@ -10,7 +10,7 @@ start
 :(1) Click on a task;
 
 |S|
-:(2) Query task details;
+:(2) Query task details \n (title, description, status, priority, \n assignee, reporter, tags, \n difficulty_level, required_skills, dates);
 
 if (Task found?) then (No)
   :(2.1) Display "Task not found" error;
@@ -20,12 +20,14 @@ if (Task found?) then (No)
 else (Yes)
 endif
 
-:(3) Query sub-tasks and comments;
-:(4) Display task details \n (title, description, status, priority, \n assignee, reporter, dates, \n sub-tasks, comments);
+|S|
+:(3) Query sub-tasks \n (tasks where parent_id = task_id);
+:(4) Query comments \n (join with users for author info, \n ordered by created_at ASC);
+:(5) Display task details \n (title, description, status, priority, \n assignee, reporter, tags, \n difficulty_level, required_skills, \n dates, sub-tasks list, comments list);
 
 |U|
-:(5) View task details;
-:(6) Confirm end;
+:(6) View task details;
+:(7) Confirm end;
 
 stop
 @enduml

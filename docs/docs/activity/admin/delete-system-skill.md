@@ -10,15 +10,15 @@ start
 :(1) Click "Delete" on a skill;
 
 |S|
-:(2) Check users using this skill;
-:(3) Display confirmation \n (N users using this skill);
+:(2) Query skill info and count of users \n with this skill in their profile;
+:(3) Display confirmation dialog \n "Delete [skill name]? \n This will remove it from [N] user profiles.";
 
 |A|
 :(4) Click "Confirm";
 
 |S|
-:(5) Delete skill (CASCADE to user_skills);
-:(6) Notify success;
+:(5) Delete skill record \n (CASCADE to user_skills);
+:(6) Notify success and refresh skill list;
 
 |A|
 :(7) Confirm end;

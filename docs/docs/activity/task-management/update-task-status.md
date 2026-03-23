@@ -10,18 +10,32 @@ start
 :(1) Drag task card to new column \n or click status button;
 
 |S|
-:(2) Update task status \n (TODO / IN_PROGRESS / REVIEW / DONE);
+:(2) Query current task status;
+:(3) Verify new status is a valid transition \n (e.g. TODO → IN_PROGRESS → REVIEW → DONE);
 
-if (Status is DONE?) then (Yes)
-  :(2.1) Update assignee workload;
-else (No)
+if (Transition valid?) then (No)
+  :(3.1) Display "Invalid status transition" error;
+  |U|
+  :(3.2) Confirm end;
+  stop
+else (Yes)
 endif
 
-:(3) Notify update;
+|S|
+:(4) Update task status \n (TODO / IN_PROGRESS / REVIEW / DONE) \n and position in column;
+
+if (Status changed to DONE?) then (Yes)
+  :(5a) Decrement assignee's current_workload;
+elseif (Status changed away from DONE?) then (Yes)
+  :(5b) Re-increment assignee's current_workload;
+else (No change)
+endif
+
+:(6) Display updated kanban card in new column;
 
 |U|
-:(4) View updated board;
-:(5) Confirm end;
+:(7) View updated board;
+:(8) Confirm end;
 
 stop
 @enduml

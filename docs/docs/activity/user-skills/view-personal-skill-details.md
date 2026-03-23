@@ -10,7 +10,7 @@ start
 :(1) Click on a skill from list;
 
 |S|
-:(2) Query skill detail by user_id + skill_id;
+:(2) Query user_skill record by user_id + skill_id \n (level, date added);
 
 if (Skill found?) then (No)
   :(2.1) Display "Skill not found" error;
@@ -20,11 +20,13 @@ if (Skill found?) then (No)
 else (Yes)
 endif
 
-:(3) Display skill details (name, level 1-5);
+|S|
+:(3) Query system skill info by skill_id \n (skill name, description);
+:(4) Display skill details \n (name, level 1-5, skill description, \n date added to profile);
 
 |U|
-:(4) View skill details;
-:(5) Confirm end;
+:(5) View skill details;
+:(6) Confirm end;
 
 stop
 @enduml

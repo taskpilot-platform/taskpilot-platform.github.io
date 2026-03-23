@@ -20,12 +20,14 @@ if (User is member?) then (No)
 else (Yes)
 endif
 
-:(3) Query project info and member count;
-:(4) Display project details \n (name, description, status, \n heuristic_mode, dates, member count);
+|S|
+:(3) Query project info \n (name, description, status, \n heuristic_mode, start_date, end_date);
+:(4) Query member count and sprint statistics \n (total sprints, active sprint info, \n sprint progress);
+:(5) Display project details \n (name, description, status, heuristic_mode, \n dates, member count, active sprint info);
 
 |U|
-:(5) View project details;
-:(6) Confirm end;
+:(6) View project details;
+:(7) Confirm end;
 
 stop
 @enduml

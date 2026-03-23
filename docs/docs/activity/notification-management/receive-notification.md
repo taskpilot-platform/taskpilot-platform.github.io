@@ -7,16 +7,22 @@
 
 |U|
 start
-:(1) User is active in the system;
+:(1) Click notification bell;
 
 |S|
-:(2) Receive notification event \n (task assigned / sprint started);
-:(3) Create notification record;
-:(4) Display notification badge to user;
+:(2) Query all notifications for user \n (ordered by created_at DESC);
+:(3) Count unread notifications \n (is_read = false);
+:(4) Display notification list \n (unread highlighted, read dimmed) \n with badge count;
+:(5) Display notification items \n (title, message, type, is_read, \n created_at, link_action);
+
+if (Has unread notifications?) then (Yes)
+  :(5.1) Display "Mark all as read" button;
+else (No)
+endif
 
 |U|
-:(5) View notification badge;
-:(6) Confirm end;
+:(6) View notifications;
+:(7) Confirm end;
 
 stop
 @enduml
