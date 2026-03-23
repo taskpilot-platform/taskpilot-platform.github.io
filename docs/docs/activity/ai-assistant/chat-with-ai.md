@@ -18,7 +18,10 @@ repeat
   :(4) Click "Send";
 
   |S|
-  :(5) Validate message not empty;
+  repeat
+    :(5) Validate message not empty;
+    backward: (5.1) Display "Message cannot be empty" error;
+  repeat while (Message valid?) is (No) not (Yes)
   :(6) Send to AI API and wait for response;
   :(7) Display AI response;
   |U|
