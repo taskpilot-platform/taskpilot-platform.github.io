@@ -23,25 +23,28 @@ users: {
    password_hash: varchar
    avatar_url: text
    role: system_role {constraint: "enum(ADMIN,USER)"}
-   status: user_status {constraint: "enum(AVAILABLE,BUSY,OOO)"}
+   status: user_status {constraint: "enum(AVAILABLE,BUSY,OOO,DEACTIVATED)"}
    current_workload: int
    created_at: timestamp
    updated_at: timestamp
 }
 
-# THÊM MỚI BẢNG REFRESH TOKENS Ở ĐÂY
 refresh_tokens: {
    shape: sql_table
    id: bigint {constraint: PK}
    token: varchar {constraint: UNQ}
    expiry_date: timestamp
    user_id: bigint {constraint: FK}
+   created_at: timestamp
+   updated_at: timestamp
 }
 
 skills: {
    shape: sql_table
    id: bigint {constraint: PK}
    name: varchar {constraint: UNQ}
+   description: text
+   is_active: boolean
 }
 
 user_skills: {
@@ -61,6 +64,7 @@ projects: {
    start_date: date
    end_date: date
    created_at: timestamp
+   workflow_mode: varchar
 }
 
 project_members: {
@@ -95,15 +99,36 @@ tasks: {
    status: task_status {constraint: "enum(TODO,IN_PROGRESS,REVIEW,DONE)"}
    priority: priority_level {constraint: "enum(LOW,MEDIUM,HIGH,URGENT)"}
    position: float
-   tags: "text[]"
+   legacy_tags_do_not_use: jsonb
    difficulty_level: int
-   required_skills: jsonb
+   legacy_skills_do_not_use: jsonb
    assignee_id: bigint {constraint: FK}
    reporter_id: bigint {constraint: FK}
    start_date: timestamp
    due_date: timestamp
    created_at: timestamp
    updated_at: timestamp
+}
+
+labels: {
+   shape: sql_table
+   id: bigint {constraint: PK}
+   project_id: bigint {constraint: FK}
+   name: varchar
+   color: varchar
+   created_at: timestamp
+}
+
+task_labels: {
+   shape: sql_table
+   task_id: bigint {constraint: [PK, FK]}
+   label_id: bigint {constraint: [PK, FK]}
+}
+
+task_required_skills: {
+   shape: sql_table
+   task_id: bigint {constraint: [PK, FK]}
+   skill_id: bigint {constraint: [PK, FK]}
 }
 
 comments: {
@@ -113,6 +138,17 @@ comments: {
    user_id: bigint {constraint: FK}
    content: text
    created_at: timestamp
+   updated_at: timestamp
+   parent_comment_id: bigint {constraint: FK}
+   deleted_at: timestamp
+   deleted_by: bigint {constraint: FK}
+}
+
+comment_mentions: {
+   shape: sql_table
+   comment_id: bigint {constraint: [PK, FK]}
+   user_id: bigint {constraint: [PK, FK]}
+   created_at: timestamp
 }
 
 notifications: {
@@ -121,10 +157,21 @@ notifications: {
    user_id: bigint {constraint: FK}
    title: varchar
    message: text
-   type: notification_type {constraint: "enum(SYSTEM,ASSIGNED,DEADLINE_NEAR)"}
+   type: notification_type {constraint: "enum(SYSTEM,ASSIGNED,DEADLINE_NEAR,COMMENT,MENTION,REPLY)"}
    is_read: boolean
    link_action: varchar
    created_at: timestamp
+}
+
+password_reset_tokens: {
+   shape: sql_table
+   id: bigint {constraint: PK}
+   token: varchar {constraint: UNQ}
+   expiry_date: timestamp
+   is_used: boolean
+   user_id: bigint {constraint: FK}
+   created_at: timestamp
+   updated_at: timestamp
 }
 
 ai_logs: {
@@ -140,6 +187,10 @@ ai_logs: {
    tool_output: jsonb
    human_feedback: varchar
    created_at: timestamp
+   model_used: varchar
+   tokens_used: int
+   duration_ms: int
+   session_id: bigint {constraint: FK}
 }
 
 chat_sessions: {
@@ -148,6 +199,7 @@ chat_sessions: {
    user_id: bigint {constraint: FK}
    title: varchar
    created_at: timestamp
+   updated_at: timestamp
 }
 
 chat_messages: {
@@ -157,6 +209,29 @@ chat_messages: {
    sender: chat_sender {constraint: "enum(USER,ASSISTANT,SYSTEM)"}
    content: text
    created_at: timestamp
+   client_message_id: varchar
+}
+
+ai_chat_memories: {
+   shape: sql_table
+   session_id: bigint {constraint: [PK, FK]}
+   messages_json: text
+   created_at: timestamp
+   updated_at: timestamp
+}
+
+ai_chat_requests: {
+   shape: sql_table
+   id: bigint {constraint: PK}
+   session_id: bigint {constraint: FK}
+   user_id: bigint {constraint: FK}
+   client_message_id: varchar
+   phase: varchar
+   model_used: varchar
+   assistant_message_id: bigint {constraint: FK}
+   error_message: text
+   created_at: timestamp
+   updated_at: timestamp
 }
 
 refresh_tokens.user_id -> users.id
@@ -172,11 +247,25 @@ tasks.assignee_id -> users.id
 tasks.reporter_id -> users.id
 comments.task_id -> tasks.id
 comments.user_id -> users.id
+comments.parent_comment_id -> comments.id
+comments.deleted_by -> users.id
+comment_mentions.comment_id -> comments.id
+comment_mentions.user_id -> users.id
 notifications.user_id -> users.id
 ai_logs.project_id -> projects.id
 ai_logs.user_id -> users.id
 ai_logs.chat_message_id -> chat_messages.id
+ai_logs.session_id -> chat_sessions.id
 chat_sessions.user_id -> users.id
 chat_messages.session_id -> chat_sessions.id
-
+password_reset_tokens.user_id -> users.id
+labels.project_id -> projects.id
+task_labels.task_id -> tasks.id
+task_labels.label_id -> labels.id
+task_required_skills.task_id -> tasks.id
+task_required_skills.skill_id -> skills.id
+ai_chat_memories.session_id -> chat_sessions.id
+ai_chat_requests.session_id -> chat_sessions.id
+ai_chat_requests.assistant_message_id -> chat_messages.id
+ai_chat_requests.user_id -> users.id
 ```
