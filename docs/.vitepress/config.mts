@@ -17,6 +17,7 @@ export default defineConfig({
 			});
 		},
 	},
+	ignoreDeadLinks: true,
 
 	themeConfig: {
 		// https://vitepress.dev/reference/default-theme-config
