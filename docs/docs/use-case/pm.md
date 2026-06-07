@@ -9,8 +9,6 @@ skinparam usecase {
   BorderColor DarkSlateGray
 }
 
-actor "Project Manager" as PM
-
 rectangle "TaskPilot System" {
 
   package "Authentication" {
@@ -72,25 +70,6 @@ rectangle "TaskPilot System" {
   UC_AI ..> UC_TASK : <<extend>>
   UC_COMMENT ..> UC_TASK : <<extend>>
 }
-
-PM -- UC_LOGIN
-PM -- UC_REG
-PM -- UC_PROFILE
-PM -- UC_SKILLS
-PM -- UC_CREATE_P
-PM -- UC_VIEW_P
-PM -- UC_UPDATE_P
-PM -- UC_JOIN_P
-PM -- UC_LEAVE_P
-PM -- UC_VIEW_M
-PM -- UC_SPRINT
-PM -- UC_TASK
-PM -- UC_KANBAN
-PM -- UC_ASSIGN
-PM -- UC_CHAT
-PM -- UC_AI
-PM -- UC_COMMENT
-PM -- UC_NOTI
 
 @enduml
 ```

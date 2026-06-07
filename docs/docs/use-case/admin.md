@@ -9,8 +9,6 @@ skinparam usecase {
   BorderColor DarkSlateGray
 }
 
-actor "Administrator" as AD
-
 rectangle "TaskPilot System" {
 
   package "Authentication" {
@@ -49,14 +47,6 @@ rectangle "TaskPilot System" {
   UC_FORGOT ..> UC_LOGIN : <<extend>>
   UC_MARK ..> UC_NOTI : <<extend>>
 }
-
-AD -- UC_LOGIN
-AD -- UC_FORGOT
-AD -- UC_RESET
-AD -- UC_CFG
-AD -- UC_VIEW_SK
-AD -- UC_VIEW_US
-AD -- UC_NOTI
 
 @enduml
 ```

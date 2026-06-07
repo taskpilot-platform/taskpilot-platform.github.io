@@ -9,8 +9,6 @@ skinparam usecase {
   BorderColor DarkSlateGray
 }
 
-actor "Member" as MEM
-
 rectangle "TaskPilot System" {
 
   package "Authentication" {
@@ -67,22 +65,6 @@ rectangle "TaskPilot System" {
   UC_COMMENT ..> UC_TASK : <<extend>>
   UC_BACKLOG ..> UC_TASK : <<extend>>
 }
-
-MEM -- UC_LOGIN
-MEM -- UC_REG
-MEM -- UC_PROFILE
-MEM -- UC_SKILLS
-MEM -- UC_VIEW_P
-MEM -- UC_DETAIL_P
-MEM -- UC_JOIN_P
-MEM -- UC_VIEW_M
-MEM -- UC_SPRINT
-MEM -- UC_TASK
-MEM -- UC_KANBAN
-MEM -- UC_COMMENT
-MEM -- UC_NOTI
-MEM -- UC_CHAT
-MEM -- UC_HISTORY
 
 @enduml
 ```
