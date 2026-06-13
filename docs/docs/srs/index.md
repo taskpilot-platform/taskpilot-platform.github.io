@@ -1,2536 +1,7619 @@
 ---
-outline: [1, 5]
+outline: [2, 4]
 ---
 
-**TMS - Tourist Management System**
-
-## Revision and Signoff Sheet
-
-### Change Record
-
-| Author   | Version | Change reference         | Date       |
-| -------- | ------- | ------------------------ | ---------- |
-| TMS Team | 0.1.0   | Initial project creation | 03/11/2025 |
-
-### Reviewers
-
-| Name           | Company | Version | Position        | Date       |
-| -------------- | ------- | ------- | --------------- | ---------- |
-| Đặng Phú Thiện | TMS     | 0.1.0   | Project Manager | 03/11/2025 |
-
-## 1. Introduction
-
-### 1.1 Purpose
-
-This Software Requirements Specification document outlines the comprehensive requirements for the "TMS" (Tourist Management System) platform. This document serves as a detailed technical foundation for the development, deployment, and maintenance of the web application. It provides developers with clear guidelines for planning, task assignment, and implementation. Additionally, quality assurance teams will utilize this document to design test cases that align with specified requirements, ensuring the final product meets both quality standards and user expectations for an online tourism management system.
-
-### 1.2 Scope
-
-This document encompasses the TMS platform, which is designed to provide a comprehensive online tourism management system for booking trips, managing routes and attractions, and handling customer bookings. The system supports multiple user roles including customers, staff, and administrators, each with distinct functionalities for browsing trips, managing bookings, managing routes and attractions, and administering the platform.
-
-### 1.3 Intended Audiences and Document Organization
-
-This document is intended for:
-
-- **Development Team**: Responsible for creating detailed designs, implementing features, and performing unit testing, integration testing, and system testing for the application using ReactJS frontend and Java Spring Boot backend.
-- **Quality Assurance Team**: Responsible for conducting user acceptance testing sessions and validating system requirements.
-- **Documentation Team**: Responsible for creating user guides and help documentation for the application.
-- **Project Stakeholders**: Business owners and managers who need to understand system capabilities and requirements.
-
-Below are the main sections of this document:
-
-- **1. Introduction**: General introduction and overview of this document.
-- **2. Functional Requirements**: Detailed description of functional requirements including use cases, sequence diagrams, and activity diagrams.
-- **3. Non-functional Requirements**: Description of non-functional requirements such as security, performance, and interface requirements.
-- **4. Other Requirements**: Additional requirements including archive functions and other supporting features.
-- **5. Appendixes**: Supporting information including glossary, messages, and issues list.
-
-### 1.4 References
-
-| #   | Title             | Version | File Name / Link         | Description                                        |
-| --- | ----------------- | ------- | ------------------------ | -------------------------------------------------- |
-| 1   | Use Case Diagrams | 0.1.0   | Use Case Documentation   | Complete use case diagrams for all user roles      |
-| 2   | Sequence Diagrams | 0.1.0   | Sequence Documentation   | Sequence flow diagrams for all major features      |
-| 3   | Activity Diagrams | 0.1.0   | Activity Documentation   | Activity flow diagrams for business processes      |
-| 4   | Database Schema   | 0.1.0   | Database Design Document | Entity-relationship diagrams and table definitions |
-
-## 2. Functional Requirements
-
-### 2.1 Use Case Description
-
-#### 2.1.1 Authentication Use Case
-
-##### 2.1.1.1 Sign In
-
-###### Use Case Description
-
-| Name               | Sign In                                                                                                                                        |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows users to authenticate and access the TMS system using their credentials (username/email and password).                    |
-| **Actor**          | Customer, Staff, Administrator                                                                                                                 |
-| **Trigger**        | User navigates to TMS login page and clicks "Sign In" button after entering credentials.                                                       |
-| **Pre-condition**  | User's device must be connected to the internet. User must have an existing account with status "active" in the system. System is operational. |
-| **Post-condition** | User is successfully authenticated with valid JWT token, user session is created, and user is redirected to role-appropriate dashboard.        |
-
-###### Sequence Flow
-
-[sequence-auth-sign-in](../sequence/auth/sign-in-tms)
-
-###### Activities Flow
-
-[activity-auth-sign-in](../activity/auth/sign-in)
-
-###### Business Rules
-
-| Activity        | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| :-------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)             | BR1     | **Displaying Rules:** The system displays a "Sign In" screen with fields: [txtBoxUsername] for username/email input, [txtBoxPassword] for password input with password masking, [btnSignIn] button for form submission, [linkForgotPassword] hyperlink to password recovery, and [linkSignUp] hyperlink to registration. (Refer to "Sign In" view in "View Description" file)                                                                                                                                                                                                                                                                          |
-| (5)             | BR2     | **Validation Rules:** When user enters credentials and clicks [btnSignIn], system uses Text_change() method to validate input. System checks: If [txtBoxUsername].Text.isEmpty() = true OR [txtBoxPassword].Text.isEmpty() = true: System moves to step (4.1) to call displayErrorMessage("Username and password are required.") (Refer to MSG 1). Else: System proceeds to step (5) to send credentials to backend via signIn([txtBoxUsername].Text, [txtBoxPassword].Text) method.                                                                                                                                                                   |
-| (7), (8), (8.1) | BR3     | **Querying Rules:** System queries user account from table "User" (Refer to "User" table in "DB Sheet" file) with SQL: "SELECT user_id, username, email, password_hash, role, status, failed_login_attempts, last_failed_login FROM User WHERE (username = [txtBoxUsername].Text OR email = [txtBoxUsername].Text) AND status = 'active'". If COUNT = 0: System moves to step (8.1) to call displayErrorMessage("Invalid username/email or password.") (Refer to MSG 2), increment retry counter, and use case ends at step (5.2). Else: System moves to step (9) to verify password.                                                                  |
-| (9), (9.1)      | BR4     | **Validation Rules:** System verifies password by calling bcryptCompare([txtBoxPassword].Text, User.password_hash) method. If bcryptCompare() returns false: System moves to step (9.1) to execute SQL UPDATE: "UPDATE User SET failed_login_attempts = failed_login_attempts + 1, last_failed_login = CURRENT_TIMESTAMP WHERE user_id = [User.user_id]", call displayErrorMessage("Invalid username/email or password.") (Refer to MSG 2), and use case ends at step (5.2). Else: System resets failed_login_attempts to 0 and proceeds to step (10).                                                                                                 |
-| (10), (10.1)    | BR5     | **Validation Rules:** System checks account lock status by evaluating condition: If User.failed_login_attempts >= 5 AND (CURRENT_TIMESTAMP - User.last_failed_login) < INTERVAL '15 minutes': System moves to step (10.1) to call displayErrorMessage("Account temporarily locked due to multiple failed login attempts. Please try again after 15 minutes or contact support.") (Refer to MSG 3) and use case ends at step (5.2). Else: System proceeds to step (11) to generate JWT token.                                                                                                                                                           |
-| (14)            | BR6     | **Displaying Rules:** System generates JWT token with payload {user_id, username, role, exp: 24h} and stores in browser localStorage by calling localStorage.setItem('authToken', jwt_token). System redirects user to home page using redirectToHomePage(User.role) method. System displays "Home" view corresponding to user role: If User.role = 'CUSTOMER' → display "Customer Home" view; If User.role = 'STAFF' → display "Staff Dashboard" view; If User.role = 'ADMIN' → display "Admin Dashboard" view. (Refer to "Home" view in "View Description" file). System displays success message "Welcome back, [User.username]!" (Refer to MSG 4). |
-
-##### 2.1.1.2 Sign Up
-
-###### Use Case Description
-
-| Name               | Sign Up                                                                                                                 |
-| :----------------- | :---------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows new users to create a Customer account in the TMS system by providing registration information.    |
-| **Actor**          | New User (becomes Customer after successful registration)                                                               |
-| **Trigger**        | User navigates to TMS registration page and clicks "Sign Up" button after filling in all required fields.               |
-| **Pre-condition**  | User's device must be connected to the internet. User does not have an existing account. System is operational.         |
-| **Post-condition** | New Customer account is created with status "active", and user is redirected to Sign In page with confirmation message. |
-
-###### Sequence Flow
-
-[sequence-auth-sign-up](../sequence/auth/sign-up-tms)
-
-###### Activities Flow
-
-[activity-auth-sign-up](../activity/auth/sign-up)
-
-###### Business Rules
-
-| Activity   | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| :--------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)        | BR7     | **Displaying Rules:** The system displays a "Sign Up" screen with registration form fields: [txtBoxUsername] for username (4-20 characters), [txtBoxEmail] for email address, [txtBoxFullName] for full name, [txtBoxPassword] for password with password strength indicator, [txtBoxConfirmPassword] for password confirmation, [chkBoxAgreeTerms] checkbox for terms acceptance, and [btnSignUp] button. (Refer to "Sign Up" view in "View Description" file)                                                                                                                                                                                          |
-| (5)        | BR8     | **Validation Rules:** When user enters registration data, system uses Text_change() method to validate in repeat loop: If [txtBoxUsername].Text.length < 4 OR > 20 OR invalid format → displayFieldError() (Refer to MSG 1). If [txtBoxEmail].Text.matches("[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}") = false → displayFieldError() (Refer to MSG 1). If [txtBoxFullName].Text.length < 2 OR > 100 → displayFieldError() (Refer to MSG 1). If [txtBoxPassword].Text.length < 8 OR missing uppercase/lowercase/digit → displayFieldError() (Refer to MSG 1). If [txtBoxConfirmPassword].Text != [txtBoxPassword].Text → displayFieldError() (Refer to MSG 1). |
-| (8), (8.1) | BR9     | **Querying Rules:** System queries table "User" (Refer to "User" table in "DB Sheet" file) with SQL: "SELECT COUNT(\*) FROM User WHERE username = [txtBoxUsername].Text OR email = [txtBoxEmail].Text". If COUNT > 0: System moves to step (8.1) to call displayErrorMessage("Username or email already exists.") (Refer to MSG 5) and use case ends. Else: System calls bcryptHash([txtBoxPassword].Text, saltRounds=10), generates user_id via generateUUID(), executes SQL INSERT to create new user with role='CUSTOMER' and cart record.                                                                                                            |
-| (17)       | BR10    | **Displaying Rules:** System calls redirectToSignInPage() to navigate to Sign In page and displays success message "Registration successful!" via displaySuccessMessage() (Refer to MSG 6). System sends welcome email to [txtBoxEmail].Text in background.                                                                                                                                                                                                                                                                                                                                                                                              |
-
-##### 2.1.1.3 Forgot Password
-
-###### Use Case Description
-
-| Name               | Forgot Password                                                                                                                    |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows users to reset their forgotten password using email verification process.                                     |
-| **Actor**          | Customer, Staff, Administrator (who forgot password)                                                                               |
-| **Trigger**        | User clicks "Forgot Password" link on Sign In page.                                                                                |
-| **Pre-condition**  | User's device must be connected to the internet. User must have registered account with valid email. Email service is operational. |
-| **Post-condition** | User receives password reset email with token, sets new password successfully, and can sign in with new credentials.               |
-
-###### Sequence Flow
-
-[sequence-auth-forgot-password](../sequence/auth/forgot-password)
-
-###### Activities Flow
-
-[activity-auth-forgot-password](../activity/auth/forgot-password)
-
-###### Business Rules
-
-| Activity             | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| :------------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)                  | BR11    | **Displaying Rules:** System displays "Forgot Password" view containing [txtBoxEmail], [btnSendResetLink], and help text explaining password reset process. (Refer to "Forgot Password" view in "View Description" file)                                                                                                                                                                                                                                                                                                                                                                               |
-| (5)                  | BR12    | **Validation Rules:** When user enters email in repeat loop (steps 3-5), method Text_change() validates [txtBoxEmail].Text matches email regex pattern. If [txtBoxEmail].isEmpty() = true OR format invalid → display error message (Refer to MSG 1), return to step (3). Else proceed to step (6).                                                                                                                                                                                                                                                                                                    |
-| (6) through (12)     | BR13    | **Querying Rules:** When user clicks [btnSendResetLink], system checks user existence with SQL: "SELECT user_id, email FROM User WHERE email = [txtBoxEmail].Text AND status = 'active'". If user not found → logWarningEvent(), display generic success message (Refer to MSG 7) to prevent email enumeration, end process. If user exists → generateResetToken() with 24h expiry, SQL: "INSERT INTO Password_Reset_Token (token, user_id, expires_at) VALUES (...)", sendResetEmail(), display generic success message (Refer to MSG 7).                                                             |
-| (15), (15.1), (15.2) | BR14    | **Querying Rules:** When user clicks reset link from email, system extracts token from URL parameter and validates with SQL: "SELECT token_id, user_id, expires_at, is_used FROM Password_Reset_Token WHERE token = [extractedToken]". System checks: if token not found OR expires_at < NOW() OR is_used = true → display "Invalid or expired token" error (Refer to MSG 8), end process. Else proceed to step (16). (Refer to "Password_Reset_Token" table in "DB Sheet" file)                                                                                                                       |
-| (16)                 | BR15    | **Displaying Rules:** System displays "Set New Password" form containing [txtBoxNewPassword], [txtBoxConfirmPassword], [btnResetPassword], [hiddenToken] field, and password requirements text (min 8 chars, uppercase, lowercase, number). (Refer to "Set New Password" view in "View Description" file)                                                                                                                                                                                                                                                                                              |
-| (19)                 | BR16    | **Validation Rules:** When user enters password in repeat loop (steps 17-19), method Text_change() validates [txtBoxNewPassword].Text and [txtBoxConfirmPassword].Text. Checks: if [txtBoxNewPassword].length < 8 OR not contains uppercase OR not contains lowercase OR not contains number OR [txtBoxNewPassword].Text ≠ [txtBoxConfirmPassword].Text → display error message (Refer to MSG 1), return to step (17). Else proceed to step (20).                                                                                                                                                      |
-| (20), (21), (22)     | BR17    | **Querying Rules:** When user clicks [btnResetPassword], system hashes new password using bcryptHash([txtBoxNewPassword].Text), updates database with SQL: "UPDATE User SET password_hash = [hashedPassword], updated_at = NOW() WHERE user_id = (SELECT user_id FROM Password_Reset_Token WHERE token = [hiddenToken])", marks token as used with SQL: "UPDATE Password_Reset_Token SET is_used = true WHERE token = [hiddenToken]", displays success "Password reset successful" (Refer to MSG 9), waits 3 seconds, then executes redirectToSignInPage(). (Refer to "User" table in "DB Sheet" file) |
-
-##### 2.1.1.4 Manage Profile
-
-###### Use Case Description
-
-| Name               | Manage Profile                                                                                                                                             |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows authenticated users to view and update their personal profile information including full name, email, phone number, and avatar image. |
-| **Actor**          | Customer, Staff, Administrator                                                                                                                             |
-| **Trigger**        | User clicks "Profile" or "My Account" menu item from navigation bar.                                                                                       |
-| **Pre-condition**  | User's device must be connected to the internet. User must be signed in with valid active session.                                                         |
-| **Post-condition** | User's profile information is updated in system, changes are saved to database, and success confirmation is displayed to user.                             |
-
-###### Sequence Flow
-
-[sequence-auth-manage-profile](../sequence/auth/manage-profile-tms)
-
-###### Activities Flow
-
-[activity-auth-manage-profile](../activity/auth/manage-profile)
-
-###### Business Rules
-
-| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| :----------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1)               | BR19    | **Validation Rules:** When user accesses profile settings, system verifies JWT token from localStorage with verifyJWT(). If token invalid OR expired OR not found → display error "Session expired. Please sign in again." (Refer to MSG 10), execute redirectToSignInPage(), end process at step (2.2).                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| (3)                      | BR20    | **Querying Rules:** System queries user data from table "User" with SQL: "SELECT user_id, username, email, full_name, phone_number, avatar_url, created_at FROM User WHERE user_id = [CurrentUser.user_id] AND status = 'active'". Stores result in [CurrentUserData] object. (Refer to "User" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| (4)                      | BR21    | **Displaying Rules:** System displays "Manage Profile" view containing two tabs: [tabUpdateInfo] with [txtBoxFullName], [txtBoxEmail], [txtBoxPhoneNumber], [fileUploadAvatar], [btnSave]; and [tabChangePassword] with [txtBoxCurrentPassword], [txtBoxNewPassword], [txtBoxConfirmPassword], [btnChangePassword]. Fields populated with [CurrentUserData] values. (Refer to "Manage Profile" view in "View Description" file)                                                                                                                                                                                                                                                                                                                           |
-| (8)                      | BR22    | **Validation Rules:** When user edits fields in repeat loop and clicks [btnSave], system validates using Text_change(): if [txtBoxEmail].isEmpty() = true OR not matches email regex → error; if [txtBoxFullName].length < 2 OR [txtBoxFullName].length > 100 → error; if [txtBoxPhoneNumber].length < 10 OR [txtBoxPhoneNumber].length > 15 OR not matches digit regex → error. If any validation fails → display error (Refer to MSG 1), return to step (6). Else proceed to step (9).                                                                                                                                                                                                                                                                  |
-| (9), (9.1), (10), (11)   | BR23    | **Validation Rules:** System checks email uniqueness with SQL: "SELECT COUNT(\*) FROM User WHERE email = [txtBoxEmail].Text AND user_id != [CurrentUser.user_id]". If COUNT > 0 → display error "Email already registered" (Refer to MSG 11), return to step (6). Else system updates with SQL: "UPDATE User SET email = [txtBoxEmail].Text, full_name = [txtBoxFullName].Text, phone_number = [txtBoxPhoneNumber].Text, updated_at = NOW() WHERE user_id = [CurrentUser.user_id]", display success "Profile updated successfully" (Refer to MSG 12). If email changed → sendNotificationEmail(oldEmail, newEmail). (Refer to "User" table in "DB Sheet" file)                                                                                            |
-| (14)                     | BR24    | **Validation Rules:** When user enters passwords in repeat loop and clicks [btnChangePassword], system validates using Text_change(): if [txtBoxCurrentPassword].isEmpty() = true → error; if [txtBoxNewPassword].length < 8 OR not contains uppercase OR not contains lowercase OR not contains number → error; if [txtBoxNewPassword].Text ≠ [txtBoxConfirmPassword].Text → error. If any validation fails → display error (Refer to MSG 1), return to step (12). Else proceed to step (15).                                                                                                                                                                                                                                                            |
-| (15), (15.1), (16), (17) | BR25    | **Validation Rules:** System verifies current password with bcryptCompare([txtBoxCurrentPassword].Text, [CurrentUserData.password_hash]). If comparison returns false → display error "Incorrect current password" (Refer to MSG 13), return to step (12). Else system hashes new password with bcryptHash([txtBoxNewPassword].Text), then updates database with SQL: "UPDATE User SET password_hash = [hashedPassword], updated_at = NOW() WHERE user_id = [CurrentUser.user_id]", sends confirmation email sendPasswordChangeEmail([CurrentUserData.email]), displays success "Password changed successfully. Please sign in again." (Refer to MSG 14), executes clearJWTToken() and redirectToSignInPage(). (Refer to "User" table in "DB Sheet" file) |
-
-#### 2.1.2 Browse Trips Use Case
-
-##### 2.1.2.1 View and Filter Available Trips
-
-###### Use Case Description
-
-| Name               | View and Filter Available Trips                                                                                                                  |
-| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows users to browse and filter available trips in TMS system using various criteria such as destination, date range, and price. |
-| **Actor**          | Customer (primary), Staff, Administrator (viewing only)                                                                                          |
-| **Trigger**        | User navigates to "Browse Trips" page from navigation bar or after successful sign in (for Customer role).                                       |
-| **Pre-condition**  | User's device must be connected to the internet. System has at least one active trip in database. System is operational.                         |
-| **Post-condition** | User can view list of available trips matching filter criteria, with pagination, and can select trip to view details or add to cart/favorites.   |
-
-###### Sequence Flow
-
-[sequence-browse-trips-view-and-filter-available-trips](../sequence/browse-trips/view-and-filter-available-trips)
-
-###### Activities Flow
-
-[activity-browse-trips-view-and-filter-available-trips](../activity/browse-trips/view-and-filter-available-trips)
-
-###### Business Rules
-
-| Activity   | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| :--------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)        | BR26    | **Displaying Rules:** System displays "Browse Trips" view containing [txtBoxKeyword], [datePickerStartDate], [datePickerEndDate], [sliderPriceRange], [dropdownDestination], [btnSearch], and list of available trips with pagination showing 12 trips per page. (Refer to "Browse Trips" view in "View Description" file)                                                                                                                                                                                                                                                                                                                               |
-| (5)        | BR27    | **Validation Rules:** When user submits search in repeat loop (steps 3-5), system validates search criteria using method Text_change(): if [txtBoxKeyword].Text.length > 0 AND [txtBoxKeyword].Text.length < 3 → error; if [datePickerStartDate].Value > [datePickerEndDate].Value → error; if [sliderPriceRange].Min > [sliderPriceRange].Max → error. If validation fails → display error message (Refer to MSG 15, MSG 16), return to step (3). Else proceed to query.                                                                                                                                                                                |
-| (5), (5.1) | BR28    | **Querying Rules:** System queries trips from table "Trip" with SQL: "SELECT trip_id, trip_name, destination, departure_date, return_date, price, available_slots, image_url FROM Trip WHERE status = 'active' AND ([txtBoxKeyword].Text = '' OR trip_name LIKE '%[txtBoxKeyword]%' OR destination LIKE '%[txtBoxKeyword]%') AND departure_date BETWEEN [datePickerStartDate] AND [datePickerEndDate] AND price BETWEEN [sliderPriceRange].Min AND [sliderPriceRange].Max ORDER BY departure_date ASC". If COUNT = 0 → display "No trips found matching your criteria" (Refer to MSG 17), return to step (3). (Refer to "Trip" table in "DB Sheet" file) |
-| (6)        | BR29    | **Displaying Rules:** System displays search results in grid layout with trip cards. Each card shows: [imgTripThumbnail], [lblTripName], [lblDestination], [lblDepartureDate], [lblPrice], [lblAvailableSlots], [btnViewDetails], [iconAddToFavorites], [btnAddToCart]. Results paginated with 12 items per page. (Refer to "Trip Card" component in "View Description" file)                                                                                                                                                                                                                                                                            |
-
-##### 2.1.2.2 View Trip Details
-
-###### Use Case Description
-
-| Name               | View Trip Details                                                                                                                                                      |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows users to view comprehensive details of a specific trip including itinerary, route attractions, pricing, available slots, and booking information. |
-| **Actor**          | Customer (primary), Staff, Administrator                                                                                                                               |
-| **Trigger**        | User clicks "View Details" button on a trip card from Browse Trips page, or navigates directly via trip URL.                                                           |
-| **Pre-condition**  | User's device must be connected to the internet. Trip ID must exist in database. Trip status must be "active".                                                         |
-| **Post-condition** | User can view complete trip information and perform actions: add to cart, add to favorites, share trip, or proceed to booking.                                         |
-
-###### Sequence Flow
-
-[sequence-browse-trips-view-trip-details](../sequence/browse-trips/view-trip-details)
-
-###### Activities Flow
-
-[activity-browse-trips-view-trip-details](../activity/browse-trips/view-trip-details)
-
-###### Business Rules
-
-| Activity   | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| :--------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (3), (3.1) | BR30    | **Validation Rules:** When user selects trip in repeat loop (steps 2-3), system verifies trip exists and is active with SQL: "SELECT trip_id, status FROM Trip WHERE trip_id = [trip_id]". If COUNT = 0 OR status != 'active' → display error "Trip not found or no longer available" (Refer to MSG 18), return to step (2). Else proceed to step (4).                                                                                                                                                                                                                                                                                                                                                                                  |
-| (4)        | BR31    | **Querying Rules:** System queries full trip details from table "Trip" with SQL: "SELECT t.\*, r.route_name, r.description as route_description, GROUP_CONCAT(a.attraction_name) as attractions FROM Trip t JOIN Route r ON t.route_id = r.route_id LEFT JOIN Route_Attraction ra ON r.route_id = ra.route_id LEFT JOIN Attraction a ON ra.attraction_id = a.attraction_id WHERE t.trip_id = [trip_id] GROUP BY t.trip_id". System displays "Trip Details" view showing: [imgTripGallery], [lblTripName], [lblDestination], [lblDepartureDate], [lblReturnDate], [lblPrice], [lblAvailableSlots], [txtRouteDescription], [listAttractions], [btnAddToCart], [btnAddToFavorites], [btnShare]. (Refer to "Trip" table in "DB Sheet" file) |
-
-#### 2.1.3 Adjust Cart Use Case
-
-##### 2.1.3.1 Add Trip to Cart
-
-###### Use Case Description
-
-| Name               | Add Trip to Cart                                                                                                                               |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows authenticated users to add a selected trip to their shopping cart for future booking.                                     |
-| **Actor**          | Customer (must be signed in)                                                                                                                   |
-| **Trigger**        | User clicks "Add to Cart" button on trip card (Browse Trips page) or trip details page.                                                        |
-| **Pre-condition**  | User must be signed in with active session. Trip must exist and have status "active". Trip must have available_slots > 0.                      |
-| **Post-condition** | Trip is added to user's cart, cart item count is updated, success message is displayed, and user can continue browsing or proceed to checkout. |
-
-###### Sequence Flow
-
-[sequence-adjust-cart-add-trip-to-cart](../sequence/adjust-cart/add-trip-to-cart)
-
-###### Activities Flow
-
-[activity-adjust-cart-add-trip-to-cart](../activity/adjust-cart/add-trip-to-cart)
-
-###### Business Rules
-
-| Activity         | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| :--------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (3), (3.1)       | BR33    | **Validation Rules:** When user clicks [btnAddToCart] at step (2), system verifies JWT token from localStorage with verifyJWT(). If token invalid OR not found → display error "Please sign in to add trips to cart" (Refer to MSG 19), execute redirectToSignInPage() at step (3.1), user performs login at step (3.2). Else proceed to step (4).                                                                                                                                                                                                                                                                 |
-| (5)              | BR34    | **Displaying Rules:** System calls getOrCreateCart([user_id]) to retrieve or initialize cart, then displays "Add to Cart" modal containing [lblTripName], [lblPrice], [numericUpDownQuantity] with default value 1, [lblAvailableSeats], [btnConfirm], [btnCancel]. (Refer to "Add to Cart Form" view in "View Description" file)                                                                                                                                                                                                                                                                                  |
-| (8), (9), (10)   | BR35    | **Validation Rules:** When user enters quantity in repeat loop (steps 6-10) and clicks [btnConfirm], system validates: if [numericUpDownQuantity].Value < 1 OR [numericUpDownQuantity].Value > 20 → display error "Quantity must be between 1 and 20" (Refer to MSG 20), return to step (6). System queries available seats with SQL: "SELECT available_slots FROM Trip WHERE trip_id = [trip_id]". If [numericUpDownQuantity].Value > available_slots → display error "Insufficient seats available" (Refer to MSG 21), return to step (6). Else proceed to step (11). (Refer to "Trip" table in "DB Sheet" file) |
-| (11), (12), (13) | BR36    | **Querying Rules:** System checks if trip exists in cart with SQL: "SELECT cart_item_id, quantity FROM Cart_Item WHERE cart_id = [cart_id] AND trip_id = [trip_id]". If COUNT > 0 → update with SQL: "UPDATE Cart_Item SET quantity = quantity + [numericUpDownQuantity].Value, updated_at = NOW() WHERE cart_item_id = [cart_item_id]" at step (12). Else insert with SQL: "INSERT INTO Cart_Item (cart_id, trip_id, quantity, price, created_at) VALUES ([cart_id], [trip_id], [numericUpDownQuantity].Value, [trip_price], NOW())" at step (13). (Refer to "Cart_Item" table in "DB Sheet" file)                |
-| (14), (15)       | BR37    | **Displaying Rules:** System displays success notification showing trip name and quantity "Added [numericUpDownQuantity].Value x [lblTripName] to cart" (Refer to MSG 22), closes modal, updates [badgeCartCount] icon with new cart item count using getCartItemCount([cart_id]).                                                                                                                                                                                                                                                                                                                                 |
-
-##### 2.1.3.2 Remove Trip from Cart
-
-###### Use Case Description
-
-| Name               | Remove Trip from Cart                                                                                                     |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------ |
-| **Description**    | This use case allows authenticated users to remove a trip from their shopping cart.                                       |
-| **Actor**          | Customer (must be signed in)                                                                                              |
-| **Trigger**        | User clicks "Remove" or trash icon button on a trip item in cart view.                                                    |
-| **Pre-condition**  | User must be signed in. Trip must exist in user's cart. Cart item must have valid cart_item_id.                           |
-| **Post-condition** | Trip is removed from cart, cart item count is updated, cart total is recalculated, and confirmation message is displayed. |
-
-###### Sequence Flow
-
-[sequence-adjust-cart-remove-trip-from-cart](../sequence/adjust-cart/remove-trip-from-cart)
-
-###### Activities Flow
-
-[activity-adjust-cart-remove-trip-from-cart](../activity/adjust-cart/remove-trip-from-cart)
-
-###### Business Rules
-
-| Activity                         | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| :------------------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)                              | BR38    | **Querying Rules:** When user clicks [btnRemove] at step (1), system queries cart item details with SQL: "SELECT ci.cart_item_id, ci.quantity, t.trip_name, t.price, t.departure_date FROM Cart_Item ci JOIN Trip t ON ci.trip_id = t.trip_id WHERE ci.cart_item_id = [cart_item_id]". Stores in [selectedCartItem]. (Refer to "Cart_Item" and "Trip" tables in "DB Sheet" file)                                                 |
-| (3)                              | BR39    | **Displaying Rules:** System displays confirmation modal containing [lblConfirmMessage] "Remove [selectedCartItem.trip_name] from cart?", [lblTripDetails] showing quantity and price, [btnConfirmDelete], [btnCancel]. (Refer to "Remove Confirmation Dialog" in "View Description" file)                                                                                                                                       |
-| (4), (4.1), (4.2)                | BR40    | **Selecting Rules:** User clicks button in dialog. If user clicks [btnCancel] → close modal at step (4.1), end use case at step (4.2). If user clicks [btnConfirmDelete] → proceed to step (5).                                                                                                                                                                                                                                  |
-| (5)                              | BR41    | **Querying Rules:** System deletes cart item with SQL: "DELETE FROM Cart_Item WHERE cart_item_id = [cart_item_id]". (Refer to "Cart_Item" table in "DB Sheet" file)                                                                                                                                                                                                                                                              |
-| (6), (7), (8), (9), (9.1), (9.2) | BR42    | **Displaying Rules:** System displays success notification "Removed [selectedCartItem.trip_name] from cart" (Refer to MSG 23), removes item row from [listCartItems] UI, updates [lblTotalPrice] and [badgeCartCount]. System executes getCartItemCount([cart_id]). If COUNT = 0 → display empty cart message "Your cart is empty. Start exploring tours!" (Refer to MSG 24) at step (9.1), disable [btnCheckout] at step (9.2). |
-
-##### 2.1.3.3 Edit Trip Details in Cart
-
-###### Use Case Description
-
-| Name               | Edit Trip Details in Cart                                                                            |
-| :----------------- | :--------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows authenticated users to edit quantity of trips in their shopping cart.           |
-| **Actor**          | Customer (must be signed in)                                                                         |
-| **Trigger**        | User clicks "Edit" button on a trip item in cart view.                                               |
-| **Pre-condition**  | User must be signed in. Trip must exist in user's cart. Trip must still be valid and active.         |
-| **Post-condition** | Trip quantity is updated in cart, cart total is recalculated, and confirmation message is displayed. |
-
-###### Sequence Flow
-
-[sequence-adjust-cart-edit-trip-details](../sequence/adjust-cart/edit-trip-details)
-
-###### Activities Flow
-
-[activity-adjust-cart-edit-trip-details](../activity/adjust-cart/edit-trip-details)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                     |
-| :---------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)               | BR43    | **Querying Rules:** When user clicks [btnEdit] at step (1), system queries cart item with SQL: "SELECT ci.cart_item_id, ci.quantity, t.trip_name, t.available_slots, t.price, t.status FROM Cart_Item ci JOIN Trip t ON ci.trip_id = t.trip_id WHERE ci.cart_item_id = [cart_item_id]". Stores in [editCartItem]. (Refer to "Cart_Item" and "Trip" tables in "DB Sheet" file)                   |
-| (3), (3.1), (3.2) | BR44    | **Validation Rules:** System verifies trip still valid with checks: if [editCartItem.status] != 'active' OR [editCartItem.available_slots] = 0 → display warning "This trip is no longer available. Please remove from cart" (Refer to MSG 25), end use case at step (3.2). Else proceed to step (4).                                                                                           |
-| (4)               | BR45    | **Displaying Rules:** System displays "Edit Quantity" modal containing [lblTripName], [lblCurrentQuantity], [numericUpDownNewQuantity] with current value, [lblAvailableSeats] showing available slots, [lblTotalPrice] with auto-calculated price, [btnSave], [btnCancel]. (Refer to "Edit Trip Quantity Form" in "View Description" file)                                                     |
-| (8)               | BR46    | **Validation Rules:** When user clicks [btnSave] in repeat loop (steps 7-10), system validates at step (8): if [numericUpDownNewQuantity].Value < 1 OR [numericUpDownNewQuantity].Value > 20 → display error "Quantity must be between 1 and 20" (Refer to MSG 20), return to step (5). Else proceed to step (9).                                                                               |
-| (9), (10)         | BR47    | **Validation Rules:** System queries available seats with SQL: "SELECT available_slots FROM Trip WHERE trip_id = [editCartItem.trip_id]" at step (9). At step (10), if [numericUpDownNewQuantity].Value > available_slots → display error "Only [available_slots] seats available" (Refer to MSG 21), return to step (5). Else proceed to step (11). (Refer to "Trip" table in "DB Sheet" file) |
-| (11)              | BR48    | **Querying Rules:** System updates cart item with SQL: "UPDATE Cart_Item SET quantity = [numericUpDownNewQuantity].Value, updated_at = NOW() WHERE cart_item_id = [cart_item_id]". (Refer to "Cart_Item" table in "DB Sheet" file)                                                                                                                                                              |
-| (12), (13)        | BR49    | **Displaying Rules:** System displays success notification "Updated quantity to [numericUpDownNewQuantity].Value" (Refer to MSG 26), closes modal, updates [listCartItems] UI with new quantity, recalculates and updates [lblTotalPrice] on cart page at step (13).                                                                                                                            |
-
-##### 2.1.3.4 View and Filter Trips in Cart
-
-###### Use Case Description
-
-| Name               | View and Filter Trips in Cart                                                                                       |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------ |
-| **Description**    | This use case allows authenticated users to view all trips in their cart and filter them by criteria.               |
-| **Actor**          | Customer (must be signed in)                                                                                        |
-| **Trigger**        | User clicks cart icon in navigation bar.                                                                            |
-| **Pre-condition**  | User must be signed in with valid session.                                                                          |
-| **Post-condition** | User views cart with all items, can filter items, and sees updated totals including subtotal, tax, and grand total. |
-
-###### Sequence Flow
-
-[sequence-adjust-cart-view-and-filter-trips-in-cart](../sequence/adjust-cart/view-and-filter-trips-in-cart)
-
-###### Activities Flow
-
-[activity-adjust-cart-view-and-filter-trips-in-cart](../activity/adjust-cart/view-and-filter-trips-in-cart)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR50    | **Querying Rules:** When user clicks [iconCart] at step (1), system queries cart items with SQL: "SELECT ci.cart_item_id, ci.quantity, t.trip_id, t.trip_name, t.destination, t.departure_date, t.price, t.image_url FROM Cart c JOIN Cart_Item ci ON c.cart_id = ci.cart_id JOIN Trip t ON ci.trip_id = t.trip_id WHERE c.user_id = [user_id]". If COUNT = 0 → display empty cart message "Your cart is empty. Start exploring tours!" (Refer to MSG 24) with [btnExploreTours] at step (2.1), end use case at step (2.2). (Refer to "Cart", "Cart_Item", "Trip" tables in "DB Sheet" file) |
-| (3)               | BR51    | **Displaying Rules:** System displays "Cart" view containing [listCartItems] with each item showing: [imgTripThumbnail], [lblTripName], [lblDestination], [lblDepartureDate], [lblQuantity], [lblPrice], [btnEdit], [btnRemove]; and [panelCartSummary] showing [lblSubtotal], [lblTax], [lblGrandTotal], [btnCheckout]. (Refer to "Cart" view in "View Description" file)                                                                                                                                                                                                                   |
-| (6), (6.1)        | BR52    | **Validation Rules:** When user submits filter in repeat loop (steps 4-6), system validates filter criteria: if [datePickerDepartureDateFrom].Value > [datePickerDepartureDateTo].Value → error. System filters [listCartItems] by destination, date range, price range. If filtered COUNT = 0 → display "No trips match your filters" (Refer to MSG 31) at step (6.1), return to step (4). Else proceed to step (7).                                                                                                                                                                        |
-| (7)               | BR53    | **Displaying Rules:** System updates [listCartItems] with filtered results, recalculates [lblSubtotal] = SUM(quantity × price), [lblTax] = subtotal × 0.1, [lblGrandTotal] = subtotal + tax, displays count "[filtered_count] of [total_count] trips in cart".                                                                                                                                                                                                                                                                                                                               |
-
-#### 2.1.4 Adjust Favorite Trips Use Case
-
-##### 2.1.4.1 Toggle Favorite Trip
-
-###### Use Case Description
-
-| Name               | Toggle Favorite Trip                                                                                           |
-| :----------------- | :------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows authenticated users to add or remove a trip from their favorites list.                    |
-| **Actor**          | Customer (must be signed in)                                                                                   |
-| **Trigger**        | User clicks heart icon on trip card or trip details page.                                                      |
-| **Pre-condition**  | User must be signed in with valid session. Trip must exist and be active.                                      |
-| **Post-condition** | Trip is added to or removed from favorites, heart icon is updated, and confirmation notification is displayed. |
-
-###### Sequence Flow
-
-[sequence-adjust-favorite-trips-toggle-favorite-trip](../sequence/adjust-favorite-trips/toggle-favorite-trip)
-
-###### Activities Flow
-
-[activity-adjust-favorite-trips-toggle-favorite-trip](../activity/adjust-favorite-trips/toggle-favorite-trip)
-
-###### Business Rules
-
-| Activity            | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                    |
-| :------------------ | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2)   | BR54    | **Validation Rules:** When user clicks [iconHeart] at step (1), system verifies JWT token from localStorage with verifyJWT(). If token invalid OR not found → display "Please sign in to save favorites" (Refer to MSG 27), execute redirectToSignInPage() at step (2.1), user performs login at step (2.2). Else proceed to step (3).                                         |
-| (3)                 | BR55    | **Querying Rules:** System checks favorite status with SQL: "SELECT favorite_id FROM Favorite_Tour WHERE user_id = [user_id] AND trip_id = [trip_id]". If COUNT > 0 → proceed to step (4.1) for unfavorite. If COUNT = 0 → proceed to step (3.1) for favorite. (Refer to "Favorite_Tour" table in "DB Sheet" file)                                                             |
-| (3.1), (3.2), (3.3) | BR56    | **Querying Rules:** If trip not favorited, system inserts with SQL: "INSERT INTO Favorite_Tour (user_id, trip_id, created_at) VALUES ([user_id], [trip_id], NOW())" at step (3.1), updates [iconHeart] to filled state at step (3.2), displays success notification "Added to favorites!" (Refer to MSG 28) at step (3.3). (Refer to "Favorite_Tour" table in "DB Sheet" file) |
-| (4.1), (4.2), (4.3) | BR57    | **Querying Rules:** If trip already favorited, system deletes with SQL: "DELETE FROM Favorite_Tour WHERE user_id = [user_id] AND trip_id = [trip_id]" at step (4.1), updates [iconHeart] to empty state at step (4.2), displays notification "Removed from favorites" (Refer to MSG 29) at step (4.3). (Refer to "Favorite_Tour" table in "DB Sheet" file)                     |
-
-##### 2.1.4.2 View and Filter Favorite Trips
-
-###### Use Case Description
-
-| Name               | View and Filter Favorite Trips                                                                                          |
-| :----------------- | :---------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows authenticated users to view their list of favorite trips and filter them by various criteria.      |
-| **Actor**          | Customer (must be signed in)                                                                                            |
-| **Trigger**        | User navigates to "My Favorites" page from navigation menu.                                                             |
-| **Pre-condition**  | User must be signed in with valid session.                                                                              |
-| **Post-condition** | User can view their favorite trips list with optional filters applied, and can access trip details or remove favorites. |
-
-###### Sequence Flow
-
-[sequence-adjust-favorite-trips-view-and-filter-favorite-trips](../sequence/adjust-favorite-trips/view-and-filter-favorite-trips)
-
-###### Activities Flow
-
-[activity-adjust-favorite-trips-view-and-filter-favorite-trips](../activity/adjust-favorite-trips/view-and-filter-favorite-trips)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| :---------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR58    | **Querying Rules:** When user navigates to "My Favorites" at step (1), system queries favorite trips with SQL: "SELECT ft.favorite_id, t.trip_id, t.trip_name, t.destination, t.departure_date, t.price, t.available_slots, t.image_url FROM Favorite_Tour ft JOIN Trip t ON ft.trip_id = t.trip_id WHERE ft.user_id = [user_id] AND t.status = 'active' ORDER BY ft.created_at DESC". If COUNT = 0 → display "No favorite trips yet. Start exploring!" (Refer to MSG 30) with [btnExploreTours] at step (2.1), end use case at step (2.2). (Refer to "Favorite_Tour" and "Trip" tables in "DB Sheet" file) |
-| (3)               | BR59    | **Displaying Rules:** System displays "Favorite Trips" view containing [listFavoriteTrips] with each trip showing: [imgTripThumbnail], [lblTripName], [lblDestination], [lblDepartureDate], [lblPrice], [lblAvailableSlots], [iconHeartFilled], [btnViewDetails], [btnAddToCart]. Displays total count "[COUNT] favorite trips". (Refer to "Favorite Trips" view in "View Description" file)                                                                                                                                                                                                                |
-| (6), (6.1)        | BR60    | **Validation Rules:** When user submits filter in repeat loop (steps 4-6), system validates filter criteria: if [datePickerDepartureDateFrom].Value > [datePickerDepartureDateTo].Value → error. System filters [listFavoriteTrips] by [dropdownDestination], date range, [sliderPriceRange]. If filtered COUNT = 0 → display "No trips match your filters" (Refer to MSG 31) at step (6.1), return to step (4). Else proceed to step (7).                                                                                                                                                                  |
-| (7)               | BR61    | **Displaying Rules:** System updates [listFavoriteTrips] with filtered results, displays count "[filtered_count] of [total_count] favorite trips matching filters".                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-
-#### 2.1.5 Manage Personal Booking Use Case
-
-##### 2.1.5.1 Book a Trip
-
-###### Use Case Description
-
-| Name               | Book a Trip                                                                                                                                         |
-| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows authenticated customers to book a trip by entering passenger information and confirming the booking.                           |
-| **Actor**          | Customer (must be signed in)                                                                                                                        |
-| **Trigger**        | User clicks "Book Now" button on trip details page.                                                                                                 |
-| **Pre-condition**  | User must be signed in with valid session. Trip must exist and have status "active". Trip must have available_slots > 0.                            |
-| **Post-condition** | Booking is created with status "Confirmed", invoice is generated, trip available slots are decremented, and confirmation email is sent to customer. |
-
-###### Sequence Flow
-
-[sequence-manage-personal-booking-book-a-trip](../sequence/manage-personal-booking/book-a-trip)
-
-###### Activities Flow
-
-[activity-manage-personal-booking-book-a-trip](../activity/manage-personal-booking/book-a-trip)
-
-###### Business Rules
-
-| Activity               | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| :--------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (3), (3.1), (3.2)      | BR62    | **Validation Rules:** When user clicks [btnBookNow] at step (2), system verifies JWT token from localStorage with verifyJWT(). If token invalid OR not found → display notification "Please sign in to book this trip" (Refer to MSG 19) at step (3.1), execute redirectToSignInPage(), user performs login at step (3.2), return to step (1). Else proceed to step (4).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| (4)                    | BR63    | **Displaying Rules:** System displays "Booking Form" containing: [lblTripName], [lblTripPrice], [lblDepartureDate], [numericUpDownAdults] with default value 1 and range 1-10, [numericUpDownChildren] with default value 0 and range 0-10, [panelPassengerInfo] with fields [txtBoxFullName], [txtBoxIdNumber], [txtBoxPhoneNumber], [txtBoxEmail] for each passenger (adults + children), [lblTotalAmount] showing calculated total, [btnSubmit], [btnCancel]. (Refer to "Booking Form" view in "View Description" file)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| (8)                    | BR64    | **Validation Rules:** When user clicks [btnSubmit] in repeat loop (steps 5-14), system validates booking data at step (8): if [numericUpDownAdults].Value < 1 OR ([numericUpDownAdults].Value + [numericUpDownChildren].Value) > 20 → display error "Number of passengers must be between 1 and 20" (Refer to MSG 20), return to step (5); for each passenger if [txtBoxFullName].isEmpty() = true OR [txtBoxFullName].length < 2 → error; if [txtBoxIdNumber].isEmpty() = true OR [txtBoxIdNumber].length < 9 → error; if [txtBoxPhoneNumber].isEmpty() = true OR not matches phone regex → error; if [txtBoxEmail].isEmpty() = true OR not matches email regex → error. If any validation fails → display error (Refer to MSG 36) at step (8.1), return to step (5). Else proceed to step (9).                                                                                                                                                                                                                                                                |
-| (9), (9.1)             | BR65    | **Querying Rules:** System verifies seat availability with SQL: "SELECT available_slots FROM Trip WHERE trip_id = [trip_id] AND status = 'active'" at step (9). If available_slots < ([numericUpDownAdults].Value + [numericUpDownChildren].Value) OR available_slots = 0 → display notification "Insufficient seats available. Only [available_slots] seats remaining" (Refer to MSG 21) at step (9.1), return to step (5). Else proceed to step (10). (Refer to "Trip" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| (10), (11), (12), (13) | BR66    | **Querying Rules:** System starts database transaction at step (11): generates booking*id via generateUUID(), calculates total_amount = (adults * trip.price) + (children \_ trip.price \* 0.5), creates booking with SQL: "INSERT INTO Tour_Booking (booking_id, user_id, trip_id, booking_status, total_amount, created_at) VALUES ([booking_id], [user_id], [trip_id], 'Confirmed', [total_amount], NOW())"; inserts travelers with SQL: "INSERT INTO Booking_Traveler (booking_id, full_name, id_number, phone_number, email, created_at) VALUES ..." for each passenger; generates invoice with SQL: "INSERT INTO Invoice (booking_id, invoice_amount, tax_amount, total_amount, payment_status, due_date, created_at) VALUES ([booking_id], [total_amount], [tax], [total_with_tax], 'Pending', NOW() + INTERVAL '7 days', NOW())"; updates trip with SQL: "UPDATE Trip SET available_slots = available_slots - [total_passengers] WHERE trip_id = [trip_id]". (Refer to "Tour_Booking", "Booking_Traveler", "Invoice", "Trip" tables in "DB Sheet" file) |
-| (12), (13)             | BR67    | **Displaying Rules:** System displays success notification "Booking created successfully!" (Refer to MSG 37) at step (12), sends confirmation email sendBookingConfirmationEmail([email], [booking_id], [invoice_id]) at step (13) containing booking details, trip information, passenger list, and invoice. Customer confirms end at step (14).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-
-##### 2.1.5.2 View and Filter Personal Bookings
-
-###### Use Case Description
-
-| Name               | View and Filter Personal Bookings                                                                                         |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------ |
-| **Description**    | This use case allows authenticated customers to view their booking history and filter bookings by various criteria.       |
-| **Actor**          | Customer (must be signed in)                                                                                              |
-| **Trigger**        | User clicks "My Bookings" in navigation menu.                                                                             |
-| **Pre-condition**  | User must be signed in with valid session.                                                                                |
-| **Post-condition** | User can view their bookings list with tabs (Upcoming/Past) and optional filters applied, and can access booking details. |
-
-###### Sequence Flow
-
-[sequence-manage-personal-booking-view-and-filter-personal-bookings](../sequence/manage-personal-booking/view-and-filter-personal-bookings)
-
-###### Activities Flow
-
-[activity-manage-personal-booking-view-and-filter-personal-bookings](../activity/manage-personal-booking/view-and-filter-personal-bookings)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| :---------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR68    | **Querying Rules:** When user clicks "My Bookings" at step (1), system queries bookings with SQL: "SELECT tb.booking_id, tb.booking_status, tb.total_amount, tb.created_at, t.trip_name, t.destination, t.departure_date FROM Tour_Booking tb JOIN Trip t ON tb.trip_id = t.trip_id WHERE tb.user_id = [user_id] ORDER BY tb.created_at DESC". If COUNT = 0 → display "No bookings yet. Start exploring tours!" (Refer to MSG 32) with [btnExploreTours] at step (2.1), end use case at step (2.2). (Refer to "Tour_Booking" and "Trip" tables in "DB Sheet" file) |
-| (3)               | BR69    | **Displaying Rules:** System displays "My Bookings" view containing [tabUpcoming], [tabPast], [tabCancelled] with bookings list; and filter panel with [dropdownStatus], [datePickerFrom], [datePickerTo], [txtBoxTripName], [btnApplyFilter]. Each booking shows: [lblBookingId], [lblTripName], [lblDestination], [lblDepartureDate], [lblStatus], [lblAmount], [btnViewDetails]. (Refer to "My Bookings" view in "View Description" file)                                                                                                                       |
-| (6), (6.1)        | BR70    | **Querying Rules:** When user clicks [btnApplyFilter] at step (5), system queries with SQL: "SELECT tb._, t._ FROM Tour_Booking tb JOIN Trip t ON tb.trip_id = t.trip_id WHERE tb.user_id = [user_id] AND ([dropdownStatus].Value = 'All' OR tb.booking_status = [dropdownStatus].Value) AND t.departure_date BETWEEN [datePickerFrom] AND [datePickerTo] AND ([txtBoxTripName].Text = '' OR t.trip_name LIKE '%[txtBoxTripName]%')". If COUNT = 0 → display "No bookings match your filters" (Refer to MSG 33) at step (6.1). Else proceed to step (7).           |
-| (7)               | BR71    | **Displaying Rules:** System updates booking list with filtered results, displays count "[COUNT] bookings found".                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-
-##### 2.1.5.3 Checkout Cart
-
-###### Use Case Description
-
-| Name               | Checkout Cart                                                                                                                      |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows authenticated customers to proceed from cart to create bookings by entering passenger details and confirming. |
-| **Actor**          | Customer (must be signed in)                                                                                                       |
-| **Trigger**        | User clicks "Checkout" button in cart page.                                                                                        |
-| **Pre-condition**  | User must be signed in. Cart must contain valid trip items. Trips must have available seats.                                       |
-| **Post-condition** | Bookings are created, invoices are generated, cart is cleared, and confirmation email is sent.                                     |
-
-###### Sequence Flow
-
-[sequence-manage-personal-booking-checkout-cart](../sequence/manage-personal-booking/checkout-cart)
-
-###### Activities Flow
-
-[activity-manage-personal-booking-checkout-cart](../activity/manage-personal-booking/checkout-cart)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (3), (3.1), (3.2) | BR72    | **Querying Rules:** When user clicks [btnCheckout] at step (2), system queries cart with SQL: "SELECT ci.\*, t.trip_name, t.available_slots, t.status FROM Cart_Item ci JOIN Trip t ON ci.trip_id = t.trip_id WHERE ci.cart_id = [cart_id]". If COUNT = 0 → display "Your cart is empty" (Refer to MSG 34) at step (3.1), end use case at step (3.2). (Refer to "Cart_Item" and "Trip" tables in "DB Sheet" file)                                                                                                                                                                                                                           |
-| (4), (4.1), (4.2) | BR73    | **Validation Rules:** System verifies all trips at step (4): checks if t.status = 'active' AND t.available_slots >= ci.quantity for each cart item. If any trip invalid → display invalid trips list showing trip names and issues (Refer to MSG 35) at step (4.1), prompt user to remove invalid trips or cancel at step (4.2), end use case. Else proceed to step (5).                                                                                                                                                                                                                                                                    |
-| (5)               | BR74    | **Displaying Rules:** System displays "Checkout" form containing: for each trip in cart [sectionTripDetails] with [lblTripName], [numericUpDownPassengerCount]; and [panelTravelerDetails] with fields [txtBoxFullName], [txtBoxIdNumber], [txtBoxPhoneNumber], [txtBoxEmail] for each passenger; [lblTotalAmount], [btnConfirmBooking], [btnCancel]. (Refer to "Checkout Form" view in "View Description" file)                                                                                                                                                                                                                            |
-| (8)               | BR75    | **Validation Rules:** When user clicks [btnConfirmBooking] in repeat loop (steps 6-8), system validates at step (8): for each traveler if [txtBoxFullName].isEmpty() = true OR [txtBoxFullName].length < 2 → error; if [txtBoxIdNumber].isEmpty() = true OR [txtBoxIdNumber].length < 9 → error; if [txtBoxPhoneNumber].isEmpty() = true OR not matches phone regex → error; if [txtBoxEmail].isEmpty() = true OR not matches email regex → error. If any validation fails → display error (Refer to MSG 36), return to step (6). Else proceed to step (9).                                                                                 |
-| (11), (12), (13)  | BR76    | **Querying Rules:** System starts database transaction: (11) creates bookings with SQL INSERT INTO Tour_Booking, inserts travelers with SQL INSERT INTO Booking_Traveler, generates invoices with SQL INSERT INTO Invoice; (12) updates trip seats with SQL: "UPDATE Trip SET available_slots = available_slots - [quantity]", deletes cart items with SQL: "DELETE FROM Cart_Item WHERE cart_id = [cart_id]"; (13) displays success "Bookings created successfully!" (Refer to MSG 37), sends confirmation email sendBookingConfirmationEmail([email]). (Refer to "Tour_Booking", "Booking_Traveler", "Invoice" tables in "DB Sheet" file) |
-
-##### 2.1.5.4 Edit Upcoming Trip's Passenger Details
-
-###### Use Case Description
-
-| Name               | Edit Upcoming Trip's Passenger Details                                                                                                               |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows authenticated customers to edit passenger information for upcoming trips before departure.                                      |
-| **Actor**          | Customer (must be signed in)                                                                                                                         |
-| **Trigger**        | User clicks "Edit Passengers" button on an upcoming booking details page.                                                                            |
-| **Pre-condition**  | User must be signed in. Booking must be in "Confirmed" or "Pending Payment" status. Departure date must be at least 48 hours in the future.          |
-| **Post-condition** | Passenger details are updated in database, customer receives email confirmation with updated information, and can view the updated traveler details. |
-
-###### Sequence Flow
-
-[sequence-manage-personal-booking-edit-upcoming-trip's-passenger-details](../sequence/manage-personal-booking/edit-upcoming-trip's-passenger-details)
-
-###### Activities Flow
-
-[activity-manage-personal-booking-edit-upcoming-trip's-passenger-details](../activity/manage-personal-booking/edit-upcoming-trip's-passenger-details)
-
-###### Business Rules
-
-| Activity               | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| :--------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (3), (4)               | BR77    | **Querying Rules:** When user clicks [btnEditPassengers] at step (5), system queries travelers with SQL: "SELECT bt.traveler_id, bt.full_name, bt.id_number, bt.phone_number, bt.email FROM Booking_Traveler bt WHERE bt.booking_id = [booking_id] ORDER BY bt.traveler_id ASC". Displays travelers in [listTravelers] showing: [lblTravelerName], [lblIdNumber], [lblPhone], [lblEmail], [btnEdit] for each traveler. (Refer to "Booking_Traveler" table in "DB Sheet" file)                                                                                                                                                         |
-| (6), (7), (7.1), (7.2) | BR78    | **Validation Rules:** System verifies edit conditions at step (7): queries booking with SQL: "SELECT booking_status, tb.departure_date FROM Tour_Booking tb JOIN Trip t ON tb.trip_id = t.trip_id WHERE tb.booking_id = [booking_id]". Checks if booking_status IN ('Confirmed', 'Pending Payment') AND DATEDIFF(hour, NOW(), departure_date) >= 48. If any condition fails → display "Cannot edit: " with reason (booking cancelled/completed OR departure within 48 hours) (Refer to MSG 38) at step (7.1), user confirms at step (7.2), end use case. Else proceed to step (8). (Refer to "Tour_Booking" table in "DB Sheet" file) |
-| (8)                    | BR79    | **Displaying Rules:** System displays "Edit Passenger Details" form containing: for each selected traveler [panelTravelerEdit] with fields [txtBoxFullName], [txtBoxIdNumber], [txtBoxPhoneNumber], [txtBoxEmail] pre-filled with current data; [btnSaveChanges], [btnCancel]. (Refer to "Edit Passenger Details" form in "View Description" file)                                                                                                                                                                                                                                                                                    |
-| (11)                   | BR80    | **Validation Rules:** When user clicks [btnSaveChanges] in repeat loop (steps 9-11), system validates at step (11): for each edited traveler if [txtBoxFullName].isEmpty() = true OR [txtBoxFullName].length < 2 → error; if [txtBoxIdNumber].isEmpty() = true OR [txtBoxIdNumber].length < 9 → error; if [txtBoxPhoneNumber].isEmpty() = true OR not matches phone regex → error; if [txtBoxEmail].isEmpty() = true OR not matches email regex → error. If any validation fails → display error (Refer to MSG 39), return to step (9). Else proceed to step (12).                                                                    |
-| (12), (13), (14), (15) | BR81    | **Querying Rules:** System starts database transaction at step (12): updates travelers with SQL: "UPDATE Booking_Traveler SET full_name = [new_name], id_number = [new_id], phone_number = [new_phone], email = [new_email], updated_at = NOW() WHERE traveler_id = [traveler_id]" for each edited traveler; (13) commits transaction; (14) displays "Passenger details updated successfully!" (Refer to MSG 40); (15) sends email sendPassengerUpdateConfirmation([email], [booking_id], [updated_travelers]). Customer views updated information at step (16). (Refer to "Booking_Traveler" table in "DB Sheet" file)               |
-
-##### 2.1.5.5 View and Pay Booking Invoice Details
-
-###### Use Case Description
-
-| Name               | View and Pay Booking Invoice Details                                                                                                                                      |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Description**    | This use case allows authenticated customers to view invoice details for their bookings and process payment for unpaid invoices through integrated payment gateway.       |
-| **Actor**          | Customer (must be signed in)                                                                                                                                              |
-| **Trigger**        | User clicks "View Invoice" or "Pay Now" button on a booking in their bookings list.                                                                                       |
-| **Pre-condition**  | User must be signed in. Booking must exist and belong to the user. Invoice must be generated for the booking.                                                             |
-| **Post-condition** | If payment is made: invoice status is updated to "Paid", booking status is updated to "Confirmed", customer receives payment confirmation email with e-ticket attachment. |
-
-###### Sequence Flow
-
-[sequence-manage-personal-booking-view-and-pay-booking-invoice-details](../sequence/manage-personal-booking/view-and-pay-booking-invoice-details)
-
-###### Activities Flow
-
-[activity-manage-personal-booking-view-and-pay-booking-invoice-details](../activity/manage-personal-booking/view-and-pay-booking-invoice-details)
-
-###### Business Rules
-
-| Activity                     | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| :--------------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2)            | BR82    | **Querying Rules:** When user clicks [btnViewInvoice] at step (1), system queries booking with SQL: "SELECT tb.\* FROM Tour_Booking tb WHERE tb.booking_id = [booking_id] AND tb.user_id = [user_id]". If COUNT = 0 OR user_id mismatch → display "Booking not found or access denied" (Refer to MSG 41) at step (2.1), user confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Tour_Booking" table in "DB Sheet" file)                                                                                                                                                                                                                 |
-| (3), (4)                     | BR83    | **Querying Rules:** System queries invoice with SQL: "SELECT i.invoice_id, i.payment_status, i.invoice_amount, i.tax_amount, i.total_amount, i.due_date, i.created_at, tb.booking_id, tb.booking_status, t.trip_name, t.destination, t.departure_date FROM Invoice i JOIN Tour_Booking tb ON i.booking_id = tb.booking_id JOIN Trip t ON tb.trip_id = t.trip_id WHERE i.booking_id = [booking_id]". Displays invoice in [panelInvoiceDetails] showing: [lblInvoiceId], [lblAmount], [lblTax], [lblTotal], [lblPaymentStatus], trip details, [btnPayNow]. (Refer to "Invoice", "Tour_Booking", "Trip" tables in "DB Sheet" file)                                 |
-| (7), (7.1), (7.2)            | BR84    | **Validation Rules:** When user clicks [btnPayNow] at step (6), system verifies at step (7): checks if i.payment_status != 'Paid' AND tb.booking_status NOT IN ('Cancelled', 'Completed') AND i.due_date >= NOW(). If any condition fails → display "Cannot process payment: " with reason (already paid OR booking cancelled/completed OR invoice overdue) (Refer to MSG 42) at step (7.1), user confirms at step (7.2), end use case. Else proceed to step (8).                                                                                                                                                                                               |
-| (8)                          | BR85    | **Displaying Rules:** System displays "Payment Gateway" page containing: [dropdownPaymentMethod] with options (Credit Card, Debit Card, E-Wallet, Bank Transfer); conditional fields based on selection - for cards: [txtBoxCardNumber], [txtBoxCardholderName], [datePickerExpiry], [txtBoxCVV]; for e-wallet: [txtBoxWalletPhone]; for bank transfer: [dropdownBank]. Displays [lblTotalToPay], [btnConfirmPayment], [btnCancel]. (Refer to "Payment Gateway" view in "View Description" file)                                                                                                                                                                |
-| (12), (13), (13.1), (13.2)   | BR86    | **Querying Rules:** When user clicks [btnConfirmPayment] at step (11), system processes payment at step (12): calls processPaymentGateway([payment_method], [payment_details], [total_amount]) with payment gateway API. Receives payment result at step (13). If payment_result.status = 'failed' OR payment_result.error != null → display "Payment failed: " with gateway error message (Refer to MSG 43) at step (13.1), user clicks [btnRetry] or [btnChangeMethod] at step (13.2), return to step (8) or (9). Else if payment_result.status = 'success' → proceed to step (14).                                                                           |
-| (14), (15), (16), (17), (18) | BR87    | **Querying Rules:** System starts database transaction: (14) updates invoice with SQL: "UPDATE Invoice SET payment_status = 'Paid', payment_method = [method], transaction_id = [gateway_transaction_id], paid_at = NOW() WHERE invoice_id = [invoice_id]"; (15) updates booking status with SQL: "UPDATE Tour_Booking SET booking_status = 'Confirmed' WHERE booking_id = [booking_id]"; (16) commits transaction; (17) displays "Payment successful! Your booking is confirmed." (Refer to MSG 44); (18) sends email sendPaymentConfirmationWithTicket([email], [invoice_id], [e_ticket_pdf]). (Refer to "Invoice", "Tour_Booking" tables in "DB Sheet" file) |
-| (19), (20)                   | BR88    | **Displaying Rules:** Customer views success message at step (19) with: [iconCheckmark], [lblSuccessMessage] "Payment successful!", [lblBookingStatus] "Confirmed", [lblTransactionId], [btnDownloadTicket], [btnViewBookingDetails]. User confirms at step (20) to end use case. (Refer to "Payment Success" view in "View Description" file)                                                                                                                                                                                                                                                                                                                  |
-
-#### 2.1.6 Manage Routes Use Case
-
-##### 2.1.6.1 Add New Route
-
-###### Use Case Description
-
-| Name               | Add New Route                                                                                                                        |
-| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to create new travel routes by entering route information including name, start/end points, and duration. |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                            |
-| **Trigger**        | Staff selects "Add New Route" function in routes management page.                                                                    |
-| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to routes management module.                                     |
-| **Post-condition** | New route is saved to database with all provided information. Staff is redirected to routes list showing the newly created route.    |
-
-###### Sequence Flow
-
-[sequence-manage-routes-add-new-route](../sequence/manage-routes/add-new-route)
-
-###### Activities Flow
-
-[activity-manage-routes-add-new-route](../activity/manage-routes/add-new-route)
-
-###### Business Rules
-
-| Activity      | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| :------------ | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)           | BR89    | **Displaying Rules:** When staff selects "Add New Route" at step (1), system displays "Add Route" form containing: [txtBoxRouteName], [txtBoxStartLocation], [txtBoxEndLocation], [numericUpDownDurationDays] with range 1-30, [fileUploadRouteImage] accepting .jpg/.png max 5MB, [dropdownStatus] with options (Active, Inactive), [btnSave], [btnCancel]. (Refer to "Add Route Form" view in "View Description" file)                                                                                                                                                          |
-| (5)           | BR90    | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 3-5), system validates at step (5): if [txtBoxRouteName].isEmpty() = true OR [txtBoxRouteName].length < 3 → error; if [txtBoxStartLocation].isEmpty() = true → error; if [txtBoxEndLocation].isEmpty() = true → error; if [numericUpDownDurationDays].Value < 1 OR > 30 → error; if [fileUploadRouteImage] provided, check if file.size > 5MB OR file extension not in (".jpg", ".png") → error. If any validation fails → display error (Refer to MSG 45), return to step (3). Else proceed to step (6). |
-| (6)           | BR91    | **Querying Rules:** System inserts new route with SQL: "INSERT INTO Route (route_name, start_location, end_location, duration_days, image_url, status, created_at, created_by) VALUES ([route_name], [start_location], [end_location], [duration_days], [uploaded_image_path], [status], NOW(), [staff_id])". (Refer to "Route" table in "DB Sheet" file)                                                                                                                                                                                                                         |
-| (7), (8), (9) | BR92    | **Displaying Rules:** System displays success notification "Route created successfully!" (Refer to MSG 46) at step (7), redirects to routes list view showing all routes with new route highlighted. Staff views new route in [listRoutes] at step (8), confirms at step (9) to end use case.                                                                                                                                                                                                                                                                                     |
-
-##### 2.1.6.2 View Route Detail
-
-###### Use Case Description
-
-| Name               | View Route Detail                                                                                                                                                            |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to view detailed information of a specific route including route data, total trips count, and schedule summary by day.                            |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                    |
-| **Trigger**        | Staff clicks on a route from the routes list.                                                                                                                                |
-| **Pre-condition**  | Staff must be authenticated with staff role. Route must exist in database.                                                                                                   |
-| **Post-condition** | Staff views complete route details including basic information, associated trips count, and schedule summary organized by day showing attractions for each day of the route. |
-
-###### Sequence Flow
-
-[sequence-manage-routes-view-route-detail](../sequence/manage-routes/view-route-detail)
-
-###### Activities Flow
-
-[activity-manage-routes-view-route-detail](../activity/manage-routes/view-route-detail)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| :---------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR93    | **Querying Rules:** When staff clicks route at step (1), system queries with SQL: "SELECT r.route_id, r.route_name, r.start_location, r.end_location, r.duration_days, r.image_url, r.status, r.created_at FROM Route r WHERE r.route_id = [route_id]". If COUNT = 0 → display "Route not found" (Refer to MSG 47) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Route" table in "DB Sheet" file)                                                                                                    |
-| (3)               | BR94    | **Querying Rules:** System queries trips count and schedule with SQL: "SELECT COUNT(DISTINCT t.trip_id) as total_trips, ra.day_number, a.attraction_name, a.description FROM Route r LEFT JOIN Trip t ON r.route_id = t.route_id LEFT JOIN Route_Attraction ra ON r.route_id = ra.route_id LEFT JOIN Attraction a ON ra.attraction_id = a.attraction_id WHERE r.route_id = [route_id] GROUP BY ra.day_number, a.attraction_name ORDER BY ra.day_number, ra.visit_order". (Refer to "Trip", "Route_Attraction", "Attraction" tables in "DB Sheet" file) |
-| (4), (5), (6)     | BR95    | **Displaying Rules:** System displays "Route Details" view at step (4) containing: [lblRouteName], [lblStartLocation], [lblEndLocation], [lblDurationDays], [imgRouteImage], [lblStatus], [lblTotalTrips] showing trip count; and [panelScheduleSummary] with [listDaySchedule] showing for each day: [lblDayNumber], [listAttractions] with attraction names. Staff views details at step (5), confirms at step (6). (Refer to "Route Details" view in "View Description" file)                                                                       |
-
-##### 2.1.6.3 Edit Route Detail
-
-###### Use Case Description
-
-| Name               | Edit Route Detail                                                                                                                         |
-| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to modify existing route information including name, locations, duration, image, and status.                   |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                 |
-| **Trigger**        | Staff selects "Edit Route" function on a route from routes list.                                                                          |
-| **Pre-condition**  | Staff must be authenticated with staff role. Route must exist and be in editable state (not archived or locked).                          |
-| **Post-condition** | Route information is updated in database with new values. Staff views updated route details in the routes list with success confirmation. |
-
-###### Sequence Flow
-
-[sequence-manage-routes-edit-route-details](../sequence/manage-routes/edit-route-details)
-
-###### Activities Flow
-
-[activity-manage-routes-edit-route-details](../activity/manage-routes/edit-route-details)
-
-###### Business Rules
-
-| Activity            | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| :------------------ | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2)   | BR96    | **Querying Rules:** When staff selects "Edit Route" at step (1), system queries route with SQL: "SELECT r.\*, COUNT(t.trip_id) as active_trips FROM Route r LEFT JOIN Trip t ON r.route_id = t.route_id AND t.status = 'active' WHERE r.route_id = [route_id] GROUP BY r.route_id". Checks if COUNT = 0 OR r.status = 'Archived'. If route not found OR not editable → display "Cannot edit route: " with reason (not found OR archived OR has active trips) (Refer to MSG 48) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Route" and "Trip" tables in "DB Sheet" file)                                        |
-| (3)                 | BR97    | **Displaying Rules:** System displays "Edit Route" form at step (3) containing: [txtBoxRouteName], [txtBoxStartLocation], [txtBoxEndLocation], [numericUpDownDurationDays] with range 1-30, [fileUploadRouteImage] accepting .jpg/.png max 5MB (showing current image thumbnail), [dropdownStatus] with options (Active, Inactive), [btnSave], [btnCancel]. All fields pre-filled with current route data. (Refer to "Edit Route Form" view in "View Description" file)                                                                                                                                                                                            |
-| (6)                 | BR98    | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 4-6), system validates at step (6): if [txtBoxRouteName].isEmpty() = true OR [txtBoxRouteName].length < 3 → error; if [txtBoxStartLocation].isEmpty() = true → error; if [txtBoxEndLocation].isEmpty() = true → error; if [numericUpDownDurationDays].Value < 1 OR > 30 → error; if [fileUploadRouteImage] changed, check if file.size > 5MB OR file extension not in (".jpg", ".png") → error. Checks constraints: if changing status to Inactive, verify no active trips exist. If any validation fails → display error (Refer to MSG 49), return to step (4). Else proceed to step (7). |
-| (7), (8), (9), (10) | BR99    | **Querying Rules:** System updates route with SQL: "UPDATE Route SET route_name = [new_name], start_location = [new_start], end_location = [new_end], duration_days = [new_duration], image_url = [new_image_path], status = [new_status], updated_at = NOW(), updated_by = [staff_id] WHERE route_id = [route_id]" at step (7). Displays success "Route updated successfully!" (Refer to MSG 50) at step (8), reloads routes list. Staff views updated route at step (9), confirms at step (10). (Refer to "Route" table in "DB Sheet" file)                                                                                                                      |
-
-##### 2.1.6.4 Delete Route
-
-###### Use Case Description
-
-| Name               | Delete Route                                                                                                                                                                  |
-| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to permanently delete a route from the system after verifying it has no related trips or attraction schedules.                                     |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                     |
-| **Trigger**        | Staff clicks "Delete" button on a route in routes list.                                                                                                                       |
-| **Pre-condition**  | Staff must be authenticated with staff role. Route must exist. Route must have no related trips or attraction schedules (foreign key constraints satisfied).                  |
-| **Post-condition** | Route is permanently removed from database if no dependencies exist. Staff views updated routes list without the deleted route. If dependencies exist, deletion is prevented. |
-
-###### Sequence Flow
-
-[sequence-manage-routes-delete-route](../sequence/manage-routes/delete-route)
-
-###### Activities Flow
-
-[activity-manage-routes-delete-route](../activity/manage-routes/delete-route)
-
-###### Business Rules
-
-| Activity           | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| :----------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (3), (3.1), (3.2)  | BR100   | **Querying Rules:** When staff clicks [btnDelete] at step (2), system queries related data at step (3) with SQL: "SELECT COUNT(t.trip_id) as trip_count, COUNT(ra.attraction_id) as attraction_count FROM Route r LEFT JOIN Trip t ON r.route_id = t.route_id LEFT JOIN Route_Attraction ra ON r.route_id = ra.route_id WHERE r.route_id = [route_id] GROUP BY r.route_id". If trip_count > 0 OR attraction_count > 0 → display "Cannot delete route: Route has [X] trips and [Y] attractions. Remove them first." (Refer to MSG 51) at step (3.1), staff confirms at step (3.2), end use case. Else proceed to step (4). (Refer to "Trip", "Route_Attraction" tables in "DB Sheet" file) |
-| (4)                | BR101   | **Displaying Rules:** System displays confirmation dialog at step (4) with [lblConfirmMessage] "Are you sure you want to delete route '[route_name]'? This action cannot be undone.", [btnConfirm], [btnCancel]. (Refer to "Delete Confirmation Dialog" in "View Description" file)                                                                                                                                                                                                                                                                                                                                                                                                       |
-| (5), (5.1), (5.2)  | BR102   | **Choosing Rules:** Staff clicks [btnConfirm] or [btnCancel] at step (5). If staff clicks [btnCancel] → close dialog at step (5.1), staff confirms at step (5.2), end use case. Else if [btnConfirm] clicked → proceed to step (6).                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| (6), (7), (8), (9) | BR103   | **Querying Rules:** System deletes route in transaction at step (6) with SQL: "DELETE FROM Route WHERE route_id = [route_id]". Displays success "Route deleted successfully!" (Refer to MSG 52) at step (7), reloads routes list view without deleted route. Staff views updated list at step (8), confirms at step (9). (Refer to "Route" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                      |
-
-##### 2.1.6.5 View and Filter Routes
-
-###### Use Case Description
-
-| Name               | View and Filter Routes                                                                                                                                               |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to view all routes in the system and filter them by various criteria such as status, name, location, and duration.                        |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                            |
-| **Trigger**        | Staff selects "View Routes" function in routes management module.                                                                                                    |
-| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to routes management module.                                                                     |
-| **Post-condition** | Staff views routes list with optional filters applied. Can repeat filter operation multiple times. List shows route cards with basic information and action buttons. |
-
-###### Sequence Flow
-
-[sequence-manage-routes-view-and-filter-routes](../sequence/manage-routes/view-and-filter-routes)
-
-###### Activities Flow
-
-[activity-manage-routes-view-and-filter-routes](../activity/manage-routes/view-and-filter-routes)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| :---------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR104   | **Querying Rules:** When staff selects "View Routes" at step (1), system queries routes with SQL: "SELECT r.route_id, r.route_name, r.start_location, r.end_location, r.duration_days, r.status, r.image_url, COUNT(t.trip_id) as trips_count FROM Route r LEFT JOIN Trip t ON r.route_id = t.route_id GROUP BY r.route_id ORDER BY r.created_at DESC". If COUNT = 0 → display "No routes found. Add a new route to get started." (Refer to MSG 53) with [btnAddRoute] at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Route" and "Trip" tables in "DB Sheet" file)         |
-| (3)               | BR105   | **Displaying Rules:** System displays "Routes List" view at step (3) containing: filter panel with [txtBoxSearchName], [dropdownFilterStatus] with options (All, Active, Inactive), [numericUpDownMinDays], [numericUpDownMaxDays], [btnApplyFilter], [btnClearFilter]; and [listRoutes] showing for each route: [cardRoute] with [imgRouteThumbnail], [lblRouteName], [lblLocations], [lblDuration], [lblStatus], [lblTripsCount], [btnView], [btnEdit], [btnDelete]. Displays total "[COUNT] routes". (Refer to "Routes List" view in "View Description" file)                                                            |
-| (6), (6.1)        | BR106   | **Querying Rules:** When staff clicks [btnApplyFilter] at step (5) in repeat loop (steps 4-8), system queries filtered routes at step (6) with SQL: "SELECT r.\_, COUNT(t.trip_id) as trips_count FROM Route r LEFT JOIN Trip t ON r.route_id = t.route_id WHERE ([txtBoxSearchName].Text = '' OR r.route_name LIKE '%[search]%') AND ([dropdownFilterStatus].Value = 'All' OR r.status = [status]) AND r.duration_days BETWEEN [min_days] AND [max_days] GROUP BY r.route_id ORDER BY r.created_at DESC". If COUNT = 0 → display "No routes match your filters" (Refer to MSG 54) at step (6.1). Else proceed to step (7). |
-| (7), (8)          | BR107   | **Displaying Rules:** System updates [listRoutes] with filtered results at step (7), displays count "[filtered_count] of [total_count] routes". Staff can repeat filter at step (8) or confirm end. When staff confirms No at step (8), proceed to confirm end.                                                                                                                                                                                                                                                                                                                                                             |
-
-#### 2.1.7 Manage Route Schedule Use Case
-
-##### 2.1.7.1 Add New Itinerary
-
-###### Use Case Description
-
-| Name               | Add New Itinerary                                                                                                                                                       |
-| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to add attractions to a route schedule by specifying day number, visit order, and activity description for each attraction.                  |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                                                               |
-| **Trigger**        | Admin clicks "Add Attraction" button while viewing a route schedule.                                                                                                    |
-| **Pre-condition**  | Admin must be authenticated with admin role. Route must exist and be editable (not closed/archived). At least one attraction must exist in the system.                  |
-| **Post-condition** | New itinerary item is added to route schedule with specified day, order, and description. System adjusts visit orders if conflicts exist. Admin views updated schedule. |
-
-###### Sequence Flow
-
-[sequence-manage-route-schedule-add-itinerary](../sequence/manage-route-schedule/add-itinerary)
-
-###### Activities Flow
-
-[activity-manage-route-schedule-add-itinerary](../activity/manage-route-schedule/add-itinerary)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| :---------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (3), (3.1), (3.2) | BR108   | **Querying Rules:** When admin clicks [btnAddAttraction] at step (2), system queries at step (3) with SQL: "SELECT r.status, COUNT(a.attraction_id) as available_attractions FROM Route r, Attraction a WHERE r.route_id = [route_id] AND a.status = 'active' GROUP BY r.route_id". Checks if r.status IN ('Closed', 'Archived') OR available_attractions = 0. If route not editable OR no attractions → display "Cannot add: " with reason (route closed/archived OR no active attractions available) (Refer to MSG 55) at step (3.1), admin confirms at step (3.2), end use case. Else proceed to step (4). (Refer to "Route" and "Attraction" tables in "DB Sheet" file) |
-| (4)               | BR109   | **Displaying Rules:** System displays "Add Itinerary" form at step (4) containing: [dropdownAttraction] with available attractions list showing attraction names, [numericUpDownDayNumber] with range 1 to route.duration_days, [numericUpDownVisitOrder] with range 1-20, [txtAreaActivityDescription] for description text, [btnSave], [btnCancel]. (Refer to "Add Itinerary Form" view in "View Description" file)                                                                                                                                                                                                                                                       |
-| (7)               | BR110   | **Validation Rules:** When admin clicks [btnSave] in repeat loop (steps 5-7), system validates at step (7): if [dropdownAttraction].SelectedValue = null → error; if [numericUpDownDayNumber].Value < 1 OR > route.duration_days → error; if [numericUpDownVisitOrder].Value < 1 OR > 20 → error; if [txtAreaActivityDescription].isEmpty() = true OR [txtAreaActivityDescription].length < 10 → error. Checks duplicate: query if attraction already exists in same route. If duplicate → error. If any validation fails → display error (Refer to MSG 56), return to step (5). Else proceed to step (8).                                                                  |
-| (8)               | BR111   | **Querying Rules:** System checks order conflicts at step (8): queries "SELECT order_in_day FROM Route_Attraction WHERE route_id = [route_id] AND day_number = [day] AND order_in_day >= [order]". If conflicts found → updates with SQL: "UPDATE Route_Attraction SET order_in_day = order_in_day + 1 WHERE route_id = [route_id] AND day_number = [day] AND order_in_day >= [order]". Then inserts with SQL: "INSERT INTO Route_Attraction (route_id, attraction_id, day_number, order_in_day, activity_description) VALUES ([route_id], [attraction_id], [day], [order], [description])". (Refer to "Route_Attraction" table in "DB Sheet" file)                         |
-| (9), (10), (11)   | BR112   | **Displaying Rules:** System displays success "Attraction added to schedule!" (Refer to MSG 57) at step (9), reloads schedule view showing updated itinerary grouped by days. Admin views updated schedule at step (10), confirms at step (11).                                                                                                                                                                                                                                                                                                                                                                                                                             |
-
-##### 2.1.7.2 View Route Schedule
-
-###### Use Case Description
-
-| Name               | View Route Schedule                                                                                                                                                                                 |
-| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff and admin to view the complete schedule of a route showing all attractions organized by day number with visit order and activity descriptions.                           |
-| **Actor**          | Staff or Admin (must be signed in with staff/admin role)                                                                                                                                            |
-| **Trigger**        | User selects "View Route Schedule" function or clicks on a route to view its schedule.                                                                                                              |
-| **Pre-condition**  | User must be authenticated with staff or admin role. Route must exist in database.                                                                                                                  |
-| **Post-condition** | User views route information and complete schedule grouped by days. If user is admin, action buttons (Add/Edit/Delete) are displayed. If schedule is empty, suggestion to add attractions is shown. |
-
-###### Sequence Flow
-
-[sequence-manage-route-schedule-view-route-schedule](../sequence/manage-route-schedule/view-route-schedule)
-
-###### Activities Flow
-
-[activity-manage-route-schedule-view-route-schedule](../activity/manage-route-schedule/view-route-schedule)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR113   | **Querying Rules:** When user selects "View Route Schedule" at step (1), system queries route with SQL: "SELECT r.route_id, r.route_name, r.start_location, r.end_location, r.duration_days, r.status, r.image_url FROM Route r WHERE r.route_id = [route_id]". If COUNT = 0 → display "Route not found" (Refer to MSG 58) at step (2.1), user confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Route" table in "DB Sheet" file)                                                                                                                                                                                                     |
-| (3), (3.1), (3.2) | BR114   | **Querying Rules:** System queries schedule at step (3) with SQL: "SELECT ra.day_number, ra.order_in_day, ra.activity_description, a.attraction_id, a.attraction_name, a.location, a.description FROM Route_Attraction ra JOIN Attraction a ON ra.attraction_id = a.attraction_id WHERE ra.route_id = [route_id] ORDER BY ra.day_number ASC, ra.order_in_day ASC". If COUNT = 0 → display "No schedule available. Add attractions to create itinerary." (Refer to MSG 59) with [btnAddAttraction] at step (3.1), user confirms at step (3.2), end use case. Else proceed to step (4). (Refer to "Route_Attraction" and "Attraction" tables in "DB Sheet" file) |
-| (4), (5), (6)     | BR115   | **Displaying Rules:** System groups attractions by day_number at step (4). Displays "Route Schedule" view at steps (5-6) containing: route info panel with [imgRouteImage], [lblRouteName], [lblStartEnd], [lblDuration], [lblStatus]; and schedule panel with [listDaySchedule] showing for each day: [lblDayNumber] "Day X", [listAttractions] with [cardAttraction] containing [lblAttractionName], [lblOrder], [lblActivityDescription], [lblLocation]. (Refer to "Route Schedule" view in "View Description" file)                                                                                                                                        |
-| (6.1), (7), (8)   | BR116   | **Displaying Rules:** At step (6.1), if user role = 'Admin' → display action buttons [btnAddAttraction], [btnEdit], [btnDelete] for each attraction. Else if role = 'Staff' → hide action buttons. User views schedule at step (7), confirms at step (8).                                                                                                                                                                                                                                                                                                                                                                                                      |
-
-##### 2.1.7.3 Edit Itinerary
-
-###### Use Case Description
-
-| Name               | Edit Itinerary                                                                                                                                                                                  |
-| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to modify itinerary details including day number, visit order, and activity description for an attraction in the route schedule.                                     |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                                                                                       |
-| **Trigger**        | Admin clicks "Edit" button on an attraction in the route schedule view.                                                                                                                         |
-| **Pre-condition**  | Admin must be authenticated with admin role. Route must not be closed. Route_Attraction record must exist.                                                                                      |
-| **Post-condition** | Itinerary details are updated. If day or order changed, system adjusts visit orders for affected attractions in old and new day positions. Admin views updated schedule with changes reflected. |
-
-###### Sequence Flow
-
-[sequence-manage-route-schedule-edit-itinerary](../sequence/manage-route-schedule/edit-itinerary)
-
-###### Activities Flow
-
-[activity-manage-route-schedule-edit-itinerary](../activity/manage-route-schedule/edit-itinerary)
-
-###### Business Rules
-
-| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| :----------------------- | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (3), (3.1), (3.2)        | BR117   | **Querying Rules:** When admin clicks [btnEdit] at step (2), system queries route status at step (3) with SQL: "SELECT r.status FROM Route r WHERE r.route_id = [route_id]". If r.status = 'Closed' → display "Cannot edit: Route is closed" (Refer to MSG 60) at step (3.1), admin confirms at step (3.2), end use case. Else proceed to step (4). (Refer to "Route" table in "DB Sheet" file)                                                                                                                                                                                                                        |
-| (4), (4.1), (4.2), (4.3) | BR118   | **Querying Rules:** System queries itinerary at step (4) with SQL: "SELECT ra.route_id, ra.attraction_id, ra.day_number, ra.order_in_day, ra.activity_description, a.attraction_name FROM Route_Attraction ra JOIN Attraction a ON ra.attraction_id = a.attraction_id WHERE ra.route_id = [route_id] AND ra.attraction_id = [attraction_id]". If COUNT = 0 → display "Attraction not found in schedule" (Refer to MSG 61) at step (4.1), reload schedule at step (4.2), admin confirms at step (4.3), end use case. Else proceed to step (5). (Refer to "Route_Attraction" and "Attraction" tables in "DB Sheet" file) |
-| (5)                      | BR119   | **Displaying Rules:** System displays "Edit Itinerary" form at step (5) containing: [lblAttractionName] (read-only) showing current attraction, [numericUpDownDayNumber] with range 1 to route.duration_days pre-filled, [numericUpDownVisitOrder] with range 1-20 pre-filled, [txtAreaActivityDescription] pre-filled with current description, [btnSave], [btnCancel]. (Refer to "Edit Itinerary Form" view in "View Description" file)                                                                                                                                                                              |
-| (8)                      | BR120   | **Validation Rules:** When admin clicks [btnSave] in repeat loop (steps 6-8), system validates at step (8): if [numericUpDownDayNumber].Value < 1 OR > route.duration_days → error; if [numericUpDownVisitOrder].Value < 1 OR > 20 → error; if [txtAreaActivityDescription].isEmpty() = true OR [txtAreaActivityDescription].length < 10 → error. If any validation fails → display error (Refer to MSG 62), return to step (6). Else proceed to step (9).                                                                                                                                                             |
-| (9), (9.1), (9.2), (9.3) | BR121   | **Querying Rules:** System checks if day or order changed at step (9). If changed: (9.1) stores old values; (9.2) updates with SQL: "UPDATE Route_Attraction SET order_in_day = order_in_day - 1 WHERE route_id = [route_id] AND day_number = [old_day] AND order_in_day > [old_order]"; (9.3) updates with SQL: "UPDATE Route_Attraction SET order_in_day = order_in_day + 1 WHERE route_id = [route_id] AND day_number = [new_day] AND order_in_day >= [new_order] AND attraction_id != [current_attraction]". Else skip to step (10). (Refer to "Route_Attraction" table in "DB Sheet" file)                        |
-| (10), (11)               | BR122   | **Querying Rules:** System updates itinerary at step (10) with SQL: "UPDATE Route_Attraction SET day_number = [new_day], order_in_day = [new_order], activity_description = [new_description], updated_at = NOW() WHERE route_id = [route_id] AND attraction_id = [attraction_id]". Commits transaction at step (11). (Refer to "Route_Attraction" table in "DB Sheet" file)                                                                                                                                                                                                                                           |
-| (12), (13), (14), (15)   | BR123   | **Displaying Rules:** System displays success "Itinerary updated successfully!" (Refer to MSG 63) at step (12), reloads schedule at step (13) showing updated order and data. Admin views updated schedule at step (14), confirms at step (15).                                                                                                                                                                                                                                                                                                                                                                        |
-
-##### 2.1.7.4 Delete Itinerary
-
-###### Use Case Description
-
-| Name               | Delete Itinerary                                                                                                                                                     |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to remove an attraction from the route schedule after verification that it's not the last remaining attraction.                           |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                                                            |
-| **Trigger**        | Admin clicks "Delete" button on an attraction in the route schedule view.                                                                                            |
-| **Pre-condition**  | Admin must be authenticated with admin role. Route must not be closed. Route_Attraction record must exist. Route must have more than one attraction in schedule.     |
-| **Post-condition** | Attraction is removed from route schedule. Visit orders for remaining attractions in same day are adjusted. Admin views updated schedule without deleted attraction. |
-
-###### Sequence Flow
-
-[sequence-manage-route-schedule-delete-itinerary](../sequence/manage-route-schedule/delete-itinerary)
-
-###### Activities Flow
-
-[activity-manage-route-schedule-delete-itinerary](../activity/manage-route-schedule/delete-itinerary)
-
-###### Business Rules
-
-| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| :----------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (3), (3.1), (3.2)        | BR124   | **Querying Rules:** When admin clicks [btnDelete] at step (2), system queries route status at step (3) with SQL: "SELECT r.status FROM Route r WHERE r.route_id = [route_id]". If r.status = 'Closed' → display "Cannot delete: Route is closed" (Refer to MSG 64) at step (3.1), admin confirms at step (3.2), end use case. Else proceed to step (4). (Refer to "Route" table in "DB Sheet" file)                                                                                                                                                            |
-| (4), (4.1), (4.2), (4.3) | BR125   | **Querying Rules:** System queries itinerary at step (4) with SQL: "SELECT ra.day_number, ra.order_in_day, a.attraction_name FROM Route_Attraction ra JOIN Attraction a ON ra.attraction_id = a.attraction_id WHERE ra.route_id = [route_id] AND ra.attraction_id = [attraction_id]". If COUNT = 0 → display "Attraction not found in schedule" (Refer to MSG 65) at step (4.1), reload schedule at step (4.2), admin confirms at step (4.3), end use case. Else proceed to step (5). (Refer to "Route_Attraction" and "Attraction" tables in "DB Sheet" file) |
-| (5), (5.1), (5.2)        | BR126   | **Querying Rules:** System queries total attractions at step (5) with SQL: "SELECT COUNT(\*) as total FROM Route_Attraction WHERE route_id = [route_id]". If total <= 1 → display "Cannot delete: This is the last attraction in schedule. Route must have at least one attraction." (Refer to MSG 66) at step (5.1), admin confirms at step (5.2), end use case. Else proceed to step (6). (Refer to "Route_Attraction" table in "DB Sheet" file)                                                                                                             |
-| (6)                      | BR127   | **Displaying Rules:** System displays confirmation dialog at step (6) with [lblConfirmMessage] "Are you sure you want to remove '[attraction_name]' from Day [day_number]? This action cannot be undone.", [btnConfirm], [btnCancel]. (Refer to "Delete Itinerary Confirmation Dialog" in "View Description" file)                                                                                                                                                                                                                                             |
-| (7), (7.1), (7.2)        | BR128   | **Choosing Rules:** Admin clicks [btnConfirm] or [btnCancel] at step (7). If admin clicks [btnCancel] → close dialog at step (7.1), admin confirms at step (7.2), end use case. Else if [btnConfirm] clicked → proceed to step (8).                                                                                                                                                                                                                                                                                                                            |
-| (8), (9), (10), (11)     | BR129   | **Querying Rules:** System stores day and order at step (8). Deletes itinerary at step (9) in transaction with SQL: "DELETE FROM Route_Attraction WHERE route_id = [route_id] AND attraction_id = [attraction_id]". Updates remaining orders at step (10) with SQL: "UPDATE Route_Attraction SET order_in_day = order_in_day - 1 WHERE route_id = [route_id] AND day_number = [day] AND order_in_day > [deleted_order]". Commits transaction at step (11). (Refer to "Route_Attraction" table in "DB Sheet" file)                                              |
-| (12), (13), (14), (15)   | BR130   | **Displaying Rules:** System displays success "Attraction removed from schedule!" (Refer to MSG 67) at step (12), reloads schedule at step (13) showing updated itinerary. Admin views updated schedule at step (14), confirms at step (15).                                                                                                                                                                                                                                                                                                                   |
-
-#### 2.1.8 Manage Attraction Use Case
-
-##### 2.1.8.1 Add New Attraction
-
-###### Use Case Description
-
-| Name               | Add New Attraction                                                                                                                                              |
-| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to create new attraction records by entering attraction information including name, description, location, category, and status.     |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                                                       |
-| **Trigger**        | Admin selects "Add New Attraction" function in attractions management page.                                                                                     |
-| **Pre-condition**  | Admin must be authenticated with admin role. Admin must have access to attractions management module. At least one category must exist in the system.           |
-| **Post-condition** | New attraction is saved to database with status ACTIVE by default. Admin is redirected to attractions list or detail view showing the newly created attraction. |
-
-###### Sequence Flow
-
-[sequence-manage-attraction-add-new-attraction](../sequence/manage-attraction/add-new-attraction)
-
-###### Activities Flow
-
-[activity-manage-attraction-add-new-attraction](../activity/manage-attraction/add-new-attraction)
-
-###### Business Rules
-
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| :------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)      | BR131   | **Displaying Rules:** System displays "Add New Attraction" form at step (2) containing: [txtBoxAttractionName] for attraction name input, [txtAreaDescription] for multiline description text, [txtBoxLocation] for location input, [dropdownCategory] populated with available categories, [dropdownStatus] with default value 'Active', [btnSave], [btnCancel]. (Refer to "Add Attraction Form" view in "View Description" file)                                                                                                                                                                    |
-| (4), (5) | BR132   | **Validation Rules:** When admin clicks [btnSave] in repeat loop (steps 3-5), system validates at step (4): if [txtBoxAttractionName].length < 3 → error; if [txtAreaDescription].length < 20 → error; if [txtBoxLocation].isEmpty() = true → error; if [dropdownCategory].SelectedValue = null OR [dropdownStatus].SelectedValue = null → error. Checks duplicate with SQL: "SELECT COUNT(\*) FROM Attraction WHERE attraction_name = [name] AND location = [location]". If duplicate found OR any validation fails → display error (Refer to MSG 68), return to step (3). Else proceed to step (6). |
-| (6)      | BR133   | **Querying Rules:** System inserts new attraction at step (6) with SQL: "INSERT INTO Attraction (attraction_name, description, location, category_id, status, created_at, created_by) VALUES ([name], [description], [location], [category_id], [status], NOW(), [admin_id])". (Refer to "Attraction" table in "DB Sheet" file)                                                                                                                                                                                                                                                                       |
-| (7), (8) | BR134   | **Displaying Rules:** System displays success message "Attraction created successfully!" (Refer to MSG 69) at step (7), redirects to attractions list view at step (8). Admin views updated list and confirms end.                                                                                                                                                                                                                                                                                                                                                                                    |
-
-##### 2.1.8.2 View Attraction Detail
-
-###### Use Case Description
-
-| Name               | View Attraction Detail                                                                                                                                             |
-| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to view detailed information of a specific attraction including basic data, category information, and usage summary in route schedules. |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                          |
-| **Trigger**        | Staff clicks on an attraction from the attractions list.                                                                                                           |
-| **Pre-condition**  | Staff must be authenticated with staff role. Attraction must exist in database.                                                                                    |
-| **Post-condition** | Staff views complete attraction details including name, description, location, category, status, and summary of how many routes reference this attraction.         |
-
-###### Sequence Flow
-
-[sequence-manage-attraction-view-attraction-detail](../sequence/manage-attraction/view-attraction-detail)
-
-###### Activities Flow
-
-[activity-manage-attraction-view-attraction-detail](../activity/manage-attraction/view-attraction-detail)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| :---------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR135   | **Querying Rules:** When staff selects attraction at step (1), system queries attraction data at step (2) with SQL: "SELECT attraction_id, attraction_name, description, location, category_id, status, created_at, updated_at FROM Attraction WHERE attraction_id = [id]". If COUNT = 0 → display "Attraction not found" (Refer to MSG 70) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Attraction" table in "DB Sheet" file)                                                    |
-| (3)               | BR136   | **Querying Rules:** System queries category and usage information at step (3) with SQL: "SELECT c.category_name, COUNT(DISTINCT ra.route_id) as routes_count FROM Attraction a JOIN Category c ON a.category_id = c.category_id LEFT JOIN Route_Attraction ra ON a.attraction_id = ra.attraction_id WHERE a.attraction_id = [id] GROUP BY c.category_name". (Refer to "Category" and "Route_Attraction" tables in "DB Sheet" file)                                                                                                   |
-| (4), (5), (6)     | BR137   | **Displaying Rules:** System displays "Attraction Detail" view at steps (4-6) containing: [lblAttractionName] showing attraction name, [txtDescription] displaying description text (read-only), [lblLocation] showing location, [lblCategory] showing category name, [lblStatus] showing current status; usage summary panel displaying "Used in [X] routes" with [btnViewRoutes] button if routes_count > 0. Staff views details at step (5), confirms at step (6). (Refer to "Attraction Detail" view in "View Description" file) |
-
-##### 2.1.8.3 Edit Attraction Detail
-
-###### Use Case Description
-
-| Name               | Edit Attraction Detail                                                                                                                                                  |
-| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to modify existing attraction information including name, description, location, category, and status.                                       |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                               |
-| **Trigger**        | Staff selects "Edit Attraction" function on an attraction from attractions list.                                                                                        |
-| **Pre-condition**  | Staff must be authenticated with staff role. Attraction must exist and be in editable state (not deleted).                                                              |
-| **Post-condition** | Attraction information is updated in database with new values. Staff views updated attraction details in the attractions list or detail view with success confirmation. |
-
-###### Sequence Flow
-
-[sequence-manage-attraction-edit-attraction-detail](../sequence/manage-attraction/edit-attraction-detail)
-
-###### Activities Flow
-
-[activity-manage-attraction-edit-attraction-detail](../activity/manage-attraction/edit-attraction-detail)
-
-###### Business Rules
-
-| Activity            | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| :------------------ | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2)   | BR138   | **Querying Rules:** When staff selects "Edit Attraction" at step (1), system queries attraction data at step (2) with SQL: "SELECT attraction_id, attraction_name, description, location, category_id, status FROM Attraction WHERE attraction_id = [id]". If COUNT = 0 → display "Attraction not found" (Refer to MSG 71), end use case. If status = 'Deleted' → display "Cannot edit: Attraction has been deleted" (Refer to MSG 71) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Attraction" table in "DB Sheet" file)                                                            |
-| (3)                 | BR139   | **Displaying Rules:** System displays "Edit Attraction" form at step (3) containing: [txtBoxAttractionName], [txtAreaDescription], [txtBoxLocation], [dropdownCategory], [dropdownStatus], [btnSave], [btnCancel]. All fields are pre-filled with existing attraction data queried at step (2). (Refer to "Edit Attraction Form" view in "View Description" file)                                                                                                                                                                                                                                                                       |
-| (6)                 | BR140   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 4-6), system validates at step (6): if [txtBoxAttractionName].length < 3 → error; if [txtAreaDescription].length < 20 → error; if [txtBoxLocation].isEmpty() = true → error; if [dropdownCategory].SelectedValue = null OR [dropdownStatus].SelectedValue = null → error. Checks duplicate with SQL: "SELECT COUNT(\*) FROM Attraction WHERE attraction_name = [name] AND location = [location] AND attraction_id != [current_id]". If duplicate found OR any validation fails → display error (Refer to MSG 72), return to step (4). Else proceed to step (7). |
-| (7), (8), (9), (10) | BR141   | **Querying Rules:** System updates attraction at step (7) with SQL: "UPDATE Attraction SET attraction_name = [name], description = [description], location = [location], category_id = [category_id], status = [status], updated_at = NOW() WHERE attraction_id = [id]". Displays success message "Attraction updated successfully!" (Refer to MSG 73) at step (8), reloads attractions list at step (9). Staff views updated list at step (10), confirms end. (Refer to "Attraction" table in "DB Sheet" file)                                                                                                                         |
-
-##### 2.1.8.4 Delete Attraction
-
-###### Use Case Description
-
-| Name               | Delete Attraction                                                                                                                                                                                                                     |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Description**    | This use case allows staff to remove an attraction from the system. If attraction is referenced in route schedules, system suggests setting status to INACTIVE instead. Otherwise, performs soft delete by setting status to DELETED. |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                                                             |
-| **Trigger**        | Staff clicks "Delete" button on an attraction in attractions list.                                                                                                                                                                    |
-| **Pre-condition**  | Staff must be authenticated with staff role. Attraction must exist.                                                                                                                                                                   |
-| **Post-condition** | If no references: attraction status is set to DELETED (soft delete). If has references: attraction status is set to INACTIVE. Staff views updated attractions list with modified or removed attraction.                               |
-
-###### Sequence Flow
-
-[sequence-manage-attraction-delete-attraction](../sequence/manage-attraction/delete-attraction)
-
-###### Activities Flow
-
-[activity-manage-attraction-delete-attraction](../activity/manage-attraction/delete-attraction)
-
-###### Business Rules
-
-| Activity                              | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| :------------------------------------ | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (3), (3.1)                            | BR142   | **Querying Rules:** When staff clicks [btnDelete] at step (2), system checks references at step (3) with SQL: "SELECT COUNT(\*) FROM Route_Attraction WHERE attraction_id = [id]". If count > 0 → display "This attraction is used in [X] routes. Set status to INACTIVE instead?" (Refer to MSG 74) at step (3.1) with [btnSetInactive], [btnCancel]. Else proceed to step (4). (Refer to "Route_Attraction" table in "DB Sheet" file)                                                                                  |
-| (3.2), (3.2.1), (3.2.2)               | BR143   | **Choosing Rules:** At step (3.2), if staff clicks [btnCancel] at step (3.2.1) → close dialog, end use case. If staff clicks [btnSetInactive] at step (3.2.2) → proceed to step (3.3).                                                                                                                                                                                                                                                                                                                                   |
-| (3.3)                                 | BR144   | **Querying Rules:** System updates attraction status at step (3.3) with SQL: "UPDATE Attraction SET status = 'Inactive', updated_at = NOW() WHERE attraction_id = [id]". (Refer to "Attraction" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                |
-| (3.4), (3.5), (3.6)                   | BR145   | **Displaying Rules:** System displays success message "Attraction status set to INACTIVE!" (Refer to MSG 75) at step (3.4), reloads attractions list at step (3.5). Staff views updated list with status changed at step (3.6), confirms end use case.                                                                                                                                                                                                                                                                   |
-| (4)                                   | BR146   | **Displaying Rules:** System displays confirmation dialog at step (4): "Delete '[attraction_name]'? Status will be set to DELETED." with [btnConfirm], [btnCancel].                                                                                                                                                                                                                                                                                                                                                      |
-| (5), (5.1), (5.2), (6), (7), (8), (9) | BR147   | **Choosing/Querying Rules:** At step (5), if staff clicks [btnCancel] at step (5.1) → close dialog at step (5.2), end use case. If staff clicks [btnConfirm] → system updates at step (6) with SQL: "UPDATE Attraction SET status = 'Deleted', updated_at = NOW() WHERE attraction_id = [id]". Displays success message "Attraction deleted successfully!" (Refer to MSG 76) at step (7), reloads list at step (8). Staff views updated list at step (9), confirms end. (Refer to "Attraction" table in "DB Sheet" file) |
-
-##### 2.1.8.5 View and Filter Attractions
-
-###### Use Case Description
-
-| Name               | View and Filter Attractions                                                                                                                                                    |
-| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to view all attractions in the system and filter them by various criteria such as name, location, category, and status.                             |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                      |
-| **Trigger**        | Staff selects "View Attractions" function in attractions management module.                                                                                                    |
-| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to attractions management module.                                                                          |
-| **Post-condition** | Staff views attractions list with optional filters applied. Can repeat filter operation multiple times. List shows attraction cards with basic information and action buttons. |
-
-###### Sequence Flow
-
-[sequence-manage-attraction-view-and-filter-attractions](../sequence/manage-attraction/view-and-filter-attractions)
-
-###### Activities Flow
-
-[activity-manage-attraction-view-and-filter-attractions](../activity/manage-attraction/view-and-filter-attractions)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| :---------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR148   | **Querying Rules:** When staff selects "View Attractions" at step (1), system queries all attractions at step (2) with SQL: "SELECT a.attraction_id, a.attraction_name, a.description, a.location, a.status, c.category_name, COUNT(ra.route_id) as routes_count FROM Attraction a JOIN Category c ON a.category_id = c.category_id LEFT JOIN Route_Attraction ra ON a.attraction_id = ra.attraction_id WHERE a.status != 'Deleted' GROUP BY a.attraction_id ORDER BY a.created_at DESC". If COUNT = 0 → display "No attractions found" (Refer to MSG 77) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Attraction", "Category", "Route_Attraction" tables in "DB Sheet" file)                                                                                  |
-| (3)               | BR149   | **Displaying Rules:** System displays "Attractions List" view at step (3) containing: filter panel with [txtBoxSearchName] for name search, [txtBoxSearchLocation] for location search, [dropdownFilterCategory] populated with all categories, [dropdownFilterStatus] with status options, [btnApplyFilter]; and attractions grid displaying [cardAttraction] for each attraction showing [lblAttractionName], [lblLocation], [lblCategory], [lblStatus], usage indicator "Used in [X] routes", and action buttons [btnView], [btnEdit], [btnDelete]. (Refer to "Attractions List" view in "View Description" file)                                                                                                                                                                                              |
-| (6), (6.1)        | BR150   | **Querying Rules:** When staff clicks [btnApplyFilter] in repeat loop (steps 4-6), system applies filters at step (6) with SQL: "SELECT a.attraction_id, a.attraction_name, a.description, a.location, a.status, c.category_name, COUNT(ra.route_id) as routes_count FROM Attraction a JOIN Category c ON a.category_id = c.category_id LEFT JOIN Route_Attraction ra ON a.attraction_id = ra.attraction_id WHERE a.status != 'Deleted' AND (a.attraction_name LIKE '%[name]%' OR [name] = '') AND (a.location LIKE '%[location]%' OR [location] = '') AND (a.category_id = [category] OR [category] = null) AND (a.status = [status] OR [status] = null) GROUP BY a.attraction_id". If COUNT = 0 → display "No attractions match the filter criteria" (Refer to MSG 78) at step (6.1). Else proceed to step (7). |
-| (7), (8)          | BR151   | **Displaying Rules:** System updates attractions grid at step (7) with filtered results, displays result count "[filtered_count] of [total_count] attractions" below filter panel. Staff views filtered list at step (8), can repeat filter operation or confirm end use case.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-
-#### 2.1.9 Manage Trips Use Case
-
-##### 2.1.9.1 Add New Trip
-
-###### Use Case Description
-
-| Name               | Add New Trip                                                                                                                                                                     |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to create new trip records by entering trip information including route, departure/return dates, price, available seats, pickup location, and status. |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                        |
-| **Trigger**        | Staff selects "Add New Trip" function in trips management page.                                                                                                                  |
-| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to trips management module. At least one route must exist in the system.                                     |
-| **Post-condition** | New trip is saved to database with specified departure and return dates. Staff is redirected to trips list or detail view showing the newly created trip.                        |
-
-###### Sequence Flow
-
-[sequence-manage-trips-add-new-trip](../sequence/manage-trips/add-new-trip)
-
-###### Activities Flow
-
-[activity-manage-trips-add-new-trip](../activity/manage-trips/add-new-trip)
-
-###### Business Rules
-
-| Activity       | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| :------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)            | BR152   | **Displaying Rules:** System displays "Add New Trip" form at step (2) containing: [dropdownRoute] populated with available routes showing route names, [datePickerDeparture] for departure date selection, [datePickerReturn] for return date selection, [numericUpDownPrice] for trip price, [numericUpDownSeats] for total available seats, [txtBoxPickupLocation] for pickup location, [dropdownStatus] with default value 'Scheduled', [btnSave], [btnCancel]. (Refer to "Add Trip Form" view in "View Description" file)                                                                                                                                                                                                                                        |
-| (5), (6)       | BR153   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 3-5), system validates at step (5): if [dropdownRoute].SelectedValue = null → error; if [datePickerDeparture].Value <= NOW() → error "Departure date must be in future"; if [datePickerReturn].Value <= [datePickerDeparture].Value → error "Return date must be after departure"; if [numericUpDownPrice].Value <= 0 OR [numericUpDownSeats].Value <= 0 → error; if [txtBoxPickupLocation].isEmpty() = true → error. At step (6), checks duplicate schedule with SQL: "SELECT COUNT(\*) FROM Trip WHERE route_id = [route_id] AND departure_date = [dep_date]". If duplicate found OR any validation fails → display error (Refer to MSG 79), return to step (3). Else proceed to step (7). |
-| (7)            | BR154   | **Querying Rules:** System inserts new trip at step (7) with SQL: "INSERT INTO Trip (route_id, departure_date, return_date, price, total_seats, booked_seats, pickup_location, status, created_at, created_by) VALUES ([route_id], [dep_date], [ret_date], [price], [seats], 0, [pickup], [status], NOW(), [staff_id])". (Refer to "Trip" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                                                  |
-| (8), (9), (10) | BR155   | **Displaying Rules:** System displays success message "Trip created successfully!" (Refer to MSG 80) at step (8), redirects to trips list view at step (9). Staff views new trip in list at step (10), confirms end.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-
-##### 2.1.9.2 View Trip Details
-
-###### Use Case Description
-
-| Name               | View Trip Details                                                                                                                                                                |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to view detailed information of a specific trip including route info, dates, pricing, seat availability, and booking summary.                         |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                        |
-| **Trigger**        | Staff clicks on a trip from the trips list.                                                                                                                                      |
-| **Pre-condition**  | Staff must be authenticated with staff role. Trip must exist in database.                                                                                                        |
-| **Post-condition** | Staff views complete trip details including route information, departure/return dates, pricing, available/booked seats ratio, and summary of bookings associated with this trip. |
-
-###### Sequence Flow
-
-[sequence-manage-trips-view-trip-details](../sequence/manage-trips/view-trip-details)
-
-###### Activities Flow
-
-[activity-manage-trips-view-trip-details](../activity/manage-trips/view-trip-details)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR156   | **Querying Rules:** When staff selects trip at step (1), system queries trip data at step (2) with SQL: "SELECT t.trip_id, t.departure_date, t.return_date, t.price, t.total_seats, t.booked_seats, t.pickup_location, t.status, r.route_id, r.route_name, r.start_location, r.end_location, r.duration_days FROM Trip t JOIN Route r ON t.route_id = r.route_id WHERE t.trip_id = [id]". If COUNT = 0 → display "Trip not found" (Refer to MSG 81) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Trip" and "Route" tables in "DB Sheet" file)         |
-| (3)               | BR157   | **Querying Rules:** System queries booking summary at step (3) with SQL: "SELECT COUNT(\*) as total_bookings, SUM(no_adults + no_children) as total_travelers, SUM(CASE WHEN status = 'CONFIRMED' THEN 1 ELSE 0 END) as confirmed_count FROM Tour_Booking WHERE trip_id = [id]". (Refer to "Tour_Booking" table in "DB Sheet" file)                                                                                                                                                                                                                                                                      |
-| (4), (5), (6)     | BR158   | **Displaying Rules:** System displays "Trip Detail" view at steps (4-6) containing: trip info panel with [lblRouteName], [lblStartEnd], [lblDuration], [lblDepartureDate], [lblReturnDate], [lblPrice], [lblPickupLocation], [lblStatus]; seats panel showing [progressBarSeats] with "[booked] / [total] seats booked" and available seats count; booking summary panel displaying total bookings count, total travelers count, confirmed bookings count with [btnViewBookings] button. Staff views details at step (5), confirms at step (6). (Refer to "Trip Detail" view in "View Description" file) |
-
-##### 2.1.9.3 Edit Trip
-
-###### Use Case Description
-
-| Name               | Edit Trip                                                                                                                                                         |
-| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to modify existing trip information including dates, price, seats, pickup location, and status.                                        |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                         |
-| **Trigger**        | Staff selects "Edit Trip" function on a trip from trips list.                                                                                                     |
-| **Pre-condition**  | Staff must be authenticated with staff role. Trip must exist and be in editable state (not canceled or completed). Trip must not have departure date in the past. |
-| **Post-condition** | Trip information is updated in database with new values. Staff views updated trip details in the trips list or detail view with success confirmation.             |
-
-###### Sequence Flow
-
-[sequence-manage-trips-edit-trip](../sequence/manage-trips/edit-trip)
-
-###### Activities Flow
-
-[activity-manage-trips-edit-trip](../activity/manage-trips/edit-trip)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| :---------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR159   | **Querying Rules:** When staff selects "Edit Trip" at step (1), system queries trip data at step (2) with SQL: "SELECT t.\*, r.route_name FROM Trip t JOIN Route r ON t.route_id = r.route_id WHERE t.trip_id = [id]". If COUNT = 0 → display "Trip not found" (Refer to MSG 82), end use case. If t.status IN ('Canceled', 'Completed') OR t.departure_date < NOW() → display "Cannot edit: Trip is not editable" (Refer to MSG 82) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Trip" and "Route" tables in "DB Sheet" file) |
-| (3)               | BR160   | **Displaying Rules:** System displays "Edit Trip" form at step (3) containing: [lblRoute] showing route name (read-only), [datePickerDeparture], [datePickerReturn], [numericUpDownPrice], [numericUpDownSeats], [txtBoxPickupLocation], [dropdownStatus], [btnSave], [btnCancel]. All fields are pre-filled with existing trip data queried at step (2). (Refer to "Edit Trip Form" view in "View Description" file)                                                                                                                                                             |
-| (6)               | BR161   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 4-6), system validates at step (6): if [datePickerDeparture].Value <= NOW() → error; if [datePickerReturn].Value <= [datePickerDeparture].Value → error; if [numericUpDownPrice].Value <= 0 → error; if [numericUpDownSeats].Value < [current_booked_seats] → error "Cannot reduce seats below booked seats count"; if [txtBoxPickupLocation].isEmpty() = true → error. If any validation fails → display error (Refer to MSG 83), return to step (4). Else proceed to step (7).                          |
-| (7)               | BR162   | **Querying Rules:** System updates trip at step (7) with SQL: "UPDATE Trip SET departure_date = [dep_date], return_date = [ret_date], price = [price], total_seats = [seats], pickup_location = [pickup], status = [status], updated_at = NOW() WHERE trip_id = [id]". (Refer to "Trip" table in "DB Sheet" file)                                                                                                                                                                                                                                                                 |
-| (8), (9), (10)    | BR163   | **Displaying Rules:** System displays success message "Trip updated successfully!" (Refer to MSG 84) at step (8), reloads trips list at step (9). Staff views updated trip at step (10), confirms end.                                                                                                                                                                                                                                                                                                                                                                            |
-
-##### 2.1.9.4 Delete Trip
-
-###### Use Case Description
-
-| Name               | Delete Trip                                                                                                                                                                                                            |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to remove a trip from the system. If trip has pending/confirmed bookings, system suggests canceling the trip instead. Otherwise, performs hard delete of the trip record.                   |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                                              |
-| **Trigger**        | Staff clicks "Delete" button on a trip in trips list.                                                                                                                                                                  |
-| **Pre-condition**  | Staff must be authenticated with staff role. Trip must exist.                                                                                                                                                          |
-| **Post-condition** | If no bookings: trip record is permanently deleted from database. If has bookings: trip status is set to CANCELED and all related bookings are canceled. Staff views updated trips list without deleted/canceled trip. |
-
-###### Sequence Flow
-
-[sequence-manage-trips-delete-trip](../sequence/manage-trips/delete-trip)
-
-###### Activities Flow
-
-[activity-manage-trips-delete-trip](../activity/manage-trips/delete-trip)
-
-###### Business Rules
-
-| Activity                              | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| :------------------------------------ | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (3), (3.1)                            | BR164   | **Querying Rules:** When staff clicks [btnDelete] at step (2), system checks related bookings at step (3) with SQL: "SELECT COUNT(\*) as bookings_count, t.route_name FROM Tour_Booking tb JOIN Trip t ON tb.trip_id = t.trip_id WHERE tb.trip_id = [id] AND tb.status IN ('PENDING', 'CONFIRMED') GROUP BY t.route_name". If bookings_count > 0 → display "Cannot delete: Trip has [X] pending/confirmed bookings. Cancel trip instead?" (Refer to MSG 85) at step (3.1) with [btnCancelTrip], [btnClose]. Else proceed to step (4). (Refer to "Tour_Booking" and "Trip" tables in "DB Sheet" file) |
-| (3.2), (3.2.1), (3.2.2)               | BR165   | **Choosing Rules:** At step (3.2), if staff clicks [btnClose] at step (3.2.1) → close dialog at step (3.2.2), end use case. If staff clicks [btnCancelTrip] → proceed to step (3.3).                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| (3.3)                                 | BR166   | **Querying Rules:** System updates trip status at step (3.3) with SQL: "UPDATE Trip SET status = 'Canceled', updated_at = NOW() WHERE trip_id = [id]". (Refer to "Trip" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                                                    |
-| (3.4), (3.5), (3.6)                   | BR167   | **Displaying Rules:** System displays success message "Trip has been canceled!" (Refer to MSG 86) at step (3.4), reloads trips list at step (3.5). Staff views updated list with trip canceled at step (3.6), confirms end use case.                                                                                                                                                                                                                                                                                                                                                                 |
-| (4)                                   | BR168   | **Displaying Rules:** System displays confirmation dialog at step (4): "Delete trip to '[route_name]' on [departure_date]? This action cannot be undone." with [btnConfirm], [btnCancel].                                                                                                                                                                                                                                                                                                                                                                                                            |
-| (5), (5.1), (5.2), (6), (7), (8), (9) | BR169   | **Choosing/Querying Rules:** At step (5), if staff clicks [btnCancel] at step (5.1) → close dialog at step (5.2), end use case. If staff clicks [btnConfirm] → system deletes in transaction at step (6) with SQL: "DELETE FROM Trip WHERE trip_id = [id]". Displays success message "Trip deleted successfully!" (Refer to MSG 87) at step (7), reloads list at step (8). Staff views updated list at step (9), confirms end. (Refer to "Trip" table in "DB Sheet" file)                                                                                                                            |
-
-##### 2.1.9.5 Add New Booking for Trip
-
-###### Use Case Description
-
-| Name               | Add New Booking for Trip                                                                                                                                                                    |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Description**    | This use case allows staff to create a new booking for a specific trip on behalf of a customer, including customer selection, traveler details entry, and invoice generation.               |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                   |
-| **Trigger**        | Staff clicks "Add Booking" button on a trip detail page.                                                                                                                                    |
-| **Pre-condition**  | Staff must be authenticated with staff role. Trip must exist and be in valid state (Scheduled status, future departure date). Trip must have available seats.                               |
-| **Post-condition** | New booking is created with status CONFIRMED. Invoice is generated. Trip's booked_seats count is updated. Staff views booking details or returns to trip details with success confirmation. |
-
-###### Sequence Flow
-
-[sequence-manage-trips-add-new-booking-for-trip](../sequence/manage-trips/add-new-booking-for-trip)
-
-###### Activities Flow
-
-[activity-manage-trips-add-new-booking-for-trip](../activity/manage-trips/add-new-booking-for-trip)
-
-###### Business Rules
-
-| Activity      | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| :------------ | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (3)           | BR170   | **Displaying Rules:** System displays "Add Booking" form at step (3) containing: [txtBoxSearchCustomer] with autocomplete for customer search, [lblSelectedCustomer] showing selected customer info, [numericUpDownAdults] for number of adults (default 1), [numericUpDownChildren] for number of children (default 0), [txtAreaTravelers] for traveler names (one per line), [dropdownPaymentMethod] with payment options, [btnSave], [btnCancel]. (Refer to "Add Booking Form" view in "View Description" file)                                                                                                                                                                                                                                  |
-| (7), (8), (9) | BR171   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 4-9), system validates at step (7): checks trip status with SQL "SELECT status, departure_date, total_seats, booked_seats FROM Trip WHERE trip_id = [id]". If status != 'Scheduled' OR departure_date <= NOW() → error "Trip is not available for booking" (Refer to MSG 88). At step (8), validates customer with SQL "SELECT status FROM User WHERE user_id = [customer_id]". If status = 'Locked' → error "Customer account is locked". At step (9), if ([adults] + [children]) > (total_seats - booked_seats) → error "Not enough seats available". If any validation fails → return to step (4). Else proceed to step (10).                                            |
-| (10)          | BR172   | **Displaying Rules:** System calculates and displays booking confirmation dialog at step (10): "Confirm booking for [customer_name]? Total: [adults] adults + [children] children = [total_price] VND. Payment: [method]" with [btnConfirm], [btnCancel].                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| (12)          | BR173   | **Querying Rules:** System begins transaction and locks trip row at step (12) with SQL: "SELECT trip_id, total_seats, booked_seats FROM Trip WHERE trip_id = [id] FOR UPDATE". This prevents concurrent booking conflicts. (Refer to "Trip" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| (13)          | BR174   | **Querying Rules:** System creates booking records at step (13) with SQL: "INSERT INTO Tour_Booking (trip_id, customer_id, no_adults, no_children, total_amount, status, booking_date, created_by) VALUES ([trip_id], [customer_id], [adults], [children], [total_price], 'CONFIRMED', NOW(), [staff_id])". Creates traveler details with SQL: "INSERT INTO Tour_Booking_Detail (booking_id, traveler_name, traveler_age, traveler_type) VALUES ..." for each traveler line. Creates invoice with SQL: "INSERT INTO Invoice (booking_id, total_amount, payment_method, payment_status, issued_date) VALUES ([booking_id], [total], [method], 'PAID', NOW())". (Refer to "Tour_Booking", "Tour_Booking_Detail", "Invoice" tables in "DB Sheet" file) |
-| (14)          | BR175   | **Querying Rules:** System updates trip seats at step (14) with SQL: "UPDATE Trip SET booked_seats = booked_seats + [adults] + [children], updated_at = NOW() WHERE trip_id = [id]". Commits transaction successfully. (Refer to "Trip" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| (15), (16)    | BR176   | **Displaying Rules:** System displays success message "Booking created successfully! Booking ID: [booking_id]" (Refer to MSG 89) at step (15). Staff views booking details or trip details at step (16), confirms end.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-
-##### 2.1.9.6 View and Filter Trips
-
-###### Use Case Description
-
-| Name               | View and Filter Trips                                                                                                                                                            |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to view all trips in the system and filter them by various criteria such as route, departure date range, status, and available seats.                 |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                        |
-| **Trigger**        | Staff selects "View Trips" function in trips management module.                                                                                                                  |
-| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to trips management module.                                                                                  |
-| **Post-condition** | Staff views trips list with optional filters applied. Can repeat filter operation multiple times. List shows trip cards with route info, dates, pricing, and seats availability. |
-
-###### Sequence Flow
-
-[sequence-manage-trips-view-and-filter-trips](../sequence/manage-trips/view-and-filter-trips)
-
-###### Activities Flow
-
-[activity-manage-trips-view-and-filter-trips](../activity/manage-trips/view-and-filter-trips)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (2), (2.1), (2.2) | BR177   | **Querying Rules:** When staff selects "View Trips" at step (1), system queries all trips at step (2) with SQL: "SELECT t.trip_id, t.departure_date, t.return_date, t.price, t.total_seats, t.booked_seats, t.pickup_location, t.status, r.route_id, r.route_name, r.start_location, r.end_location FROM Trip t JOIN Route r ON t.route_id = r.route_id ORDER BY t.departure_date ASC". If COUNT = 0 → display "No trips found" (Refer to MSG 90) at step (2.1), staff confirms at step (2.2), end use case. Else proceed to step (3). (Refer to "Trip" and "Route" tables in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                      |
-| (3)               | BR178   | **Displaying Rules:** System displays "Trips List" view at step (3) containing: filter panel with [dropdownFilterRoute] populated with all routes, [datePickerFromDate] for departure date start, [datePickerToDate] for departure date end, [dropdownFilterStatus] with status options, [checkboxAvailableOnly] for filtering trips with available seats, [btnApplyFilter]; and trips grid displaying [cardTrip] for each trip showing [lblRouteName], [lblStartEnd], [lblDepartureDate], [lblReturnDate], [lblPrice], seats indicator "[booked]/[total] seats", [lblStatus], and action buttons [btnView], [btnEdit], [btnDelete], [btnAddBooking]. (Refer to "Trips List" view in "View Description" file)                                                                                                                                                                                                       |
-| (6), (6.1)        | BR179   | **Querying Rules:** When staff clicks [btnApplyFilter] in repeat loop (steps 4-6), system validates and applies filters at step (6). If [datePickerFromDate] > [datePickerToDate] → error "Invalid date range". Builds dynamic SQL: "SELECT t.trip_id, t.departure_date, t.return_date, t.price, t.total_seats, t.booked_seats, t.pickup_location, t.status, r.route_id, r.route_name, r.start_location, r.end_location FROM Trip t JOIN Route r ON t.route_id = r.route_id WHERE (r.route_id = [route] OR [route] = null) AND (t.departure_date >= [from_date] OR [from_date] = null) AND (t.departure_date <= [to_date] OR [to_date] = null) AND (t.status = [status] OR [status] = null) AND ([available_only] = false OR t.booked_seats < t.total_seats) ORDER BY t.departure_date ASC". If COUNT = 0 → display "No trips match the filter criteria" (Refer to MSG 91) at step (6.1). Else proceed to step (7). |
-| (7), (8)          | BR180   | **Displaying Rules:** System updates trips grid at step (7) with filtered results, displays result count "[filtered_count] of [total_count] trips" below filter panel. Staff views filtered list at step (8), can repeat filter operation or confirm end use case.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-
-#### 2.1.10 Adjust and Track Bookings Use Case
-
-##### 2.1.10.1 Add New Booking
-
-###### Use Case Description
-
-| Name               | Add New Booking                                                                                                                                                                          |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to create a new booking by selecting a customer and trip, entering traveler details, and generating an invoice.                                               |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                |
-| **Trigger**        | Staff selects "Add New Booking" function in bookings management page.                                                                                                                    |
-| **Pre-condition**  | Staff must be authenticated with staff role. At least one customer and one scheduled trip must exist in the system.                                                                      |
-| **Post-condition** | New booking is created with status CONFIRMED. Invoice is generated. Trip's booked_seats count is updated. Staff is redirected to booking details view showing the newly created booking. |
-
-###### Sequence Flow
-
-[sequence-adjust-and-track-bookings-add-new-booking](../sequence/adjust-and-track-bookings/add-new-booking)
-
-###### Activities Flow
-
-[activity-adjust-and-track-bookings-add-new-booking](../activity/adjust-and-track-bookings/add-new-booking)
-
-###### Business Rules
-
-| Activity        | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| :-------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (2)             | BR181   | **Displaying Rules:** System displays "Add New Booking" form at step (2) containing: [txtBoxSearchCustomer] with autocomplete, [lblSelectedCustomer], [dropdownSelectTrip] with available trips, [numericUpDownAdults] (default 1), [numericUpDownChildren] (default 0), [txtAreaTravelers], [dropdownPaymentMethod], [btnSave], [btnCancel]. (Refer to "Add Booking Form" view in "View Description" file)                                                                                                                                                                                                                                                                                                                                 |
-| (7)             | BR182   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 3-7), system validates at step (7): if [lblSelectedCustomer] empty OR [dropdownSelectTrip].SelectedValue = null → error. Queries trip: "SELECT status, departure_date, total_seats, booked_seats FROM Trip WHERE trip_id = [id]". If status != 'Scheduled' OR departure_date <= NOW() → error (Refer to MSG 92). Queries customer: "SELECT status FROM User WHERE user_id = [customer_id]". If status = 'Locked' → error (Refer to MSG 93). If ([adults] + [children]) > (total_seats - booked_seats) OR [txtAreaTravelers].lineCount != ([adults] + [children]) → error (Refer to MSG 94). If any validation fails → return to step (3). Else proceed to step (8). |
-| (8)             | BR183   | **Querying Rules:** System begins transaction and locks trip at step (8) with SQL: "SELECT \* FROM Trip WHERE trip_id = [id] FOR UPDATE". (Refer to "Trip" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| (8)             | BR184   | **Querying Rules:** System creates booking at step (8): "INSERT INTO Tour_Booking (...) VALUES (...)". Creates travelers: "INSERT INTO Tour_Booking_Detail (booking_id, traveler_name) VALUES ..." for each line. Creates invoice: "INSERT INTO Invoice (...) VALUES (...)". Updates seats: "UPDATE Trip SET booked_seats = booked_seats + [adults] + [children] WHERE trip_id = [id]". Commits transaction. (Refer to "Tour_Booking", "Tour_Booking_Detail", "Invoice", "Trip" tables in "DB Sheet" file)                                                                                                                                                                                                                                  |
-| (9), (10), (11) | BR185   | **Displaying Rules:** System displays success "Booking created successfully! Booking ID: [booking_id]" (Refer to MSG 95) at step (9), redirects to details at step (10). Staff confirms end at step (11).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-
-##### 2.1.10.2 View and Filter Bookings
-
-###### Use Case Description
-
-| Name               | View and Filter Bookings                                                                                                                                                            |
-| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to view all bookings in the system and filter them by various criteria such as customer name, trip, booking status, and booking date range.              |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                           |
-| **Trigger**        | Staff selects "View Bookings" function in bookings management module.                                                                                                               |
-| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to bookings management module.                                                                                  |
-| **Post-condition** | Staff views bookings list with optional filters applied. Can repeat filter operation multiple times. List shows booking cards with customer info, trip details, and payment status. |
-
-###### Sequence Flow
-
-[sequence-adjust-and-track-bookings-view-and-filter-bookings](../sequence/adjust-and-track-bookings/view-and-filter-bookings)
-
-###### Activities Flow
-
-[activity-adjust-and-track-bookings-view-and-filter-bookings](../activity/adjust-and-track-bookings/view-and-filter-bookings)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR186   | **Querying Rules:** When staff selects "View Bookings" at step (1), system queries at step (2) with SQL: "SELECT tb.\*, u.full_name, u.email, t.departure_date, r.route_name, i.payment_status FROM Tour_Booking tb JOIN User u, Trip t, Route r LEFT JOIN Invoice i ... ORDER BY tb.booking_date DESC". If COUNT = 0 → display "No bookings found" (Refer to MSG 96) at step (2.1), end use case. Else proceed to step (3). (Refer to "Tour_Booking", "User", "Trip", "Route", "Invoice" tables in "DB Sheet" file) |
-| (3)               | BR187   | **Displaying Rules:** System displays "Bookings List" view at step (3) containing: filter panel with [txtBoxSearchCustomer], [dropdownFilterTrip], [dropdownFilterStatus] (PENDING, CONFIRMED, CANCELED, COMPLETED), [datePickerFromDate], [datePickerToDate], [btnApplyFilter]; and bookings grid with [cardBooking] showing booking ID, customer, route, dates, passengers, amount, status, action buttons. (Refer to "Bookings List" view in "View Description" file)                                             |
-| (6), (6.1)        | BR188   | **Querying Rules:** When staff clicks [btnApplyFilter] in repeat loop (steps 4-6), system validates at step (6). If [datePickerFromDate] > [datePickerToDate] → error. Builds dynamic SQL with WHERE (u.full_name LIKE '%[name]%' OR u.email LIKE '%[name]%') AND (t.trip_id = [trip] OR [trip] = null) AND (tb.status = [status] OR [status] = null) AND date range filters. If COUNT = 0 → display "No bookings match the filter criteria" (Refer to MSG 97) at step (6.1). Else proceed to step (7).              |
-| (7), (8)          | BR189   | **Displaying Rules:** System updates grid at step (7) with filtered results, displays "[filtered_count] of [total_count] bookings". Staff can repeat or confirm end at step (8).                                                                                                                                                                                                                                                                                                                                     |
-
-##### 2.1.10.3 View Booking Details
-
-###### Use Case Description
-
-| Name               | View Booking Details                                                                                                                                                                         |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to view detailed information of a specific booking including customer info, trip details, travelers list, and invoice summary.                                    |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                    |
-| **Trigger**        | Staff clicks on a booking from the bookings list.                                                                                                                                            |
-| **Pre-condition**  | Staff must be authenticated with staff role. Booking must exist in database.                                                                                                                 |
-| **Post-condition** | Staff views complete booking details including customer information, trip schedule, list of travelers, payment status, and available action buttons based on booking status and cutoff date. |
-
-###### Sequence Flow
-
-[sequence-adjust-and-track-bookings-view-booking-details](../sequence/adjust-and-track-bookings/view-booking-details)
-
-###### Activities Flow
-
-[activity-adjust-and-track-bookings-view-booking-details](../activity/adjust-and-track-bookings/view-booking-details)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (2), (2.1), (2.2) | BR190   | **Querying Rules:** When staff selects booking at step (1), system queries at step (2) with SQL: "SELECT tb.\*, u.full_name, u.email, u.phone, t.\*, r.\* FROM Tour_Booking tb JOIN User u, Trip t, Route r WHERE tb.booking_id = [id]". If COUNT = 0 → display "Booking not found" (Refer to MSG 98) at step (2.1), end use case. Else proceed to step (3). (Refer to "Tour_Booking", "User", "Trip", "Route" tables in "DB Sheet" file)                                                                                                   |
-| (3)               | BR191   | **Querying Rules:** System queries travelers at step (3) with SQL: "SELECT traveler_name FROM Tour_Booking_Detail WHERE booking_id = [id] ORDER BY detail_id". (Refer to "Tour_Booking_Detail" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                    |
-| (4)               | BR192   | **Querying Rules:** System queries invoice at step (4) with SQL: "SELECT \* FROM Invoice WHERE booking_id = [id]". (Refer to "Invoice" table in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                                                            |
-| (5), (6), (7)     | BR193   | **Displaying Rules:** System displays "Booking Detail" view at steps (5-7) with panels: booking info ([lblBookingId], [lblBookingDate], [lblBookingStatus]); customer info ([lblCustomerName], [lblEmail], [lblPhone]); trip info (route, dates, pickup); passengers ([lblAdultsCount], [lblChildrenCount], [listTravelers]); invoice ([lblTotalAmount], [lblPaymentMethod], [lblPaymentStatus], [btnViewInvoice]); action buttons based on status. Staff confirms at step (7). (Refer to "Booking Detail" view in "View Description" file) |
-
-##### 2.1.10.4 View Booking's Invoice
-
-###### Use Case Description
-
-| Name               | View Booking's Invoice                                                                                            |
-| :----------------- | :---------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to view the invoice details associated with a specific booking.                        |
-| **Actor**          | Staff (must be signed in with staff role)                                                                         |
-| **Trigger**        | Staff clicks "View Invoice" button from booking details page.                                                     |
-| **Pre-condition**  | Staff must be authenticated with staff role. Booking must exist. Invoice must be generated for the booking.       |
-| **Post-condition** | Staff views complete invoice information including total amount, payment method, payment status, and issued date. |
-
-###### Sequence Flow
-
-[sequence-adjust-and-track-bookings-view-booking's-invoice](../sequence/adjust-and-track-bookings/view-booking's-invoice)
-
-###### Activities Flow
-
-[activity-adjust-and-track-bookings-view-booking's-invoice](../activity/adjust-and-track-bookings/view-booking's-invoice)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                |
-| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR194   | **Querying Rules:** When staff clicks "View Invoice" at step (1), system queries at step (2) with SQL: "SELECT i.\*, tb.booking_id, u.full_name FROM Invoice i JOIN Tour_Booking tb, User u WHERE i.booking_id = [booking_id]". If COUNT = 0 → display "Invoice not found" (Refer to MSG 99) at step (2.1), end use case. Else proceed to step (3). (Refer to "Invoice", "Tour_Booking", "User" tables in "DB Sheet" file) |
-| (3), (4), (5)     | BR195   | **Displaying Rules:** System displays "Invoice Detail" view at steps (3-5) with [lblInvoiceId], [lblBookingId], [lblCustomerName], [lblTotalAmount], [lblPaymentMethod], [lblPaymentStatus] color-coded (green=PAID, yellow=PENDING, red=FAILED), [btnPrint]. Staff confirms at step (5). (Refer to "Invoice Detail" view in "View Description" file)                                                                      |
-
-##### 2.1.10.5 Edit Pre-departure Booking
-
-###### Use Case Description
-
-| Name               | Edit Pre-departure Booking                                                                                                                                                                                                                              |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Description**    | This use case allows staff to modify booking information including number of passengers and traveler names for bookings that have not yet departed and are within the editable cutoff period.                                                           |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                                                                               |
-| **Trigger**        | Staff selects "Edit Booking" function on a booking from bookings list or booking details.                                                                                                                                                               |
-| **Pre-condition**  | Staff must be authenticated with staff role. Booking must exist and be in PENDING or CONFIRMED status. Trip departure date must be at least 7 days in the future (cutoff period). Invoice payment status must not be PAID (or allow refund processing). |
-| **Post-condition** | Booking information is updated with new passenger counts and traveler names. Trip's booked_seats count is adjusted (increased or decreased). Invoice total amount is recalculated. Staff views updated booking details with success confirmation.       |
-
-###### Sequence Flow
-
-[sequence-adjust-and-track-bookings-edit-pre-departure-booking](../sequence/adjust-and-track-bookings/edit-pre-departure-booking)
-
-###### Activities Flow
-
-[activity-adjust-and-track-bookings-edit-pre-departure-booking](../activity/adjust-and-track-bookings/edit-pre-departure-booking)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| :---------------- | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR196   | **Querying Rules:** When staff selects "Edit Booking" at step (1), system queries at step (2) with SQL: "SELECT tb.\*, t.departure_date, t.total_seats, t.booked_seats FROM Tour_Booking tb JOIN Trip t, Invoice i WHERE tb.booking_id = [id]". If COUNT = 0 → display "Booking not found" (Refer to MSG 100), end. Calculates cutoff as departure_date - 7 days. If tb.status NOT IN ('PENDING', 'CONFIRMED') OR NOW() > cutoff → display "Cannot edit" with reason (Refer to MSG 100) at step (2.1), end use case. Else proceed to step (3). (Refer to "Tour_Booking", "Trip" tables in "DB Sheet" file) |
-| (3)               | BR197   | **Displaying Rules:** System displays "Edit Booking" form at step (3) with [lblBookingId] (read-only), [lblTripInfo] (read-only), [numericUpDownAdults] pre-filled (min 1), [numericUpDownChildren] pre-filled (min 0), [txtAreaTravelers] pre-filled, [lblCurrentTotal], [btnSave], [btnCancel]. (Refer to "Edit Booking Form" view in "View Description" file)                                                                                                                                                                                                                                           |
-| (6)               | BR198   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 4-6), system validates at step (6): if [numericUpDownAdults] < 1 → error. Calculates delta_seats = (new_adults + new_children) - (old_adults + old_children). If delta_seats > 0 AND delta_seats > available_seats → error (Refer to MSG 101). If [txtAreaTravelers].lineCount != (new_adults + new_children) → error. If any fails → return to step (4). Else proceed to step (7).                                                                                                                                                |
-| (7)               | BR199   | **Querying Rules:** System begins transaction and locks at step (7) with SQL: "SELECT \* FROM Tour_Booking WHERE booking_id = [id] FOR UPDATE" and "SELECT \* FROM Trip WHERE trip_id = [trip_id] FOR UPDATE". (Refer to "Tour_Booking", "Trip" tables in "DB Sheet" file)                                                                                                                                                                                                                                                                                                                                 |
-| (7)               | BR200   | **Querying Rules:** System updates at step (7): "UPDATE Tour_Booking SET no_adults = [new], no_children = [new], total_amount = [new_total] WHERE booking_id = [id]". Deletes travelers: "DELETE FROM Tour_Booking_Detail WHERE booking_id = [id]". Inserts new: "INSERT INTO Tour_Booking_Detail ..." for each. Updates seats: "UPDATE Trip SET booked_seats = booked_seats + [delta_seats] WHERE trip_id = [trip_id]". Updates invoice: "UPDATE Invoice SET total_amount = [new_total] WHERE booking_id = [id]". Commits. (Refer to tables in "DB Sheet" file)                                           |
-| (8), (9), (10)    | BR201   | **Displaying Rules:** System displays success "Booking updated successfully!" (Refer to MSG 102) at step (8), reloads at step (9). Staff confirms end at step (10).                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-
-##### 2.1.10.6 Delete Booking
-
-###### Use Case Description
-
-| Name               | Delete Booking                                                                                                                                                                                         |
-| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to delete a booking from the system. Booking can only be deleted if it's within the cancellation cutoff period and payment hasn't been processed, or if refund is approved. |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                                                              |
-| **Trigger**        | Staff clicks "Delete" button on a booking in bookings list or booking details.                                                                                                                         |
-| **Pre-condition**  | Staff must be authenticated with staff role. Booking must exist. Booking status must be PENDING or CONFIRMED. Trip departure date must be at least 7 days in the future (cutoff period).               |
-| **Post-condition** | Booking and related records (travelers, invoice) are permanently deleted from database. Trip's booked_seats count is decreased. Staff views updated bookings list without deleted booking.             |
-
-###### Sequence Flow
-
-[sequence-adjust-and-track-bookings-delete-booking](../sequence/adjust-and-track-bookings/delete-booking)
-
-###### Activities Flow
-
-[activity-adjust-and-track-bookings-delete-booking](../activity/adjust-and-track-bookings/delete-booking)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| :---------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (3), (3.1), (3.2) | BR202   | **Querying Rules:** When staff clicks [btnDelete] at step (2), system verifies at step (3) with SQL: "SELECT tb.\*, t.departure_date, r.route_name FROM Tour_Booking tb JOIN Trip t, Route r WHERE tb.booking_id = [id]". Calculates cutoff as departure_date - 7 days. If tb.status NOT IN ('PENDING', 'CONFIRMED') OR NOW() > cutoff → display "Cannot delete" with reason (Refer to MSG 103) at step (3.1), end use case. Else proceed to step (4). (Refer to "Tour_Booking", "Trip", "Route" tables in "DB Sheet" file) |
-| (4)               | BR203   | **Displaying Rules:** System displays confirmation at step (4): "Delete booking #[booking_id] for [route_name] on [departure_date]? This will free [adults + children] seats. Cannot be undone." with [btnConfirm], [btnCancel].                                                                                                                                                                                                                                                                                            |
-| (5), (5.1), (5.2) | BR204   | **Choosing Rules:** At step (5), if [btnCancel] at step (5.1) → close at step (5.2), end. If [btnConfirm] → proceed to step (6).                                                                                                                                                                                                                                                                                                                                                                                            |
-| (6)               | BR205   | **Querying Rules:** System deletes in transaction at step (6): "UPDATE Trip SET booked_seats = booked_seats - [total] WHERE trip_id = [trip_id]". "DELETE FROM Tour_Booking_Detail WHERE booking_id = [id]". "DELETE FROM Invoice WHERE booking_id = [id]". "DELETE FROM Tour_Booking WHERE booking_id = [id]". Commits. (Refer to "Trip", "Tour_Booking_Detail", "Invoice", "Tour_Booking" tables in "DB Sheet" file)                                                                                                      |
-| (7), (8), (9)     | BR206   | **Displaying Rules:** System displays success "Booking deleted successfully!" (Refer to MSG 104) at step (7), redirects to list at step (8). Staff confirms end at step (9).                                                                                                                                                                                                                                                                                                                                                |
-
-#### 2.1.11 Adjust Customers Use Case
-
-##### 2.1.11.1 Add New Customer
-
-###### Use Case Description
-
-| Name               | Add New Customer                                                                                                                                                    |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Description**    | This use case allows staff to create new customer accounts by entering customer information and generating login credentials.                                       |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                           |
-| **Trigger**        | Staff selects "Add New Customer" function in customers management page.                                                                                             |
-| **Pre-condition**  | Staff must be authenticated with staff role. Staff must have access to customers management module.                                                                 |
-| **Post-condition** | New customer account is created with role CUSTOMER. Empty cart is created for customer. Welcome email is sent with login credentials. Staff views customer details. |
-
-###### Sequence Flow
-
-[sequence-adjust-customers-add-new-customer](../sequence/adjust-customers/add-new-customer)
-
-###### Activities Flow
-
-[activity-adjust-customers-add-new-customer](../activity/adjust-customers/add-new-customer)
-
-###### Business Rules
-
-| Activity      | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| :------------ | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)           | BR207   | **Displaying Rules:** System displays "Add New Customer" form at step (2) with [txtBoxUsername], [txtBoxPassword], [txtBoxFullName], [txtBoxEmail], [txtBoxPhone], [txtAreaAddress], [datePickerBirthday], [dropdownGender], [btnSave], [btnCancel]. (Refer to "Add Customer Form" view in "View Description" file)                                                                                                                                                                  |
-| (5)           | BR208   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 3-5), system validates at step (5): if username.length < 3 OR password.length < 6 OR email invalid format OR phone invalid format → error. Checks unique: "SELECT COUNT(\*) FROM User WHERE username = [username] OR email = [email]". If duplicate found → error (Refer to MSG 105). Else proceed to step (6).                                                                                              |
-| (6)           | BR209   | **Querying Rules:** System creates customer in transaction at step (6): "INSERT INTO User (username, password, full_name, email, phone, address, birthday, gender, role, status, created_at) VALUES ([username], HASH([password]), [full_name], [email], [phone], [address], [birthday], [gender], 'CUSTOMER', 'Active', NOW())". Creates cart: "INSERT INTO Cart (customer_id, created_at) VALUES ([user_id], NOW())". Commits. (Refer to "User", "Cart" tables in "DB Sheet" file) |
-| (7), (8), (9) | BR210   | **Displaying Rules:** System sends welcome email with credentials at step (7), displays success "Customer created successfully!" (Refer to MSG 106), redirects to details at step (8). Staff confirms end at step (9).                                                                                                                                                                                                                                                               |
-
-##### 2.1.11.2 View and Filter Customers
-
-###### Use Case Description
-
-| Name               | View and Filter Customers                                                                                                                                        |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to view all customers with statistics and filter them by various criteria.                                                            |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                        |
-| **Trigger**        | Staff selects "View Customers" function in customers management module.                                                                                          |
-| **Pre-condition**  | Staff must be authenticated with staff role.                                                                                                                     |
-| **Post-condition** | Staff views customers list with booking statistics. Can filter by name, email, status, registration date. List shows customer cards with contact info and stats. |
-
-###### Sequence Flow
-
-[sequence-adjust-customers-view-and-filter-customers](../sequence/adjust-customers/view-and-filter-customers)
-
-###### Activities Flow
-
-[activity-adjust-customers-view-and-filter-customers](../activity/adjust-customers/view-and-filter-customers)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR211   | **Querying Rules:** When staff selects "View Customers" at step (1), system queries at step (2) with SQL: "SELECT u.\*, COUNT(tb.booking_id) as total_bookings, SUM(tb.total_amount) as total_spent FROM User u LEFT JOIN Tour_Booking tb ON u.user_id = tb.customer_id WHERE u.role = 'CUSTOMER' GROUP BY u.user_id ORDER BY u.created_at DESC". If COUNT = 0 → display "No customers found" (Refer to MSG 107) at step (2.1), end. Else proceed to step (3). (Refer to "User", "Tour_Booking" tables in "DB Sheet" file) |
-| (3)               | BR212   | **Displaying Rules:** System displays "Customers List" view at step (3) with filter panel: [txtBoxSearchName], [txtBoxSearchEmail], [dropdownFilterStatus] (Active, Locked), [datePickerFromDate], [datePickerToDate], [btnApplyFilter]; and grid with [cardCustomer] showing customer info, total bookings, total spent, action buttons. (Refer to "Customers List" view in "View Description" file)                                                                                                                      |
-| (6), (6.1)        | BR213   | **Querying Rules:** When staff clicks [btnApplyFilter] in repeat loop (steps 4-6), system validates at step (6). If [datePickerFromDate] > [datePickerToDate] → error. Builds dynamic SQL with WHERE (u.full_name LIKE '%[name]%') AND (u.email LIKE '%[email]%') AND (u.status = [status] OR [status] = null) AND date range. If COUNT = 0 → display "No customers match" (Refer to MSG 108) at step (6.1). Else proceed to step (7).                                                                                     |
-| (7), (8)          | BR214   | **Displaying Rules:** System updates grid at step (7) with filtered results, displays "[filtered] of [total] customers". Staff can repeat or confirm end at step (8).                                                                                                                                                                                                                                                                                                                                                      |
-
-##### 2.1.11.3 View Customer Details
-
-###### Use Case Description
-
-| Name               | View Customer Details                                                                                                                                          |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to view comprehensive customer information including personal details, booking statistics, recent bookings, and favorite routes.    |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                                                      |
-| **Trigger**        | Staff clicks on a customer from customers list.                                                                                                                |
-| **Pre-condition**  | Staff must be authenticated with staff role. Customer must exist.                                                                                              |
-| **Post-condition** | Staff views complete customer profile with statistics, recent bookings history, favorite routes list, and available action buttons for edit/delete operations. |
-
-###### Sequence Flow
-
-[sequence-adjust-customers-view-customer-details](../sequence/adjust-customers/view-customer-details)
-
-###### Activities Flow
-
-[activity-adjust-customers-view-customer-details](../activity/adjust-customers/view-customer-details)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                         |
-| :---------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (2), (2.1), (2.2) | BR215   | **Querying Rules:** When staff selects customer at step (1), system queries at step (2) with SQL: "SELECT \* FROM User WHERE user_id = [id] AND role = 'CUSTOMER'". If COUNT = 0 → display "Customer not found" (Refer to MSG 109) at step (2.1), end. Else proceed to step (3). (Refer to "User" table in "DB Sheet" file)                                                                                         |
-| (3)               | BR216   | **Querying Rules:** System queries booking stats at step (3) with SQL: "SELECT COUNT(\*) as total_bookings, SUM(total_amount) as total_spent, MAX(booking_date) as last_booking FROM Tour_Booking WHERE customer_id = [id]". (Refer to "Tour_Booking" table in "DB Sheet" file)                                                                                                                                     |
-| (4)               | BR217   | **Querying Rules:** System queries recent bookings at step (4) with SQL: "SELECT tb.\*, t.departure_date, r.route_name FROM Tour_Booking tb JOIN Trip t, Route r WHERE tb.customer_id = [id] ORDER BY tb.booking_date DESC LIMIT 5". (Refer to "Tour_Booking", "Trip", "Route" tables in "DB Sheet" file)                                                                                                           |
-| (5)               | BR218   | **Querying Rules:** System queries favorites at step (5) with SQL: "SELECT r.\* FROM Favorite_Tour ft JOIN Route r ON ft.route_id = r.route_id WHERE ft.customer_id = [id]". (Refer to "Favorite_Tour", "Route" tables in "DB Sheet" file)                                                                                                                                                                          |
-| (6), (7), (8)     | BR219   | **Displaying Rules:** System displays "Customer Detail" view at steps (6-8) with panels: personal info ([lblFullName], [lblEmail], [lblPhone], [lblAddress], [lblStatus]); statistics (total bookings, total spent, last booking date); recent bookings list; favorite routes list; action buttons [btnEdit], [btnDelete]. Staff confirms at step (8). (Refer to "Customer Detail" view in "View Description" file) |
-
-##### 2.1.11.4 Edit Customer
-
-###### Use Case Description
-
-| Name               | Edit Customer                                                                                            |
-| :----------------- | :------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to modify customer information including personal details and account status. |
-| **Actor**          | Staff (must be signed in with staff role)                                                                |
-| **Trigger**        | Staff selects "Edit Customer" function on a customer.                                                    |
-| **Pre-condition**  | Staff must be authenticated with staff role. Customer must exist.                                        |
-| **Post-condition** | Customer information is updated. Staff views updated customer details with success confirmation.         |
-
-###### Sequence Flow
-
-[sequence-adjust-customers-edit-customer](../sequence/adjust-customers/edit-customer)
-
-###### Activities Flow
-
-[activity-adjust-customers-edit-customer](../activity/adjust-customers/edit-customer)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                 |
-| :---------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR220   | **Querying Rules:** When staff selects "Edit Customer" at step (1), system queries at step (2) with SQL: "SELECT \* FROM User WHERE user_id = [id] AND role = 'CUSTOMER'". If COUNT = 0 → display "Customer not found" (Refer to MSG 110), end. Else proceed to step (3). (Refer to "User" table in "DB Sheet" file)                                        |
-| (3)               | BR221   | **Displaying Rules:** System displays "Edit Customer" form at step (3) with [lblUsername] (read-only), [txtBoxFullName], [txtBoxEmail], [txtBoxPhone], [txtAreaAddress], [datePickerBirthday], [dropdownGender], [dropdownStatus] (Active, Locked), [btnSave], [btnCancel], all pre-filled. (Refer to "Edit Customer Form" view in "View Description" file) |
-| (6)               | BR222   | **Validation Rules:** When staff clicks [btnSave] in repeat loop (steps 4-6), system validates at step (6): if email invalid format OR phone invalid format → error. Checks unique: "SELECT COUNT(\*) FROM User WHERE email = [email] AND user_id != [current_id]". If duplicate → error (Refer to MSG 111). Else proceed to step (7).                      |
-| (7)               | BR223   | **Querying Rules:** System updates at step (7) with SQL: "UPDATE User SET full_name = [name], email = [email], phone = [phone], address = [address], birthday = [birthday], gender = [gender], status = [status], updated_at = NOW() WHERE user_id = [id]". (Refer to "User" table in "DB Sheet" file)                                                      |
-| (8), (9), (10)    | BR224   | **Displaying Rules:** System displays success "Customer updated successfully!" (Refer to MSG 112) at step (8), reloads details at step (9). Staff confirms end at step (10).                                                                                                                                                                                |
-
-##### 2.1.11.5 Delete Customer
-
-###### Use Case Description
-
-| Name               | Delete Customer                                                                                                                      |
-| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows staff to delete or disable customer accounts. Cannot delete if customer has active bookings or unpaid invoices. |
-| **Actor**          | Staff (must be signed in with staff role)                                                                                            |
-| **Trigger**        | Staff clicks "Delete" button on a customer.                                                                                          |
-| **Pre-condition**  | Staff must be authenticated with staff role. Customer must exist.                                                                    |
-| **Post-condition** | Customer account is either disabled (status set to Locked) or permanently deleted. Staff views updated customers list.               |
-
-###### Sequence Flow
-
-[sequence-adjust-customers-delete-customer](../sequence/adjust-customers/delete-customer)
-
-###### Activities Flow
-
-[activity-adjust-customers-delete-customer](../activity/adjust-customers/delete-customer)
-
-###### Business Rules
-
-| Activity               | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| :--------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (3), (3.1), (3.2)      | BR225   | **Querying Rules:** When staff clicks [btnDelete] at step (2), system checks at step (3) with SQL: "SELECT COUNT(\*) as active_bookings FROM Tour_Booking WHERE customer_id = [id] AND status IN ('PENDING', 'CONFIRMED')". Checks unpaid: "SELECT COUNT(\*) FROM Invoice i JOIN Tour_Booking tb WHERE tb.customer_id = [id] AND i.payment_status = 'PENDING'". If active_bookings > 0 OR unpaid > 0 → display "Cannot delete: Customer has active bookings or unpaid invoices" (Refer to MSG 113) at step (3.1), end. Else proceed to step (4). (Refer to "Tour_Booking", "Invoice" tables in "DB Sheet" file) |
-| (4)                    | BR226   | **Displaying Rules:** System displays confirmation at step (4): "Delete or disable customer '[full_name]'?" with [btnDisable] "Set to LOCKED status", [btnDeletePermanently] "Delete permanently (cannot undo)", [btnCancel].                                                                                                                                                                                                                                                                                                                                                                                   |
-| (5), (5.1), (5.2), (6) | BR227   | **Choosing/Querying Rules:** At step (5), if [btnCancel] at step (5.1) → close at step (5.2), end. If [btnDisable] → "UPDATE User SET status = 'Locked' WHERE user_id = [id]" at step (6). If [btnDeletePermanently] → "DELETE FROM Cart WHERE customer_id = [id]" then "DELETE FROM User WHERE user_id = [id]" at step (6). Commits. (Refer to "User", "Cart" tables in "DB Sheet" file)                                                                                                                                                                                                                       |
-| (7), (8), (9)          | BR228   | **Displaying Rules:** System displays success message (Refer to MSG 114) at step (7), redirects to list at step (8). Staff confirms end at step (9).                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-
-#### 2.1.12 Adjust Staffs Use Case
-
-##### 2.1.12.1 Add New Staff
-
-###### Use Case Description
-
-| Name               | Add New Staff                                                                                                                                           |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Description**    | This use case allows admin to create new staff accounts with appropriate credentials and permissions.                                                   |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                                               |
-| **Trigger**        | Admin selects "Add New Staff" function in staff management page.                                                                                        |
-| **Pre-condition**  | Admin must be authenticated with admin role. Admin must have access to staff management module.                                                         |
-| **Post-condition** | New staff account is created with role STAFF. Empty cart is created for staff. Welcome email is sent with login credentials. Admin views staff details. |
-
-###### Sequence Flow
-
-[sequence-adjust-staffs-add-new-staff](../sequence/adjust-staffs/add-new-staff)
-
-###### Activities Flow
-
-[activity-adjust-staffs-add-new-staff](../activity/adjust-staffs/add-new-staff)
-
-###### Business Rules
-
-| Activity            | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| :------------------ | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)                 | BR229   | **Displaying Rules:** System displays "Add New Staff" form at step (2) with [txtBoxUsername], [txtBoxPassword], [txtBoxFullName], [txtBoxEmail], [txtBoxPhone], [txtAreaAddress], [datePickerBirthday], [dropdownGender], [btnSave], [btnCancel]. (Refer to "Add Staff Form" view in "View Description" file)                                                                                                                                                                  |
-| (5)                 | BR230   | **Validation Rules:** When admin clicks [btnSave] in repeat loop (steps 3-5), system validates at step (5): if username.length < 3 OR password.length < 8 OR email invalid OR phone invalid OR age < 18 → error. Checks unique: "SELECT COUNT(\*) FROM User WHERE username = [username] OR email = [email]". If duplicate → error (Refer to MSG 115). Else proceed to step (6).                                                                                                |
-| (6)                 | BR231   | **Querying Rules:** System creates staff in transaction at step (6): "INSERT INTO User (username, password, full_name, email, phone, address, birthday, gender, role, status, created_at) VALUES ([username], HASH([password]), [full_name], [email], [phone], [address], [birthday], [gender], 'STAFF', 'Active', NOW())". Creates cart: "INSERT INTO Cart (customer_id, created_at) VALUES ([user_id], NOW())". Commits. (Refer to "User", "Cart" tables in "DB Sheet" file) |
-| (7), (8), (9), (10) | BR232   | **Displaying Rules:** System sends welcome email at step (7), displays success "Staff created successfully!" (Refer to MSG 116), redirects to details at step (8-9). Admin confirms end at step (10).                                                                                                                                                                                                                                                                          |
-
-##### 2.1.12.2 View and Filter Staffs
-
-###### Use Case Description
-
-| Name               | View and Filter Staffs                                                                                                                               |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to view all staff members with work statistics and filter them by various criteria.                                       |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                                            |
-| **Trigger**        | Admin selects "Manage Staffs" function in staff management module.                                                                                   |
-| **Pre-condition**  | Admin must be authenticated with admin role.                                                                                                         |
-| **Post-condition** | Admin views staffs list with work statistics. Can filter by keyword, phone, lock status, gender. List shows staff cards with contact info and stats. |
-
-###### Sequence Flow
-
-[sequence-adjust-staffs-view-and-filter-staffs](../sequence/adjust-staffs/view-and-filter-staffs)
-
-###### Activities Flow
-
-[activity-adjust-staffs-view-and-filter-staffs](../activity/adjust-staffs/view-and-filter-staffs)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| :---------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR233   | **Querying Rules:** When admin selects "Manage Staffs" at step (1), system queries at step (2) with SQL: "SELECT u.\*, COUNT(tb.booking_id) as total_managed_bookings FROM User u LEFT JOIN Tour_Booking tb ON u.user_id = tb.staff_id WHERE u.role = 'STAFF' GROUP BY u.user_id ORDER BY u.created_at DESC". If COUNT = 0 → display "No staffs found" (Refer to MSG 117) at step (2.1) with add button, end. Else proceed to step (3). (Refer to "User", "Tour_Booking" tables in "DB Sheet" file) |
-| (3)               | BR234   | **Displaying Rules:** System displays "Staffs List" view at step (3) with filter panel: [txtBoxKeyword], [txtBoxPhone], [checkboxIsLocked], [dropdownGender], [btnApplyFilter]; and grid with [cardStaff] showing staff info, total managed bookings, action buttons. (Refer to "Staffs List" view in "View Description" file)                                                                                                                                                                      |
-| (6), (6.1)        | BR235   | **Querying Rules:** When admin clicks [btnApplyFilter] in repeat loop (steps 4-6), system validates at step (6). Builds dynamic SQL with WHERE (u.full_name LIKE '%[keyword]%' OR u.username LIKE '%[keyword]%') AND (u.phone = [phone] OR [phone] = null) AND (u.status = 'Locked' OR [isLocked] = false) AND (u.gender = [gender] OR [gender] = null). If COUNT = 0 → display "No staffs match" (Refer to MSG 118) at step (6.1). Else proceed to step (7).                                       |
-| (7), (8)          | BR236   | **Displaying Rules:** System updates grid at step (7) with filtered results, displays "[filtered] of [total] staffs". Admin can repeat or confirm end at step (8).                                                                                                                                                                                                                                                                                                                                  |
-
-##### 2.1.12.3 View Staff Details
-
-###### Use Case Description
-
-| Name               | View Staff Details                                                                                                                                                          |
-| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to view comprehensive staff information including personal details, work statistics, and recent bookings handled.                                |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                                                                   |
-| **Trigger**        | Admin clicks on a staff from staffs list.                                                                                                                                   |
-| **Pre-condition**  | Admin must be authenticated with admin role. Staff must exist.                                                                                                              |
-| **Post-condition** | Admin views complete staff profile with work statistics (total bookings/trips/routes handled), recent bookings list (TOP 10), and available action buttons for edit/delete. |
-
-###### Sequence Flow
-
-[sequence-adjust-staffs-view-staff-details](../sequence/adjust-staffs/view-staff-details)
-
-###### Activities Flow
-
-[activity-adjust-staffs-view-staff-details](../activity/adjust-staffs/view-staff-details)
-
-###### Business Rules
-
-| Activity          | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| :---------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2), (2.1), (2.2) | BR237   | **Querying Rules:** When admin selects staff at step (1), system queries at step (2) with SQL: "SELECT \* FROM User WHERE user_id = [id] AND role = 'STAFF'". If COUNT = 0 → display "Staff not found" (Refer to MSG 119) at step (2.1), end. Else proceed to step (3). (Refer to "User" table in "DB Sheet" file)                                                                                                             |
-| (3)               | BR238   | **Querying Rules:** System queries work stats at step (3) with SQL: "SELECT COUNT(DISTINCT tb.booking_id) as total_bookings, COUNT(DISTINCT t.trip_id) as total_trips, COUNT(DISTINCT r.route_id) as total_routes FROM Tour_Booking tb LEFT JOIN Trip t ON tb.trip_id = t.trip_id LEFT JOIN Route r ON t.route_id = r.route_id WHERE tb.staff_id = [id]". (Refer to "Tour_Booking", "Trip", "Route" tables in "DB Sheet" file) |
-| (4)               | BR239   | **Querying Rules:** System queries recent bookings at step (4) with SQL: "SELECT tb.\*, u.full_name, t.departure_date, r.route_name FROM Tour_Booking tb JOIN User u, Trip t, Route r WHERE tb.staff_id = [id] ORDER BY tb.booking_date DESC LIMIT 10". (Refer to "Tour_Booking", "User", "Trip", "Route" tables in "DB Sheet" file)                                                                                           |
-| (5), (6), (7)     | BR240   | **Displaying Rules:** System displays "Staff Detail" view at steps (5-7) with panels: personal info ([lblFullName], [lblEmail], [lblPhone], [lblStatus]); work statistics (total bookings, trips, routes handled); recent bookings list (TOP 10); action buttons [btnEdit], [btnDelete]. Admin confirms at step (7). (Refer to "Staff Detail" view in "View Description" file)                                                 |
-
-##### 2.1.12.4 Edit Staff
-
-###### Use Case Description
-
-| Name               | Edit Staff                                                                                                                                    |
-| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to modify staff information including personal details, password, and account status.                              |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                                     |
-| **Trigger**        | Admin selects "Edit Staff" function on a staff.                                                                                               |
-| **Pre-condition**  | Admin must be authenticated with admin role. Staff must exist.                                                                                |
-| **Post-condition** | Staff information is updated. Notification email sent if email/password changed. Admin views updated staff details with success confirmation. |
-
-###### Sequence Flow
-
-[sequence-adjust-staffs-edit-staff](../sequence/adjust-staffs/edit-staff)
-
-###### Activities Flow
-
-[activity-adjust-staffs-edit-staff](../activity/adjust-staffs/edit-staff)
-
-###### Business Rules
-
-| Activity             | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                 |
-| :------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (2), (2.1), (2.2)    | BR241   | **Querying Rules:** When admin selects "Edit Staff" at step (1), system queries at step (2) with SQL: "SELECT \* FROM User WHERE user_id = [id] AND role = 'STAFF'". If COUNT = 0 → display "Staff not found" (Refer to MSG 120), end. Else proceed to step (3). (Refer to "User" table in "DB Sheet" file)                                                                                 |
-| (3)                  | BR242   | **Displaying Rules:** System displays "Edit Staff" form at step (3) with [lblUsername] (read-only), [txtBoxPassword], [txtBoxFullName], [txtBoxEmail], [txtBoxPhone], [txtAreaAddress], [datePickerBirthday], [dropdownGender], [dropdownStatus] (Active, Locked), [btnSave], [btnCancel], all pre-filled. (Refer to "Edit Staff Form" view in "View Description" file)                     |
-| (6)                  | BR243   | **Validation Rules:** When admin clicks [btnSave] in repeat loop (steps 4-6), system validates at step (6): if password not empty AND password.length < 8 → error. If email invalid → error. Checks unique: "SELECT COUNT(\*) FROM User WHERE email = [email] AND user_id != [current_id]". If duplicate → error (Refer to MSG 121). Else proceed to step (7).                              |
-| (7)                  | BR244   | **Querying Rules:** System updates at step (7) with SQL: "UPDATE User SET password = CASE WHEN [newPassword] != '' THEN HASH([newPassword]) ELSE password END, full_name = [name], email = [email], phone = [phone], address = [address], birthday = [birthday], gender = [gender], status = [status], updated_at = NOW() WHERE user_id = [id]". (Refer to "User" table in "DB Sheet" file) |
-| (8), (9), (10), (11) | BR245   | **Displaying Rules:** System sends notification email if email/password changed at step (8), displays success "Staff updated successfully!" (Refer to MSG 122) at step (9), reloads details at step (10). Admin confirms end at step (11).                                                                                                                                                  |
-
-##### 2.1.12.5 Delete Staff
-
-###### Use Case Description
-
-| Name               | Delete Staff                                                                                                                       |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to delete or disable staff accounts. Cannot delete if staff has active bookings assigned.               |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                          |
-| **Trigger**        | Admin clicks "Delete" button on a staff.                                                                                           |
-| **Pre-condition**  | Admin must be authenticated with admin role. Staff must exist.                                                                     |
-| **Post-condition** | Staff account is either disabled (status set to Locked) or permanently deleted. Action is logged. Admin views updated staffs list. |
-
-###### Sequence Flow
-
-[sequence-adjust-staffs-delete-staff](../sequence/adjust-staffs/delete-staff)
-
-###### Activities Flow
-
-[activity-adjust-staffs-delete-staff](../activity/adjust-staffs/delete-staff)
-
-###### Business Rules
-
-| Activity               | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| :--------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (3), (3.1), (3.2)      | BR246   | **Querying Rules:** When admin clicks [btnDelete] at step (2), system checks at step (3) with SQL: "SELECT COUNT(\*) as active_bookings FROM Tour_Booking WHERE staff_id = [id] AND status IN ('PENDING', 'CONFIRMED')". If active_bookings > 0 → display "Cannot delete: Staff has active bookings. Suggest disable instead" (Refer to MSG 123) at step (3.1), end. Else proceed to step (4). (Refer to "Tour_Booking" table in "DB Sheet" file) |
-| (4)                    | BR247   | **Displaying Rules:** System displays confirmation at step (4): "Delete or disable staff '[full_name]'?" with [btnDisable] "Set to LOCKED status", [btnDeletePermanently] "Delete permanently (cannot undo)", [btnCancel].                                                                                                                                                                                                                        |
-| (5), (5.1), (5.2), (6) | BR248   | **Choosing/Querying Rules:** At step (5), if [btnCancel] at step (5.1) → close at step (5.2), end. If [btnDisable] → "UPDATE User SET status = 'Locked' WHERE user_id = [id]" at step (6). If [btnDeletePermanently] → "DELETE FROM Cart WHERE customer_id = [id]" then "DELETE FROM User WHERE user_id = [id]" at step (6). Commits. (Refer to "User", "Cart" tables in "DB Sheet" file)                                                         |
-| (7), (8), (9)          | BR249   | **Displaying Rules:** System logs action, displays success message (Refer to MSG 124) at step (7), redirects to list at step (8). Admin confirms end at step (9).                                                                                                                                                                                                                                                                                 |
-
-#### 2.1.13 View Reports Use Case
-
-##### 2.1.13.1 Revenue Report
-
-###### Use Case Description
-
-| Name               | Revenue Report                                                                                                                           |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to generate revenue reports showing total revenue, booking counts, trends over time with line and bar charts. |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                                |
-| **Trigger**        | Admin selects "Revenue Report" function in reports module.                                                                               |
-| **Pre-condition**  | Admin must be authenticated with admin role. System must have booking and invoice data.                                                  |
-| **Post-condition** | Admin views revenue report with statistics, charts, and can export to PDF/Excel.                                                         |
-
-###### Sequence Flow
-
-[sequence-view-reports-revenue-report](../sequence/view-reports/revenue-report)
-
-###### Activities Flow
-
-[activity-view-reports-revenue-report](../activity/view-reports/revenue-report)
-
-###### Business Rules
-
-| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| :----------------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)                      | BR250   | **Displaying Rules:** System displays "Revenue Report Configuration" form at step (2) with [dropdownDateRange], [datePickerFrom], [datePickerTo], [btnGenerate]. (Refer to "Report Configuration" view in "View Description" file)                                                                                                                                                                                                              |
-| (3), (4)                 | BR251   | **Validation Rules:** When admin configures and clicks [btnGenerate] in repeat loop (steps 3-4), system validates: if [datePickerFrom] > [datePickerTo] → error. If date range > 2 years → warning. Else proceed to step (5).                                                                                                                                                                                                                   |
-| (5), (5.1), (5.2)        | BR252   | **Querying Rules:** System queries revenue at step (5): "SELECT DATE(booking_date) as date, SUM(total_amount) as revenue, COUNT(\*) as bookings FROM Tour_Booking tb JOIN Invoice i WHERE i.payment_status = 'PAID' AND booking_date BETWEEN [from] AND [to] GROUP BY DATE(booking_date)". If COUNT = 0 → display "No data" (Refer to MSG 125) at step (5.1), end. Else proceed. (Refer to "Tour_Booking", "Invoice" tables in "DB Sheet" file) |
-| (6), (7)                 | BR253   | **Querying/Displaying Rules:** System calculates statistics and generates line/bar charts at steps (6-7): totals (SUM), averages (AVG), % changes, trends. Displays report with overview cards, charts, data table, export buttons.                                                                                                                                                                                                             |
-| (10), (10.1), (11), (12) | BR254   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 126) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "RevenueReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                      |
-| (13)                     | BR255   | **Displaying Rules:** Admin confirms end at step (13).                                                                                                                                                                                                                                                                                                                                                                                          |
-
-##### 2.1.13.2 Booking Report
-
-###### Use Case Description
-
-| Name               | Booking Report                                                                                                                            |
-| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to generate booking reports showing detailed booking information with status distribution and route analytics. |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                                 |
-| **Trigger**        | Admin selects "Booking Report" function in reports module.                                                                                |
-| **Pre-condition**  | Admin must be authenticated with admin role. System must have booking data.                                                               |
-| **Post-condition** | Admin views booking report with statistics, pie/bar charts, and can export to PDF/Excel.                                                  |
-
-###### Sequence Flow
-
-[sequence-view-reports-booking-report](../sequence/view-reports/booking-report)
-
-###### Activities Flow
-
-[activity-view-reports-booking-report](../activity/view-reports/booking-report)
-
-###### Business Rules
-
-| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| :----------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (2)                      | BR256   | **Displaying Rules:** System displays "Booking Report Configuration" form at step (2) with [dropdownDateRange], [datePickerFrom], [datePickerTo], [dropdownStatusFilter], [dropdownRouteFilter], [btnGenerate].                                                                                                                                                                                                                                                                 |
-| (3), (4)                 | BR257   | **Validation Rules:** When admin configures and clicks [btnGenerate] in repeat loop (steps 3-4), system validates: if [datePickerFrom] > [datePickerTo] → error. If date range > 2 years → warning. Else proceed to step (5).                                                                                                                                                                                                                                                   |
-| (5), (5.1), (5.2)        | BR258   | **Querying Rules:** System queries bookings at step (5): "SELECT tb.\*, u.full_name, t.\*, r.route_name FROM Tour_Booking tb JOIN User u, Trip t, Route r WHERE booking_date BETWEEN [from] AND [to] AND (status = [filter] OR [filter] IS NULL) AND (r.route_id = [routeFilter] OR [routeFilter] IS NULL)". If COUNT = 0 → display "No data" (Refer to MSG 125) at step (5.1), end. Else proceed. (Refer to "Tour_Booking", "User", "Trip", "Route" tables in "DB Sheet" file) |
-| (6), (7)                 | BR259   | **Querying/Displaying Rules:** System calculates statistics and generates pie/bar charts at steps (6-7): totals, status distribution, bookings by route. Displays report with overview cards, charts, data table, export buttons.                                                                                                                                                                                                                                               |
-| (10), (10.1), (11), (12) | BR260   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 126) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "BookingReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                                                      |
-| (13)                     | BR261   | **Displaying Rules:** Admin confirms end at step (13).                                                                                                                                                                                                                                                                                                                                                                                                                          |
-
-##### 2.1.13.3 Popular Routes Report
-
-###### Use Case Description
-
-| Name               | Popular Routes Report                                                                                                                |
-| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to generate reports showing most popular routes ranked by booking counts and revenue with bar/pie charts. |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                            |
-| **Trigger**        | Admin selects "Popular Routes Report" function in reports module.                                                                    |
-| **Pre-condition**  | Admin must be authenticated with admin role. System must have routes and booking data.                                               |
-| **Post-condition** | Admin views popular routes report with rankings, statistics, charts, and can export to PDF/Excel.                                    |
-
-###### Sequence Flow
-
-[sequence-view-reports-popular-routes-report](../sequence/view-reports/popular-routes-report)
-
-###### Activities Flow
-
-[activity-view-reports-popular-routes-report](../activity/view-reports/popular-routes-report)
-
-###### Business Rules
-
-| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| :----------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| (2)                      | BR262   | **Displaying Rules:** System displays "Popular Routes Report Configuration" form at step (2) with [dropdownDateRange], [datePickerFrom], [datePickerTo], [numericMinBookings], [btnGenerate].                                                                                                                                                                                                                                                                                                           |
-| (3), (4)                 | BR263   | **Validation Rules:** When admin configures and clicks [btnGenerate] in repeat loop (steps 3-4), system validates: if [datePickerFrom] > [datePickerTo] → error. If date range > 2 years → warning. Else proceed to step (5).                                                                                                                                                                                                                                                                           |
-| (5), (5.1), (5.2)        | BR264   | **Querying Rules:** System queries popular routes at step (5): "SELECT r.\*, COUNT(tb.booking_id) as total_bookings, SUM(tb.total_amount) as total_revenue FROM Route r JOIN Trip t, Tour_Booking tb WHERE tb.booking_date BETWEEN [from] AND [to] GROUP BY r.route_id HAVING total_bookings >= [minBookings] ORDER BY total_bookings DESC". If COUNT = 0 → display "No data" (Refer to MSG 125) at step (5.1), end. Else proceed. (Refer to "Route", "Trip", "Tour_Booking" tables in "DB Sheet" file) |
-| (6), (7)                 | BR265   | **Querying/Displaying Rules:** System calculates rankings and generates bar/pie charts at steps (6-7): top routes, totals, revenue distribution. Displays report with overview cards, charts, data table, export buttons.                                                                                                                                                                                                                                                                               |
-| (10), (10.1), (11), (12) | BR266   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 126) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "PopularRoutesReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                                                                        |
-| (13)                     | BR267   | **Displaying Rules:** Admin confirms end at step (13).                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-
-##### 2.1.13.4 Customer Report
-
-###### Use Case Description
-
-| Name               | Customer Report                                                                                                                      |
-| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to generate customer reports showing customer statistics, top customers by spending, and customer trends. |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                            |
-| **Trigger**        | Admin selects "Customer Report" function in reports module.                                                                          |
-| **Pre-condition**  | Admin must be authenticated with admin role. System must have customer and booking data.                                             |
-| **Post-condition** | Admin views customer report with statistics, bar/line charts for top customers and trends, and can export to PDF/Excel.              |
-
-###### Sequence Flow
-
-[sequence-view-reports-customer-report](../sequence/view-reports/customer-report)
-
-###### Activities Flow
-
-[activity-view-reports-customer-report](../activity/view-reports/customer-report)
-
-###### Business Rules
-
-| Activity                 | BR Code | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| :----------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (2)                      | BR268   | **Displaying Rules:** System displays "Customer Report Configuration" form at step (2) with [dropdownDateRange], [datePickerFrom], [datePickerTo], [dropdownCustomerType] (All, New, Returning), [btnGenerate].                                                                                                                                                                                                                                                                                                             |
-| (3), (4)                 | BR269   | **Validation Rules:** When admin configures and clicks [btnGenerate] in repeat loop (steps 3-4), system validates: if [datePickerFrom] > [datePickerTo] → error. If date range > 2 years → warning. Else proceed to step (5).                                                                                                                                                                                                                                                                                               |
-| (5), (5.1), (5.2)        | BR270   | **Querying Rules:** System queries customers at step (5): "SELECT u.\*, COUNT(tb.booking_id) as total_bookings, SUM(tb.total_amount) as total_spent FROM User u LEFT JOIN Tour_Booking tb ON u.user_id = tb.customer_id WHERE u.role = 'CUSTOMER' AND (tb.booking_date BETWEEN [from] AND [to] OR tb.booking_date IS NULL) GROUP BY u.user_id ORDER BY total_spent DESC". If COUNT = 0 → display "No data" (Refer to MSG 125) at step (5.1), end. Else proceed. (Refer to "User", "Tour_Booking" tables in "DB Sheet" file) |
-| (6), (7)                 | BR271   | **Querying/Displaying Rules:** System calculates statistics and generates bar/line charts at steps (6-7): top 10 customers by spending, new customer trends, totals, averages. Displays report with overview cards, charts, data table, export buttons.                                                                                                                                                                                                                                                                     |
-| (10), (10.1), (11), (12) | BR272   | **Querying/Displaying Rules:** When admin clicks [btnExport] at step (9-10), system generates PDF/Excel at step (10). If fails → error (Refer to MSG 126) at step (10.1). Else downloads at step (11), admin receives at step (12). File: "CustomerReport\_[DateRange]\_[Timestamp].[ext]".                                                                                                                                                                                                                                 |
-| (13)                     | BR273   | **Displaying Rules:** Admin confirms end at step (13).                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-
-##### 2.1.13.5 Export Report
-
-###### Use Case Description
-
-| Name               | Export Report                                                                                                                                       |
-| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Description**    | This use case allows admin to export any generated report (revenue, booking, popular routes, customer) to PDF or Excel format for offline analysis. |
-| **Actor**          | Admin (must be signed in with admin role)                                                                                                           |
-| **Trigger**        | Admin clicks "Export to PDF" or "Export to Excel" button on a generated report.                                                                     |
-| **Pre-condition**  | Admin must be authenticated with admin role. A report must be generated and displayed. System must have report data ready for export.               |
-| **Post-condition** | Admin receives exported file (PDF or Excel) containing report data with charts, tables, and statistics. File is downloaded to local machine.        |
-
-###### Sequence Flow
-
-[sequence-view-reports-export-report](../sequence/view-reports/export-report)
-
-###### Activities Flow
-
-[activity-view-reports-export-report](../activity/view-reports/export-report)
-
-###### Business Rules
-
-| Activity | BR Code | Description                                                                                                                                                                                                                                                                                                        |
-| :------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (1), (2) | BR274   | **Validation Rules:** When admin clicks "Export" button at step (1-2), system validates: admin must be authenticated and authorized with admin role. If not → redirect to sign-in page. Else proceed to step (3).                                                                                                  |
-| (3)      | BR275   | **Validation Rules:** System validates export format selection at step (3). If no format selected (neither PDF nor Excel) → display error message "Please select export format" (Refer to MSG 127). Else proceed to step (4).                                                                                      |
-| (4)      | BR276   | **Processing Rules:** System generates export file at step (4): convert report data (charts, tables, statistics) to selected format (PDF using PDF library, Excel using XLSX library). If generation fails → display error message "Export failed. Please try again" (Refer to MSG 128) at step (4). Else proceed. |
-| (5), (6) | BR277   | **Displaying Rules:** System triggers file download at step (5). File naming convention: "[ReportType]\_Report\_[DateRange]\_[Timestamp].[ext]" (e.g., "Revenue_Report_2024-01-01_to_2024-12-31_20241215143022.pdf"). Admin saves file at step (6).                                                                |
-
-### 2.2 List Description
-
-The TMS (Tourist Management System) utilizes the following main data lists and tables:
-
-| \#  | List Code | List Name                  | Description                                                                                                                                                                                                                      |
-| :-- | :-------- | :------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | List01    | User                       | Contains all user accounts (customers, staff, admins) with user ID, username, email, password hash, full name, phone, address, birthday, gender, role (CUSTOMER/STAFF/ADMIN), status (Active/Locked), created date, updated date |
-| 2   | List02    | Route                      | Stores travel route information including route ID, route name, description, starting location, destination, duration (days), difficulty level, status (Active/Inactive), created date, and modified date                        |
-| 3   | List03    | Attraction                 | Contains tourist attraction details with attraction ID, attraction name, description, location, category, entry fee, operating hours, contact info, images, status, created date, and modified date                              |
-| 4   | List04    | Route_Attraction           | Junction table linking routes to attractions, includes route attraction ID, route ID, attraction ID, day number in itinerary, visit order, duration at attraction, and notes                                                     |
-| 5   | List05    | Trip                       | Holds scheduled trip information with trip ID, route ID, departure date, return date, price per adult, price per child, max capacity, booked seats, trip status (Upcoming/In Progress/Completed/Cancelled), created date         |
-| 6   | List06    | Tour_Booking               | Stores booking records including booking ID, customer ID, trip ID, staff ID (handler), booking date, no. adults, no. children, total amount, booking status (PENDING/CONFIRMED/CANCELLED/COMPLETED), created date, modified date |
-| 7   | List07    | Tour_Booking_Detail        | Contains passenger details for each booking with detail ID, booking ID, traveler name, traveler age, traveler gender, passport number, special requirements, and seat assignment                                                 |
-| 8   | List08    | Invoice                    | Manages payment records with invoice ID, booking ID, issue date, due date, paid date, payment method (Cash/Card/Bank Transfer), payment status (PENDING/PAID/FAILED/REFUNDED), total amount, and transaction reference           |
-| 9   | List09    | Cart                       | Shopping cart management with cart ID, customer ID, created date, and modified date. Each customer has one active cart                                                                                                           |
-| 10  | List10    | Cart_Item                  | Individual items in cart with cart item ID, cart ID, trip ID, no. adults, no. children, added date, and price snapshot                                                                                                           |
-| 11  | List11    | Favorite_Tour              | Tracks customer favorite routes with favorite ID, customer ID, route ID, and added date                                                                                                                                          |
-| 12  | List12    | Booking_Traveler           | Stores traveler information for bookings (alternative to Tour_Booking_Detail) with traveler ID, booking ID, full name, date of birth, passport/ID, nationality, and contact number                                               |
-| 13  | List13    | Route_Schedule             | Daily itinerary details with schedule ID, route ID, day number, activity description, locations visited, meal plans, accommodation info, and special notes                                                                       |
-| 14  | List14    | Booking_History            | Audit trail of booking status changes with history ID, booking ID, previous status, new status, changed by (user ID), change date, and reason/notes                                                                              |
-| 15  | List15    | Revenue_Report             | Aggregated revenue statistics including date, total bookings, total revenue, paid invoices count, pending invoices count, route performance data                                                                                 |
-| 16  | List16    | Popular_Routes_Report      | Route popularity metrics with route ID, route name, total bookings, total revenue, average rating, booking trend, and time period                                                                                                |
-| 17  | List17    | Customer_Statistics        | Customer analytics data including customer ID, total bookings, total spent, last booking date, favorite routes, booking frequency, and customer segment                                                                          |
-| 18  | List18    | Staff_Activity_Log         | Logs staff actions with log ID, staff ID, activity type (Create/Update/Delete), entity type (Booking/Trip/Customer/Staff), entity ID, timestamp, IP address, and details                                                         |
-| 19  | List19    | Password_Reset_Token       | Manages password reset requests with token ID, user ID, reset token hash, expiration time, used status (Yes/No), and created date                                                                                                |
-| 20  | List20    | User_Session               | Tracks active user sessions with session ID, user ID, JWT token hash, device info, IP address, login time, last activity time, and expiration time                                                                               |
-| 21  | List21    | Notification               | System notifications with notification ID, user ID, type (Booking/Payment/System), title, message, read status, sent date, and link                                                                                              |
-| 22  | List22    | Payment_Transaction        | Detailed payment transaction records with transaction ID, invoice ID, payment gateway, transaction reference, amount, currency, status, request time, response time, and error message (if any)                                  |
-| 23  | List23    | Trip_Availability_Calendar | Trip availability data for calendar view with date, route ID, available trips count, total capacity, booked seats, and availability status                                                                                       |
-| 24  | List24    | Route_Review               | Customer reviews for routes (future feature) with review ID, route ID, customer ID, rating (1-5), review text, images, helpful count, status, and created date                                                                   |
-| 25  | List25    | System_Config              | System configuration parameters including config key, config value, data type, description, updated by, and updated date                                                                                                         |
-
-### 2.3 View Description
-
-The TMS (Tourist Management System) provides the following main views/screens:
-
-| \#  | View Code | View Name                   | Description                                                                                                                                                                        | User Role              |
-| :-- | :-------- | :-------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------- |
-| 1   | View01    | Sign Up                     | Registration form for new customers with fields for username, password, full name, email, phone, address, birthday, gender, and sign-up button                                     | Guest                  |
-| 2   | View02    | Sign In                     | Login form with username/email and password fields, sign-in button, forgot password link, and sign-up link                                                                         | Guest, All Users       |
-| 3   | View03    | Forgot Password             | Password recovery form with email input field and submit button. Displays confirmation message after submission                                                                    | Guest, All Users       |
-| 4   | View04    | Manage Profile              | User profile page showing personal information with edit profile button, change password section, account activity link, and account management options                            | Customer, Staff, Admin |
-| 5   | View05    | Home (Customer)             | Customer dashboard displaying featured trips, search bar, navigation menu, cart icon, favorite trips shortcut, my bookings link, and promotional banners                           | Customer               |
-| 6   | View06    | Home (Staff)                | Staff dashboard with quick access to booking management, trip management, customer management, and pending tasks/notifications                                                     | Staff                  |
-| 7   | View07    | Home (Admin)                | Admin dashboard with system overview, statistics cards, route management, staff management, reports access, and system health indicators                                           | Admin                  |
-| 8   | View08    | Browse Trips                | Trip listing page with filter sidebar (destination, date range, price, duration, difficulty), trip cards showing route name/price/dates/availability, sort options, and pagination | Customer, Staff        |
-| 9   | View09    | Trip Details                | Detailed trip page showing route information, full itinerary by day, attractions list with details, pricing breakdown, booking form, availability calendar, and add to cart button | Customer, Staff        |
-| 10  | View10    | Shopping Cart               | Cart view listing selected trips with traveler count selectors, price summary, remove buttons, trip modification options, and checkout button                                      | Customer               |
-| 11  | View11    | Checkout                    | Checkout page with customer information confirmation, traveler details form (name/age/passport), payment method selection, booking summary, and complete booking button            | Customer               |
-| 12  | View12    | My Bookings                 | Customer's booking history with filter options (status/date), booking cards showing trip name/dates/status/payment status, and action buttons (view details/pay invoice/cancel)    | Customer               |
-| 13  | View13    | Booking Details             | Detailed booking view showing complete booking information, traveler list, trip itinerary, invoice details, and available actions based on status                                  | Customer               |
-| 14  | View14    | Booking Invoice             | Invoice page displaying invoice number, issue date, payment status, amount breakdown, payment method, and pay now button (if unpaid)                                               | Customer               |
-| 15  | View15    | Edit Passenger Details      | Form for editing traveler information before trip departure, showing editable fields for each passenger with save and cancel buttons                                               | Customer               |
-| 16  | View16    | Favorite Trips              | List view of favorited routes with route cards, filter/sort options, unfavorite button, and quick book buttons                                                                     | Customer               |
-| 17  | View17    | Manage Routes (Admin/Staff) | Route management dashboard with route table, search box, filters, add new route button, and action buttons (view/edit/delete)                                                      | Staff, Admin           |
-| 18  | View18    | Add/Edit Route              | Route creation/edit form with fields for route name, description, start/end locations, duration, difficulty, pricing, status, and save button                                      | Staff, Admin           |
-| 19  | View19    | Route Details (Admin/Staff) | Admin view of route showing full details, associated trips list, booking statistics, and management actions                                                                        | Staff, Admin           |
-| 20  | View20    | Manage Route Schedule       | Itinerary management view displaying day-by-day schedule with add/edit/delete itinerary day buttons                                                                                | Staff, Admin           |
-| 21  | View21    | Add/Edit Itinerary Day      | Form for adding or editing itinerary details for a specific day including activities, attractions, meals, accommodation, and notes                                                 | Staff, Admin           |
-| 22  | View22    | Manage Attractions          | Attraction management page with attraction table, search/filter options, add new attraction button, and action buttons                                                             | Admin                  |
-| 23  | View23    | Add/Edit Attraction         | Attraction form with fields for name, description, location, category, entry fee, operating hours, contact info, image uploader, and save button                                   | Staff, Admin           |
-| 24  | View24    | Manage Trips                | Trip management dashboard showing trip schedule table with filters (route/date/status), add trip button, and action buttons (view/edit/delete/add booking)                         | Staff, Admin           |
-| 25  | View25    | Add/Edit Trip               | Trip creation/edit form with route selector, departure/return date pickers, pricing fields, capacity settings, status selector, and save button                                    | Staff, Admin           |
-| 26  | View26    | Trip Details (Admin/Staff)  | Admin view of trip showing full details, booking list, capacity utilization chart, and management actions                                                                          | Staff, Admin           |
-| 27  | View27    | Manage Bookings (Staff)     | Booking management dashboard with comprehensive booking table, advanced filters (customer/trip/status/date), search box, add booking button, and action buttons                    | Staff, Admin           |
-| 28  | View28    | Add New Booking (Staff)     | Staff booking creation form with customer search/selector, trip selector, traveler details input, payment method, and create booking button                                        | Staff, Admin           |
-| 29  | View29    | Booking Details (Staff)     | Staff view of booking showing complete details, customer info, traveler list, payment status, trip info, and admin actions (edit/cancel/confirm)                                   | Staff, Admin           |
-| 30  | View30    | Edit Booking (Staff)        | Form for staff to modify booking details (before departure) including traveler information and seat adjustments with save button                                                   | Staff                  |
-| 31  | View31    | Manage Customers            | Customer management page with customer table, search box, filters (status/registration date), statistics view, add customer button, and action buttons                             | Staff, Admin           |
-| 32  | View32    | Add/Edit Customer           | Customer account creation/edit form with all personal information fields, role selector (staff only for edit), and save button                                                     | Staff, Admin           |
-| 33  | View33    | Customer Details (Staff)    | Staff view of customer profile showing personal info, booking history, statistics (total bookings/spent), favorite routes, and action buttons                                      | Staff, Admin           |
-| 34  | View34    | Manage Staffs               | Staff management page (admin only) with staff table, search box, filters, add staff button, and action buttons                                                                     | Admin                  |
-| 35  | View35    | Add/Edit Staff              | Staff account creation/edit form with personal information fields, credentials, role settings (if admin), and save button                                                          | Admin                  |
-| 36  | View36    | Staff Details               | Staff profile view showing personal info, work statistics (bookings handled/trips managed/routes created), activity log, and action buttons                                        | Admin                  |
-| 37  | View37    | Revenue Report              | Revenue analytics dashboard with line/bar charts showing revenue trends, booking counts, filters for date range/route, summary cards, and export buttons                           | Admin                  |
-| 38  | View38    | Booking Report              | Booking analytics view with pie chart (status distribution), bar chart (bookings by route), filters, data table, and export options                                                | Admin                  |
-| 39  | View39    | Popular Routes Report       | Route performance dashboard showing ranked routes by bookings/revenue with bar/pie charts, filters, and export buttons                                                             | Admin                  |
-| 40  | View40    | Customer Report             | Customer analytics dashboard with top customers chart, customer trend line chart, statistics cards, filters, and export options                                                    | Admin                  |
-| 41  | View41    | Confirmation Dialog         | Modal dialog for confirming critical actions (delete/cancel) with warning message, cancel button, and confirm button                                                               | All                    |
-| 42  | View42    | Success/Error Message       | Toast notification or alert box displaying success or error messages with auto-dismiss or close button                                                                             | All                    |
-| 43  | View43    | Loading Indicator           | Loading overlay with spinner/progress bar displayed during asynchronous operations                                                                                                 | All                    |
-| 44  | View44    | Calendar View               | Interactive calendar showing trip availability by date with color coding for availability status and quick booking options                                                         | Customer, Staff        |
-| 45  | View45    | Filter Sidebar              | Reusable filter component with date range picker, price range slider, dropdown selectors, checkboxes, apply/reset buttons                                                          | Customer, Staff, Admin |
-
-## 3. Non-functional Requirements
-
-### 3.1 User Access and Security
-
-**Note**: X = Available for this role, X(\*) = Available only for own account/data
-
-| Function                                | Guest | Customer | Staff | Admin |
-| :-------------------------------------- | :---: | :------: | :---: | :---: |
-| **Authentication Functions**            |       |          |       |       |
-| Sign In                                 |   X   |    X     |   X   |   X   |
-| Sign Up (Customer Registration)         |   X   |          |       |       |
-| Sign Out                                |       |    X     |   X   |   X   |
-| Forgot Password                         |   X   |    X     |   X   |   X   |
-| Manage Profile                          |       |  X(\*)   | X(\*) | X(\*) |
-| **Browse Trips Functions**              |       |          |       |       |
-| View and Filter Available Trips         |   X   |    X     |   X   |       |
-| View Trip Details                       |   X   |    X     |   X   |       |
-| **Adjust Cart Functions**               |       |          |       |       |
-| Add Trip to Cart                        |       |    X     |       |       |
-| Remove Trip from Cart                   |       |  X(\*)   |       |       |
-| Edit Trip Details in Cart               |       |  X(\*)   |       |       |
-| View and Filter Trips in Cart           |       |  X(\*)   |       |       |
-| **Adjust Favorite Trips Functions**     |       |          |       |       |
-| Favorite/Unfavorite a Trip (Toggle)     |       |    X     |       |       |
-| View and Filter Favorite Trips          |       |  X(\*)   |       |       |
-| **Manage Personal Bookings Functions**  |       |          |       |       |
-| Book a Trip                             |       |    X     |   X   |       |
-| Edit Upcoming Trip's Passenger Details  |       |  X(\*)   |   X   |       |
-| View and Filter Personal Bookings       |       |  X(\*)   |       |       |
-| Checkout Cart                           |       |    X     |       |       |
-| View and Pay Booking Invoice Details    |       |  X(\*)   |       |       |
-| **Manage Routes Functions**             |       |          |       |       |
-| Add New Route                           |       |          |   X   |   X   |
-| View Route Detail                       |       |          |   X   |   X   |
-| Edit Route Detail                       |       |          |   X   |   X   |
-| Delete Route                            |       |          |       |   X   |
-| View and Filter Routes                  |       |          |   X   |   X   |
-| **Manage Route Schedule Functions**     |       |          |       |       |
-| Add New Itinerary                       |       |          |   X   |   X   |
-| View Route Schedule                     |       |          |   X   |   X   |
-| Edit Itinerary                          |       |          |   X   |   X   |
-| Delete Itinerary                        |       |          |       |   X   |
-| **Manage Attraction Functions**         |       |          |       |       |
-| Add New Attraction                      |       |          |       |   X   |
-| View Attraction Detail                  |       |          |   X   |   X   |
-| Edit Attraction Detail                  |       |          |   X   |   X   |
-| Delete Attraction                       |       |          |       |   X   |
-| View and Filter Attractions             |       |          |   X   |   X   |
-| **Manage Trips Functions**              |       |          |       |       |
-| Add New Trip                            |       |          |   X   |   X   |
-| View Trip Details (Management)          |       |          |   X   |   X   |
-| Edit Trip                               |       |          |   X   |   X   |
-| Delete Trip                             |       |          |       |   X   |
-| View and Filter Trips (Management)      |       |          |   X   |   X   |
-| Add New Booking for Trip                |       |          |   X   |   X   |
-| **Adjust and Track Bookings Functions** |       |          |       |       |
-| Add New Booking                         |       |          |   X   |   X   |
-| View Booking Details                    |       |          |   X   |   X   |
-| Edit Pre-Departure Booking              |       |          |   X   |       |
-| Delete Booking                          |       |          |   X   |       |
-| View and Filter Bookings                |       |          |   X   |   X   |
-| View Booking Invoice                    |       |          |   X   |   X   |
-| **Adjust Customers Functions**          |       |          |       |       |
-| Add New Customer                        |       |          |   X   |       |
-| View Customer Details                   |       |          |   X   |       |
-| Edit Customer                           |       |          |   X   |   X   |
-| Delete Customer                         |       |          |   X   |   X   |
-| View and Filter Customers               |       |          |   X   |   X   |
-| **Adjust Staffs Functions**             |       |          |       |       |
-| Add New Staff                           |       |          |       |   X   |
-| View Staff Details                      |       |          |       |   X   |
-| Edit Staff                              |       |          |       |   X   |
-| Delete Staff                            |       |          |       |   X   |
-| View and Filter Staffs                  |       |          |       |   X   |
-| **View Reports Functions**              |       |          |       |       |
-| View Revenue Report                     |       |          |       |   X   |
-| View Booking Report                     |       |          |       |   X   |
-| View Popular Routes Report              |       |          |       |   X   |
-| View Customer Report                    |       |          |       |   X   |
-| Export Reports (PDF/Excel)              |       |          |       |   X   |
-
-**Legend:**
-
-- **X**: User has full permission to perform the function
-- **X(\*)**: User has permission to perform the function on their own account/data only
-
-**Security Requirements:**
-
-1. **Authentication & Authorization:**
-   - JWT tokens with 24-hour expiration time
-   - HTTPS must be enforced for all connections in production environment
-   - All API endpoints must validate authentication tokens before processing requests
-   - Role-based access control (RBAC) enforced at both frontend and backend
-   - Failed login attempts limited to 5 before temporary account lock (15 minutes)
-   - Password reset tokens expire after 1 hour
-   - Session tokens must be invalidated on logout
-
-2. **Data Protection:**
-   - All passwords must be hashed using bcrypt (min 10 salt rounds)
-   - Sensitive customer data (phone, address, passport) encrypted at rest
-   - Payment information must never be stored directly (use payment gateway references only)
-   - Personal data access must be logged for audit purposes
-   - Database backups encrypted and stored securely
-
-3. **Input Validation & Sanitization:**
-   - SQL injection prevention through parameterized queries and ORM
-   - XSS protection through input sanitization and output encoding
-   - CSRF tokens required for all state-changing operations
-   - Input validation on both client and server side
-   - File upload restrictions: max 10MB for route/attraction images
-   - Allowed file types: JPEG, PNG, PDF only
-
-4. **API Security:**
-   - Rate limiting: max 100 requests per minute per IP address
-   - API versioning for backward compatibility
-   - Request/Response logging for audit trail
-   - Error messages must not expose sensitive system information
-   - CORS configured to allow only trusted domains
-
-5. **Audit & Monitoring:**
-   - All admin actions must be logged in Staff_Activity_Log table
-   - Critical operations (delete, payment) require confirmation and logging
-   - Booking modifications must maintain history in Booking_History table
-   - System must track user sessions for security analysis
-   - Failed authentication attempts must be logged with IP address
-
-### 3.2 Performance Requirements
-
-1. **Response Time:**
-   - Page load time: ≤ 2 seconds for 95% of requests
-   - API response time: ≤ 500ms for simple queries
-   - Complex report generation: ≤ 5 seconds
-   - Search operations: ≤ 1 second
-   - Checkout process: ≤ 3 seconds end-to-end
-
-2. **Throughput:**
-   - System must support at least 1000 concurrent users
-   - Handle at least 10,000 booking transactions per day
-   - Support peak load of 500 requests per second
-   - Database queries optimized with proper indexing
-   - Static assets served via CDN for faster delivery
-
-3. **Scalability:**
-   - Application must be horizontally scalable
-   - Database design must support sharding if needed
-   - Session management must support distributed deployment
-   - Cache layer (Redis) for frequently accessed data
-   - Load balancing across multiple application servers
-
-4. **Database Performance:**
-   - Database queries optimized with appropriate indexes on:
-     - User: user_id (PK), username, email, role
-     - Route: route_id (PK), status
-     - Trip: trip_id (PK), route_id, departure_date, status
-     - Tour_Booking: booking_id (PK), customer_id, trip_id, booking_date, status
-     - Invoice: invoice_id (PK), booking_id, payment_status
-   - Connection pooling configured with min 10, max 100 connections
-   - Query execution plans monitored and optimized regularly
-   - Database statistics updated automatically
-
-5. **Caching Strategy:**
-   - Static content cached in browser (images, CSS, JS) for 7 days
-   - API responses cached in Redis with TTL:
-     - Route list: 1 hour
-     - Trip list: 15 minutes
-     - Attraction list: 1 hour
-     - Reports: 5 minutes
-   - Cache invalidation on data updates
-
-### 3.3 Implementation Requirements
-
-1. **Technology Stack:**
-   - **Frontend:** ReactJS with TypeScript, React Router, Redux Toolkit
-   - **Backend:** Java Spring Boot 3.x, Spring Security, Spring Data JPA
-   - **Database:** PostgreSQL 14+ or MySQL 8+
-   - **Cache:** Redis 7+
-   - **Build Tools:** Maven 3.8+, Vite
-   - **Version Control:** Git
-
-2. **Browser Compatibility:**
-   - Google Chrome (latest 2 versions)
-   - Mozilla Firefox (latest 2 versions)
-   - Microsoft Edge (latest 2 versions)
-   - Safari (latest 2 versions on macOS/iOS)
-   - Responsive design supporting devices from 320px to 2560px width
-
-3. **Mobile Support:**
-   - Progressive Web App (PWA) features
-   - Touch-friendly UI elements
-   - Optimized for mobile data usage
-   - Offline capability for viewing booked trips
-   - Mobile-first responsive design
-
-4. **Deployment:**
-   - Containerized deployment using Docker
-   - CI/CD pipeline for automated testing and deployment
-   - Staging environment mirroring production
-   - Blue-green deployment strategy for zero-downtime updates
-   - Environment-specific configuration management
-
-5. **Development Standards:**
-   - Code must follow Java coding conventions (Google Java Style Guide)
-   - JavaScript/TypeScript code must follow ESLint rules
-   - Unit test coverage minimum 70%
-   - Integration tests for all critical workflows
-   - API documentation using Swagger/OpenAPI 3.0
-   - Database schema versioning using Flyway or Liquibase
-
-6. **Internationalization & Localization:**
-   - Support for multiple languages (initially Vietnamese and English)
-   - Date/time formatting based on user locale
-   - Currency formatting with proper symbols
-   - Translation files externalized from code
-   - RTL support for future expansion
-
-7. **Accessibility:**
-   - WCAG 2.1 Level AA compliance
-   - Keyboard navigation support
-   - Screen reader compatibility
-   - Sufficient color contrast ratios (4.5:1 minimum)
-   - Alternative text for all images
-   - Form labels properly associated with inputs
-
-8. **Logging & Monitoring:**
-   - Application logging using SLF4J with Logback
-   - Log levels: ERROR, WARN, INFO, DEBUG
-   - Centralized log management system
-   - Real-time error tracking and alerting
-   - Performance metrics collection
-   - User activity analytics
-
-9. **Backup & Recovery:**
-   - Daily automated database backups
-   - Backup retention policy: 30 days
-   - Point-in-time recovery capability
-   - Disaster recovery plan with RTO ≤ 4 hours, RPO ≤ 1 hour
-   - Regular backup restoration tests (monthly)
-
-10. **Documentation Requirements:**
-    - API documentation auto-generated from code annotations
-    - User manuals for each user role
-    - Administrator guide for system configuration
-    - Database schema documentation
-    - Deployment and installation guides
-    - Troubleshooting guides
-
-- User sessions must be invalidated on password change or role change
-
-**Technology Stack:**
-
-- Frontend: React.js with Next.js framework
-- Backend: Go (Golang) for API services
-- Authentication: Keycloak for identity and access management
-- Database: PostgreSQL for relational data
-- Search Engine: ParadeDB for product/user/document search
-- File Storage: AWS S3 or compatible object storage
-- CDN: CloudFlare or AWS CloudFront for static assets
-- Monitoring: Prometheus, Loki, Grafana for system monitoring
-
-**Development Environment:**
-
-- Version Control: Git with Github Flow branching strategy
-- CI/CD: GitHub Actions
-- Code Quality: SonarQube for code analysis
-- Testing: Jest for frontend, Go test for backend
-- API Documentation: Swagger/OpenAPI specification
-- Containerization: Docker for development and deployment
-- Orchestration: Kubernetes for production deployment
-
-**Deployment:**
-
-- Development: Local Docker containers
-- Staging: Kubernetes cluster on cloud provider
-- Production: Kubernetes cluster with auto-scaling
-- Database: PostgreSQL on Kubernetes
-- Monitoring: Integrated logging and monitoring stack
-
-**Security Implementation:**
-
-- Authentication: OAuth 2.0 / OpenID Connect via Keycloak
-- Authorization: Role-Based Access Control (RBAC)
-- API Security: JWT tokens
-- Communication: TLS 1.3 for all external connections
-- Database: Encrypted at rest and in transit
-- Secrets Management: HashiCorp Vault or AWS Secrets Manager, or encrypted secret on repositories
-- Penetration Testing: Quarterly security audits
-
-**Compliance:**
-
-- GDPR compliance for EU customers
-- PCI DSS compliance for payment processing
-- Data retention policies per regulatory requirements
-- Privacy policy and terms of service
-- Cookie consent management
-
-## 4. Other Requirements
-
-### 4.1 Archive Function
-
-- Only Admin (and Staff where specified) can initiate archival actions.
-- Archived data is stored in a secure, read-only state and cannot be modified or deleted except by system administrators.
-- Archived records are excluded from standard queries and user interfaces but remain accessible for audit, legal, and compliance review.
-- Data retention periods are reviewed annually to ensure compliance with legal and organizational requirements.
-
-The following archival policy follows the ELE SRS style: concise table listing data sets, responsible actors, and archival conditions/retention notes.
-
-| List/Table             | Actor        | Condition / Retention                                                                                                           |
-| :--------------------- | :----------- | :------------------------------------------------------------------------------------------------------------------------------ |
-| Tour_Booking           | Admin        | Archive completed or cancelled bookings older than 2 years. Retain archived booking records for 5 years for compliance.         |
-| User                   | Admin        | Archive deleted user accounts after 90 days. Personal data anonymized per privacy regulations. Retain anonymized records 3 yrs. |
-| Trip                   | Staff, Admin | Archive trips that ended or were cancelled more than 2 years ago.                                                               |
-| Route                  | Admin        | Archive inactive routes; archived routes are hidden from customer-facing views.                                                 |
-| Attraction             | Admin        | Archive attractions that are no longer active.                                                                                  |
-| Invoice                | Admin        | Archive paid invoices older than 2 years. Retain for 5 years for financial audit.                                               |
-| Staff_Activity_Log     | Admin        | Archive staff activity logs older than 1 year; retain audit logs for minimum 3 years.                                           |
-| Booking_History        | Admin        | Archive booking modification history older than 2 years.                                                                        |
-| System Monitoring Data | Admin        | Archive monitoring data older than 90 days to reduce operational storage and improve performance.                               |
-
-Notes:
-
-- Archived data is stored in secure, read-only storage and excluded from regular application queries and UI lists.
-- Only Admin (and Staff where specified) may trigger archival or retrieval actions; all archival actions produce audit logs.
-- Retention periods are subject to legal and organizational review and will be updated as required.
-
-- Only Admin (and Staff where specified) can initiate archival actions.
-- Archived data is stored in a secure, read-only state and cannot be modified or deleted except by system administrators.
-- Archived records are excluded from standard queries and user interfaces but remain accessible for audit, legal, and compliance review.
-- Data retention periods are reviewed annually to ensure compliance with legal and organizational requirements.
-
-### 4.2 Security Audit Function
-
-<!--
-ALTERNATIVE (CHC-style, commented out):
-Uncomment this block and comment out the table below.
-
-Enable Security Audit Function for Admin to track modifications on user permissions and critical data operations across Auth, Booking, Payment, Catalog, Documents, Integrations, and System Operations. Audit logs must be immutable and retained according to policy (at least 1 year online + 2 years archived). Storage is implementation-agnostic (e.g., append-only DB table, append-only file/object storage with object lock, or managed log service).
--->
-
-Audit events captured by the system:
-
-| #   | Area                     | Key events                                                                              | Actor(s)                | Log store                                   | Retention                       |
-| :-- | :----------------------- | :-------------------------------------------------------------------------------------- | :---------------------- | :------------------------------------------ | :------------------------------ |
-| 1   | AuthN/AuthZ              | Login success/fail; lock/unlock; token issue/rotate/revoke; role/permission change      | All, Admin              | WORM-compliant log store (DB/file/service)  | 1 year online + 2 years archive |
-| 2   | User & Staff Management  | Create/update/delete user; password change/reset; MFA setup/reset; role assignment      | Staff, Admin            | WORM log store                              | Same as above                   |
-| 3   | Booking Lifecycle        | Create/hold/pay/cancel/modify booking; seat allocation adjustments                      | Customer, Staff         | WORM log store                              | Same as above                   |
-| 4   | Payment & Invoicing      | Payment initiated/success/failure/refund; invoice generate/send/void                    | System, Customer, Staff | WORM log store                              | Same as above                   |
-| 5   | Catalog & Capacity       | Route/trip/itinerary create/update/delete; price/capacity changes                       | Staff, Admin            | WORM log store                              | Same as above                   |
-| 6   | Data Access & Exports    | PII read/download/export; report execution (filters, scope)                             | Staff, Admin            | WORM log store (+ export register optional) | Same as above                   |
-| 7   | Documents                | Upload/update/delete traveler documents; verification status changes                    | Customer, Staff         | WORM log store                              | Same as above                   |
-| 8   | Integrations & Webhooks  | Incoming/outgoing webhook delivery (status, latency); retries; signature verification   | System                  | WORM log store                              | Same as above                   |
-| 9   | Configuration & Security | System config change; API key/secret rotation; OAuth client config; feature flags       | Admin                   | WORM log store                              | Same as above                   |
-| 10  | System Operations        | Rate-limit triggered; anomalous login patterns; critical errors; backup/restore actions | System, Admin           | WORM log store                              | Same as above                   |
-
-Audit record schema (minimum): timestamp (UTC), actor_id/role, ip, user_agent, resource_type/id, action, status/result, correlation_id, metadata (changed fields/diff), checksum/signature.
-
-Access & integrity: Audit logs are restricted by RBAC (Admin full; Staff scoped to owned/assigned objects) and stored immutably in a WORM-compliant log store. Implementation is agnostic (relational append-only table, append-only file/object storage with object lock, or managed log service) and must provide tamper-evidence and authorized export. Retention aligns with 4.1 (minimum 1 year online + 2 years archive, extendable under legal hold).
-
-### 4.3 TMS Sites
-
-| #   | Site Name       | Description                                                                                                                                                                                                                                                                                                                                                        |
-| :-- | :-------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Customer Portal | Public-facing portal for customers to browse and filter available trips, view trip details and itineraries, add trips to cart, checkout and pay, manage personal bookings, view and pay invoices, manage favorite routes, and manage personal profile. Includes help center and basic support entry points.                                                        |
-| 2   | Staff Portal    | Internal portal for staff to manage routes, itineraries (route schedules), attractions, and trips; create/view/edit pre-departure bookings; view booking details and invoices; manage customers; and perform operational tasks permitted to staff roles. Staff can also access their self-performance report if enabled by policy.                                 |
-| 3   | Admin Console   | Administrative console for system administrators to manage staff and customers, assign roles, configure system settings, oversee operations, and access analytics. Admin can manage all route/attraction/trip entities, audit activities, and view reports (Revenue, Booking, Popular Routes, Customer). Includes system monitoring and document management tools. |
-
-### 4.4 TMS Lists
-
-Refer to section 2.2 List Description for detailed information about all lists/tables used in the TMS (Tourist Management System). This includes, but is not limited to: User, Route, Attraction, Route_Attraction, Trip, Tour_Booking, Tour_Booking_Detail, Invoice, Cart, Cart_Item, Favorite_Tour, Route_Schedule, Booking_History, Revenue_Report, Popular_Routes_Report, Customer_Statistics, Staff_Activity_Log, Password_Reset_Token, User_Session, Notification, Payment_Transaction, Trip_Availability_Calendar, Route_Review, and System_Config.
-
-### 4.5 Custom Pages
-
-Custom pages implemented in the TMS (Tourist Management System):
-
-| #   | Page Name                    | Description                                                                                                     | User Role              |
-| :-- | :--------------------------- | :-------------------------------------------------------------------------------------------------------------- | :--------------------- |
-| 1   | Customer Dashboard           | Personalized dashboard with featured trips, recommendations, upcoming trips, and quick access to bookings.      | Customer               |
-| 2   | Trip Catalog                 | Advanced browse and filter page for trips (date range, destination, price, duration, seats) with facets.        | Guest, Customer, Staff |
-| 3   | Trip Detail                  | Detailed trip page with itinerary, pricing, seat availability calendar, gallery, and “Add to Cart/Book Now”.    | Guest, Customer, Staff |
-| 4   | Shopping Cart                | Cart management page for adding/removing trips, adjusting travelers, and viewing estimated totals.              | Customer               |
-| 5   | Checkout                     | Booking checkout page for traveler information, contact details, and payment confirmation.                      | Customer               |
-| 6   | My Bookings                  | Booking history and filters (status, date range) with actions: view details, invoice, and modify pre-departure. | Customer               |
-| 7   | Booking Detail & Invoice     | Booking summary, passenger list, payment status, invoice download/email, and support contact.                   | Customer, Staff        |
-| 8   | Favorites                    | Saved routes and trips for quick access and future booking.                                                     | Customer               |
-| 9   | Route & Itinerary Management | CRUD for routes and itinerary days; drag-and-drop visit order and duration editing.                             | Staff, Admin           |
-| 10  | Trip & Capacity Management   | CRUD for trips, pricing tiers, capacity, and blocking dates.                                                    | Staff, Admin           |
-| 11  | Customer & Staff Management  | Search, view, and edit customer/staff profiles with access per role.                                            | Staff, Admin           |
-| 12  | Reports & Monitoring Hub     | Revenue, Booking, Popular Routes, Customer reports; system health and activity audit shortcuts.                 | Admin                  |
-
-### 4.6 Scheduled Agents
-
-Scheduled jobs and automated tasks in the TMS (Tourist Management System):
-
-| #   | Agent Name                    | Schedule                    | Description                                                                                                |
-| :-- | :---------------------------- | :-------------------------- | :--------------------------------------------------------------------------------------------------------- |
-| 1   | Trip Availability Sync        | Hourly at :00               | Recomputes available seats per trip from confirmed bookings/cancellations; refreshes cache for trip lists. |
-| 2   | Auto-cancel Unpaid Bookings   | Every 15 minutes            | Cancels bookings pending payment beyond hold time (e.g., 30 minutes); frees seats and notifies customer.   |
-| 3   | Payment Reconciliation        | Daily at 3:00 AM            | Reconciles payment gateway transactions with invoices; retries webhook failures.                           |
-| 4   | Invoice Generation & Delivery | Every hour at :10           | Generates invoices for paid bookings and emails PDFs; retries stalled deliveries.                          |
-| 5   | Pre-departure Reminder        | Daily at 8:00 AM            | Sends reminders 3 days and 24 hours before departure with checklist and contact info.                      |
-| 6   | Post-trip Feedback Request    | Daily at 9:00 AM            | Sends survey/feedback emails 1 day after trip end; aggregates NPS metrics.                                 |
-| 7   | Report Aggregation            | Daily at 1:00 AM            | Aggregates Revenue, Booking, Popular Routes, and Customer reports into summary tables and caches outputs.  |
-| 8   | Database Backup               | Daily at 2:00 AM            | Performs full database backup and integrity verification; rotates backups by retention policy.             |
-| 9   | Log & Audit Cleanup           | Weekly on Sunday at 3:00 AM | Archives logs and prunes expired sessions/tokens per retention policy.                                     |
-| 10  | Cache Warmup (Trips & Routes) | Hourly at :05               | Warms frequently used caches (trip catalog, routes, attractions).                                          |
-| 11  | Session & Token Cleanup       | Hourly at :20               | Deletes expired user sessions and password reset tokens.                                                   |
-| 12  | Data Archival Execution       | Monthly on 1st at 1:30 AM   | Executes archival policy defined in 4.1 for eligible bookings, invoices, and logs.                         |
-
-### 4.7 Technical Concern
-
-**Scalability Concerns:**
-
-- Seasonal peaks (holidays, campaigns) can cause sharp traffic and booking spikes. Use auto-scaling, CDN caching, and message queues to smooth load.
-- Seat allocation must be consistent under high concurrency. Employ row-level locking or optimistic concurrency for availability updates and enforce idempotency on booking mutations.
-- Rate-limit write-heavy endpoints (booking, payment confirmation) and apply backpressure on downstream services.
-
-**Data Management Concerns:**
-
-- Itinerary and route versions change over time; maintain versioned itinerary records and booking-to-itinerary references.
-- Time zones and currencies vary by trip; normalize storage (UTC, base currency) and present localized formats per user.
-- PII minimization and selective encryption at rest (passport, phone, email) with strict access auditing.
-- Retention and archival policies (see 4.1) for bookings, invoices, and logs to control data growth.
-
-**Security Concerns:**
-
-- OAuth2/OIDC with short-lived JWT access tokens and refresh rotation; strict RBAC for Customer/Staff/Admin.
-- PCI DSS-aligned payment flow using tokenization; never store primary card data.
-- CSRF protection for state-changing requests; XSS and SQLi mitigations via encoding/sanitization and parameterized queries.
-- File upload hardening (type/size limits, AV scan if applicable) and comprehensive admin/staff audit trails.
-
-**Performance Concerns:**
-
-- Index critical fields: Trip(route_id, departure_date, status), Tour_Booking(customer_id, trip_id, status, booking_date), Invoice(booking_id, payment_status).
-- Cache hot queries (trip catalog, route lists, attraction lists, summary reports) with defined TTL and cache-busting on updates.
-- Paginate and stream report data; pre-aggregate nightly for heavy dashboards.
-- Keep availability checks fast with computed seat counts and background reconciliation jobs.
-
-**Reliability & Consistency:**
-
-- Booking pipeline should be idempotent and resilient (SAGA pattern with compensating actions for payment failures).
-- Prevent double-spend on seats with transactional boundaries and unique idempotency keys.
-- Implement retries with exponential backoff and dead-letter queues for failed async tasks.
-
-**Integration Concerns:**
-
-- Payment gateway, email/SMS, and maps/geocoding integrations must include timeout, retry, and circuit breaker policies.
-- Validate and sign incoming webhooks; store webhook delivery logs for audit and troubleshooting.
-
-**Observability & Operations:**
-
-- KPIs: search-to-booking conversion, payment success rate, availability accuracy, average time to book, error rate.
-- Centralized logging, metrics, and tracing with alert thresholds (e.g., payment success < 97% or booking error rate > 1%).
-- Blue-green or rolling deployments with health checks; periodic DR drills and backup restore verification.
-
-## 5. Appendixes
-
-### 5.1 Glossary
-
-The list below contains all the necessary terms to interpret the document, including acronyms and abbreviations.
-
-| Term       | Description                                                             |
-| :--------- | :---------------------------------------------------------------------- |
-| _API_      | **A**pplication **P**rogramming **I**nterface                           |
-| _AWS_      | **A**mazon **W**eb **S**ervices                                         |
-| _BR_       | **B**usiness **R**ule                                                   |
-| _CDN_      | **C**ontent **D**elivery **N**etwork                                    |
-| _CLV_      | **C**ustomer **L**ifetime **V**alue                                     |
-| _CPU_      | **C**entral **P**rocessing **U**nit                                     |
-| _CRUD_     | **C**reate, **R**ead, **U**pdate, **D**elete                            |
-| _CSRF_     | **C**ross-**S**ite **R**equest **F**orgery                              |
-| _DB_       | **D**ata**b**ase                                                        |
-| _GDPR_     | **G**eneral **D**ata **P**rotection **R**egulation                      |
-| _HTML_     | **H**yper**T**ext **M**arkup **L**anguage                               |
-| _HTTPS_    | **H**yper**T**ext **T**ransfer **P**rotocol **S**ecure                  |
-| _ID_       | **Id**entifier                                                          |
-| _IP_       | **I**nternet **P**rotocol                                               |
-| _JPG/JPEG_ | **J**oint **P**hotographic **E**xperts **G**roup (image format)         |
-| _JSON_     | **J**ava**S**cript **O**bject **N**otation                              |
-| _JWT_      | **J**SON **W**eb **T**oken                                              |
-| _MB_       | **M**ega**b**yte                                                        |
-| _MSG_      | **M**es**s**a**g**e                                                     |
-| _N/A_      | **N**ot **A**vailable or **N**ot **A**pplicable                         |
-| _OAuth_    | **O**pen **Auth**orization                                              |
-| _PCI DSS_  | **P**ayment **C**ard **I**ndustry **D**ata **S**ecurity **S**tandard    |
-| _PDF_      | **P**ortable **D**ocument **F**ormat                                    |
-| _PNG_      | **P**ortable **N**etwork **G**raphics (image format)                    |
-| _RBAC_     | **R**ole-**B**ased **A**ccess **C**ontrol                               |
-| _REST_     | **RE**presentational **S**tate **T**ransfer                             |
-| _RTO_      | **R**ecovery **T**ime **O**bjective                                     |
-| _SEO_      | **S**earch **E**ngine **O**ptimization                                  |
-| _SKU_      | **S**tock **K**eeping **U**nit                                          |
-| _SQL_      | **S**tructured **Q**uery **L**anguage                                   |
-| _SRS_      | **S**oftware **R**equirements **S**pecification                         |
-| _SSL/TLS_  | **S**ecure **S**ockets **L**ayer / **T**ransport **L**ayer **S**ecurity |
-| _TBD_      | **T**o **b**e **d**etermined or **t**o **b**e **d**efined               |
-| _TMS_      | **T**ourist **M**anagement **S**ystem                                   |
-| _UC_       | **U**se **C**ase                                                        |
-| _UI_       | **U**ser **I**nterface                                                  |
-| _URL_      | **U**niform **R**esource **L**ocator                                    |
-| _UUID_     | **U**niversally **U**nique **Id**entifier                               |
-| _XSS_      | **C**ross-**S**ite **S**cripting                                        |
-
-### 5.2 Mapping to Notes Application
-
-\*\* There is no mapping between the TMS (Tourist Management System) application and any source Notes application. \*\*
-
-### 5.3 Messages
-
-This section standardizes UI messages referenced across Use Cases and BR rules. Messages are grouped by domain to align with BRD modules. Codes (MSG n) are referenced throughout Section 2 (e.g., “Refer to MSG n”).
-
-| Message Code | Category   | Message Content                                                                                            | Button |
-| :----------- | :--------- | :--------------------------------------------------------------------------------------------------------- | :----- |
-| MSG 1        | Validation | Please correct the highlighted fields.                                                                     | Ok     |
-| MSG 2        | Auth       | Invalid username/email or password. Please try again.                                                      | Ok     |
-| MSG 3        | Auth       | Account temporarily locked due to multiple failed attempts. Try again after 15 minutes or contact support. | Ok     |
-| MSG 4        | Auth       | Welcome back, {username}!                                                                                  | Ok     |
-| MSG 5        | Auth       | Username or email already exists. Please use a different one.                                              | Ok     |
-| MSG 6        | Auth       | Registration successful! Redirecting to Sign In...                                                         | Ok     |
-| MSG 7        | Auth       | If this email is registered, you will receive a password reset link shortly.                               | Ok     |
-| MSG 8        | Auth       | Invalid or expired reset link. Please request a new one.                                                   | Ok     |
-| MSG 9        | Auth       | Password reset successful.                                                                                 | Ok     |
-| MSG 10       | Auth       | Session expired. Please sign in again.                                                                     | Ok     |
-| MSG 11       | Profile    | Email already registered. Please use a different email.                                                    | Ok     |
-| MSG 12       | Profile    | Profile updated successfully.                                                                              | Ok     |
-| MSG 13       | Profile    | Incorrect current password.                                                                                | Ok     |
-| MSG 14       | Profile    | Password changed successfully. Please sign in again.                                                       | Ok     |
-| MSG 15       | Search     | Keyword must be at least 3 characters.                                                                     | Ok     |
-| MSG 16       | Search     | Invalid date range. Please adjust your filters.                                                            | Ok     |
-| MSG 17       | Search     | No trips found matching your criteria.                                                                     | Ok     |
-| MSG 18       | Trip       | Trip not found or no longer available.                                                                     | Ok     |
-| MSG 19       | Cart       | Please sign in to add trips to cart.                                                                       | Ok     |
-| MSG 20       | Cart       | Quantity must be between 1 and 20.                                                                         | Ok     |
-| MSG 21       | Cart       | Insufficient seats available.                                                                              | Ok     |
-| MSG 22       | Cart       | Trip added to cart.                                                                                        | Ok     |
-| MSG 23       | Cart       | Item removed from cart.                                                                                    | Ok     |
-| MSG 24       | Cart       | Your cart is empty. Start exploring tours!                                                                 | Ok     |
-| MSG 25       | Cart       | This trip is no longer available. Please remove from cart.                                                 | Ok     |
-| MSG 26       | Cart       | Quantity updated.                                                                                          | Ok     |
-| MSG 27       | Favorites  | Please sign in to save favorites.                                                                          | Ok     |
-| MSG 28       | Favorites  | Added to favorites!                                                                                        | Ok     |
-| MSG 29       | Favorites  | Removed from favorites.                                                                                    | Ok     |
-| MSG 30       | Favorites  | No favorite trips yet. Start exploring!                                                                    | Ok     |
-| MSG 31       | Filters    | No trips match your filters.                                                                               | Ok     |
-| MSG 32       | Booking    | No bookings yet. Start exploring tours!                                                                    | Ok     |
-| MSG 33       | Booking    | No bookings match your filters.                                                                            | Ok     |
-| MSG 34       | Checkout   | Your cart is empty.                                                                                        | Ok     |
-| MSG 35       | Checkout   | Some trips in your cart are no longer available or have insufficient seats.                                | Ok     |
-| MSG 36       | Checkout   | Please correct traveler information.                                                                       | Ok     |
-| MSG 37       | Checkout   | Bookings created successfully!                                                                             | Ok     |
-| MSG 38       | Booking    | Cannot edit: booking cancelled/completed or departure within 48 hours.                                     | Ok     |
-| MSG 39       | Booking    | Please correct passenger details.                                                                          | Ok     |
-| MSG 40       | Booking    | Passenger details updated successfully!                                                                    | Ok     |
-| MSG 41       | Booking    | Booking not found or access denied.                                                                        | Ok     |
-| MSG 42       | Payment    | Cannot process payment: already paid, cancelled/completed booking, or invoice overdue.                     | Ok     |
-| MSG 43       | Payment    | Payment failed: {gateway_error}.                                                                           | Ok     |
-| MSG 44       | Payment    | Payment successful! Your booking is confirmed.                                                             | Ok     |
-| MSG 45       | Routes     | Please check required fields and attachments.                                                              | Ok     |
-| MSG 46       | Routes     | Route created successfully!                                                                                | Ok     |
-| MSG 47       | Routes     | Route not found.                                                                                           | Ok     |
-| MSG 48       | Routes     | Cannot edit route: not found, archived, or has active trips.                                               | Ok     |
-| MSG 49       | Routes     | Please correct route details and try again.                                                                | Ok     |
-| MSG 50       | Routes     | Route updated successfully!                                                                                | Ok     |
-| MSG 51       | Routes     | Cannot delete route: Route has trips and/or attractions. Remove them first.                                | Ok     |
-| MSG 52       | Routes     | Route deleted successfully!                                                                                | Ok     |
-| MSG 53       | Routes     | No routes found. Add a new route to get started.                                                           | Ok     |
-| MSG 54       | Routes     | No routes match your filters.                                                                              | Ok     |
-| MSG 55       | Itinerary  | Cannot add: route closed/archived or no active attractions available.                                      | Ok     |
-| MSG 56       | Itinerary  | Please correct itinerary details.                                                                          | Ok     |
-| MSG 57       | Itinerary  | Attraction added to schedule!                                                                              | Ok     |
-| MSG 58       | Itinerary  | Route not found.                                                                                           | Ok     |
-| MSG 59       | Itinerary  | No schedule available. Add attractions to create itinerary.                                                | Ok     |
-| MSG 60       | Itinerary  | Cannot edit: Route is closed.                                                                              | Ok     |
-| MSG 61       | Itinerary  | Attraction not found in schedule.                                                                          | Ok     |
-| MSG 62       | Itinerary  | Please correct itinerary changes.                                                                          | Ok     |
-| MSG 63       | Itinerary  | Itinerary updated successfully!                                                                            | Ok     |
-| MSG 64       | Itinerary  | Cannot delete: Route is closed.                                                                            | Ok     |
-| MSG 65       | Itinerary  | Attraction not found in schedule.                                                                          | Ok     |
-| MSG 66       | Itinerary  | Cannot delete: This is the last attraction in schedule. Route must have at least one attraction.           | Ok     |
-| MSG 67       | Itinerary  | Attraction removed from schedule!                                                                          | Ok     |
-| MSG 68       | Attraction | Please check required fields or duplicates.                                                                | Ok     |
-| MSG 69       | Attraction | Attraction created successfully!                                                                           | Ok     |
-| MSG 70       | Attraction | Attraction not found.                                                                                      | Ok     |
-| MSG 71       | Attraction | Attraction not found or has been deleted.                                                                  | Ok     |
-| MSG 72       | Attraction | Please correct attraction details.                                                                         | Ok     |
-| MSG 73       | Attraction | Attraction updated successfully!                                                                           | Ok     |
-| MSG 74       | Attraction | This attraction is used in {X} routes. Set status to INACTIVE instead?                                     | Yes/No |
-| MSG 75       | Attraction | Attraction status set to INACTIVE!                                                                         | Ok     |
-| MSG 76       | Attraction | Attraction deleted successfully!                                                                           | Ok     |
-| MSG 77       | Attraction | No attractions found.                                                                                      | Ok     |
-| MSG 78       | Attraction | No attractions match the filter criteria.                                                                  | Ok     |
-| MSG 79       | Trip       | Please correct trip details.                                                                               | Ok     |
-| MSG 80       | Trip       | Trip created successfully!                                                                                 | Ok     |
-| MSG 81       | Trip       | Trip not found.                                                                                            | Ok     |
-| MSG 82       | Trip       | Trip not found or not editable.                                                                            | Ok     |
-| MSG 83       | Trip       | Please correct trip details.                                                                               | Ok     |
-| MSG 84       | Trip       | Trip updated successfully!                                                                                 | Ok     |
-| MSG 85       | Trip       | Cannot delete: Trip has {X} pending/confirmed bookings. Cancel trip instead?                               | Yes/No |
-| MSG 86       | Trip       | Trip has been canceled!                                                                                    | Ok     |
-| MSG 87       | Trip       | Trip deleted successfully!                                                                                 | Ok     |
-| MSG 88       | Booking    | Trip is not available for booking.                                                                         | Ok     |
-| MSG 89       | Booking    | Booking created successfully! Booking ID: {booking_id}                                                     | Ok     |
-| MSG 90       | Trip       | No trips found.                                                                                            | Ok     |
-| MSG 91       | Trip       | No trips match the filter criteria.                                                                        | Ok     |
-| MSG 92       | Booking    | Trip is not available for booking.                                                                         | Ok     |
-| MSG 93       | Customer   | Customer account is locked.                                                                                | Ok     |
-| MSG 94       | Booking    | Insufficient seats or invalid traveler information.                                                        | Ok     |
-| MSG 95       | Booking    | Booking created successfully! Booking ID: {booking_id}                                                     | Ok     |
-| MSG 96       | Booking    | No bookings found.                                                                                         | Ok     |
-| MSG 97       | Booking    | No bookings match the filter criteria.                                                                     | Ok     |
-| MSG 98       | Booking    | Booking not found.                                                                                         | Ok     |
-| MSG 99       | Invoice    | Invoice not found.                                                                                         | Ok     |
-| MSG 100      | Booking    | Booking not found or cannot be edited.                                                                     | Ok     |
-| MSG 101      | Booking    | Insufficient seats available.                                                                              | Ok     |
-| MSG 102      | Booking    | Booking updated successfully!                                                                              | Ok     |
-| MSG 103      | Booking    | Cannot delete booking.                                                                                     | Ok     |
-| MSG 104      | Booking    | Booking deleted successfully!                                                                              | Ok     |
-| MSG 105      | Customer   | Username or email already exists.                                                                          | Ok     |
-| MSG 106      | Customer   | Customer created successfully!                                                                             | Ok     |
-| MSG 107      | Customer   | No customers found.                                                                                        | Ok     |
-| MSG 108      | Customer   | No customers match the filter criteria.                                                                    | Ok     |
-| MSG 109      | Customer   | Customer not found.                                                                                        | Ok     |
-| MSG 110      | Customer   | Customer not found.                                                                                        | Ok     |
-| MSG 111      | Customer   | Email already registered.                                                                                  | Ok     |
-| MSG 112      | Customer   | Customer updated successfully!                                                                             | Ok     |
-| MSG 113      | Customer   | Cannot delete: Customer has active bookings or unpaid invoices.                                            | Ok     |
-| MSG 114      | Customer   | Customer deleted successfully!                                                                             | Ok     |
-| MSG 115      | Staff      | Username or email already exists.                                                                          | Ok     |
-| MSG 116      | Staff      | Staff created successfully!                                                                                | Ok     |
-| MSG 117      | Staff      | No staffs found.                                                                                           | Ok     |
-| MSG 118      | Staff      | No staffs match the filter criteria.                                                                       | Ok     |
-| MSG 119      | Staff      | Staff not found.                                                                                           | Ok     |
-| MSG 120      | Staff      | Staff not found.                                                                                           | Ok     |
-| MSG 121      | Staff      | Email already registered.                                                                                  | Ok     |
-| MSG 122      | Staff      | Staff updated successfully!                                                                                | Ok     |
-| MSG 123      | Staff      | Cannot delete: Staff has active bookings.                                                                  | Ok     |
-| MSG 124      | Staff      | Staff deleted successfully!                                                                                | Ok     |
-| MSG 125      | Reports    | No data available for the selected period.                                                                 | Ok     |
-| MSG 126      | Reports    | Export failed. Please try again.                                                                           | Ok     |
-
-### 5.4 Issues List
-
-N/A
+# SRS / Use Case Specifications
+
+This page is the English extended SRS reference for the Vietnamese TaskPilot report appendix. It preserves the 59 use cases used by the report and links each use case to existing sequence diagrams, activity diagrams, UI specification pages, and database tables where those artefacts exist.
+
+## System overview
+
+TaskPilot is an intelligent project and task management system with AI Copilot support. The core scope covers project/member/sprint/task management, Kanban collaboration, realtime notification, AI Copilot with controlled tool calling, and assignment recommendation based on weighted heuristic scoring.
+
+## Actors
+
+| Actor | Description |
+| --- | --- |
+| Guest | Unauthenticated user who can register, sign in, or recover/reset a password. |
+| System Administrator (ad) | Manages users, system skill directory, AI/system settings and audit views. |
+| Project Manager (pm) | Creates and manages projects, members, sprints, tasks and assignment decisions. |
+| Project Member (mem) | Works on tasks, comments, notifications, sprint/backlog views and AI Copilot within granted project permissions. |
+| AI Copilot | Internal assistant component that proposes answers/actions through controlled tool calling; it is not a direct human actor. |
+
+## Use case group count verification
+
+| # | Group | Range | Count |
+| --- | --- | --- | --- |
+| 1 | Authentication | UC01–UC04 | 4 |
+| 2 | User Profile | UC05–UC07 | 3 |
+| 3 | User Skills | UC08–UC12 | 5 |
+| 4 | System Administration | UC13–UC21 | 9 |
+| 5 | Project Management | UC22–UC28 | 7 |
+| 6 | Project Members | UC29–UC33 | 5 |
+| 7 | Sprint Management | UC34–UC39 | 6 |
+| 8 | Task Management | UC40–UC48 | 9 |
+| 9 | Interaction & Communication | UC49–UC52 | 4 |
+| 10 | Notification Management | UC53–UC54 | 2 |
+| 11 | AI Assistant | UC55–UC59 | 5 |
+
+**Total: 59 use cases across 11 groups.**
+
+## Use case catalogue
+
+| ID | Name | Actor(s) | Subsystem | UI | Sequence | Activity | Database table(s) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| UC01 | Sign In | ad, pm, mem | Authentication | [Login screen](/docs/ui-specification#login-screen) | [sequence diagram](/docs/sequence/auth/login) | [activity diagram](/docs/activity/auth/login) | users |
+| UC02 | Register / Sign Up | ad, pm, mem | Authentication | [Register screen](/docs/ui-specification#register-screen) | [sequence diagram](/docs/sequence/auth/register) | [activity diagram](/docs/activity/auth/register) | users |
+| UC03 | Forgot Password | ad, pm, mem | Authentication | [Forgot password screen](/docs/ui-specification#forgot-password-screen) | [sequence diagram](/docs/sequence/auth/forgot-password) | [activity diagram](/docs/activity/auth/forgot-password) | users, password_reset_tokens |
+| UC04 | Reset Password | ad, pm, mem | Authentication | [Forgot password screen](/docs/ui-specification#forgot-password-screen) | [sequence diagram](/docs/sequence/auth/reset-password) | [activity diagram](/docs/activity/auth/reset-password) | users, password_reset_tokens |
+| UC05 | Update Personal Information | ad, pm, mem | User Profile | [Profile screen](/docs/ui-specification#profile-screen) | [sequence diagram](/docs/sequence/user-profile/update-personal-information) | [activity diagram](/docs/activity/user-profile/update-personal-information) | users |
+| UC06 | View User Profile | ad, pm, mem | User Profile | [Profile screen](/docs/ui-specification#profile-screen) | [sequence diagram](/docs/sequence/user-profile/view-user-profile) | [activity diagram](/docs/activity/user-profile/view-user-profile) | users |
+| UC07 | Delete Personal Account | ad, pm, mem | User Profile | [Profile screen](/docs/ui-specification#profile-screen) | [sequence diagram](/docs/sequence/user-profile/delete-personal-account) | [activity diagram](/docs/activity/user-profile/delete-personal-account) | users |
+| UC08 | View Personal Skill List | pm, mem | User Skills | [Profile screen](/docs/ui-specification#profile-screen) | [sequence diagram](/docs/sequence/user-skills/view-personal-skill-list) | [activity diagram](/docs/activity/user-skills/view-personal-skill-list) | user_skills, skills |
+| UC09 | View Personal Skill Details | pm, mem | User Skills | [Profile screen](/docs/ui-specification#profile-screen) | [sequence diagram](/docs/sequence/user-skills/view-personal-skill-details) | [activity diagram](/docs/activity/user-skills/view-personal-skill-details) | user_skills, skills |
+| UC10 | Add Personal Skill | pm, mem | User Skills | [Profile screen](/docs/ui-specification#profile-screen) | [sequence diagram](/docs/sequence/user-skills/add-personal-skill) | [activity diagram](/docs/activity/user-skills/add-personal-skill) | user_skills, skills |
+| UC11 | Update Personal Skill | pm, mem | User Skills | [Profile screen](/docs/ui-specification#profile-screen) | [sequence diagram](/docs/sequence/user-skills/update-personal-skill) | [activity diagram](/docs/activity/user-skills/update-personal-skill) | user_skills, skills |
+| UC12 | Delete Personal Skill | pm, mem | User Skills | [Profile screen](/docs/ui-specification#profile-screen) | [sequence diagram](/docs/sequence/user-skills/delete-personal-skill) | [activity diagram](/docs/activity/user-skills/delete-personal-skill) | user_skills, skills |
+| UC13 | Configure System Parameters | ad | System Administration | [Admin system configuration](/docs/ui-specification#admin-system-configuration) | [sequence diagram](/docs/sequence/admin/configure-system-parameters) | [activity diagram](/docs/activity/admin/configure-system-parameters) | system_settings |
+| UC14 | View System Skill Directory | ad | System Administration | [Admin skill directory](/docs/ui-specification#admin-skill-directory) | [sequence diagram](/docs/sequence/admin/view-system-skill-directory) | [activity diagram](/docs/activity/admin/view-system-skill-directory) | skills |
+| UC15 | Add System Skill | ad | System Administration | [Admin skill directory](/docs/ui-specification#admin-skill-directory) | [sequence diagram](/docs/sequence/admin/add-system-skill) | [activity diagram](/docs/activity/admin/add-system-skill) | skills |
+| UC16 | Edit System Skill | ad | System Administration | [Admin skill directory](/docs/ui-specification#admin-skill-directory) | [sequence diagram](/docs/sequence/admin/edit-system-skill) | [activity diagram](/docs/activity/admin/edit-system-skill) | skills |
+| UC17 | Delete System Skill | ad | System Administration | [Admin skill directory](/docs/ui-specification#admin-skill-directory) | [sequence diagram](/docs/sequence/admin/delete-system-skill) | [activity diagram](/docs/activity/admin/delete-system-skill) | skills |
+| UC18 | View Global User List | ad | System Administration | [Admin user management](/docs/ui-specification#admin-user-management) | [sequence diagram](/docs/sequence/admin/view-global-user-list) | [activity diagram](/docs/activity/admin/view-global-user-list) | users |
+| UC19 | Add System User | ad | System Administration | [Admin user management](/docs/ui-specification#admin-user-management) | [sequence diagram](/docs/sequence/admin/add-system-user) | [activity diagram](/docs/activity/admin/add-system-user) | users |
+| UC20 | Edit System User | ad | System Administration | [Admin user management](/docs/ui-specification#admin-user-management) | [sequence diagram](/docs/sequence/admin/edit-system-user) | [activity diagram](/docs/activity/admin/edit-system-user) | users |
+| UC21 | Delete System User | ad | System Administration | [Admin user management](/docs/ui-specification#admin-user-management) | [sequence diagram](/docs/sequence/admin/delete-system-user) | [activity diagram](/docs/activity/admin/delete-system-user) | users |
+| UC22 | View Joined Projects | pm, mem | Project Management | [Project dashboard / project list](/docs/ui-specification#project-dashboard--project-list) | [sequence diagram](/docs/sequence/project-management/view-joined-projects) | [activity diagram](/docs/activity/project-management/view-joined-projects) | projects, project_members |
+| UC23 | Create New Project | pm | Project Management | [Create project screen](/docs/ui-specification#create-project-screen) | [sequence diagram](/docs/sequence/project-management/create-new-project) | [activity diagram](/docs/activity/project-management/create-new-project) | projects, project_members |
+| UC24 | View Project Details / Summary | pm, mem | Project Management | [Project workspace](/docs/ui-specification#project-workspace)<br>[Project overview](/docs/ui-specification#project-overview)<br>[Timeline](/docs/ui-specification#timeline) | [sequence diagram](/docs/sequence/project-management/view-project-details) | [activity diagram](/docs/activity/project-management/view-project-details) | projects |
+| UC25 | Update Project Information | pm | Project Management | [Project settings general](/docs/ui-specification#project-settings-general) | [sequence diagram](/docs/sequence/project-management/update-project-information) | [activity diagram](/docs/activity/project-management/update-project-information) | projects |
+| UC26 | Join Project | pm, mem | Project Management | [Project dashboard / project list](/docs/ui-specification#project-dashboard--project-list) | [sequence diagram](/docs/sequence/project-management/join-project) | [activity diagram](/docs/activity/project-management/join-project) | project_members |
+| UC27 | Leave Project | pm, mem | Project Management | [Project workspace](/docs/ui-specification#project-workspace) | [sequence diagram](/docs/sequence/project-management/leave-project) | [activity diagram](/docs/activity/project-management/leave-project) | project_members |
+| UC28 | Close / Archive Project | pm | Project Management | [Project settings general](/docs/ui-specification#project-settings-general) | [sequence diagram](/docs/sequence/project-management/close-archive-project) | [activity diagram](/docs/activity/project-management/close-archive-project) | projects |
+| UC29 | View Project Member List | pm, mem | Project Members | [Project settings members](/docs/ui-specification#project-settings-members) | [sequence diagram](/docs/sequence/project-members/view-project-member-list) | [activity diagram](/docs/activity/project-members/view-project-member-list) | project_members, users |
+| UC30 | View Member Details | pm, mem | Project Members | [Project settings members](/docs/ui-specification#project-settings-members) | [sequence diagram](/docs/sequence/project-members/view-member-details) | [activity diagram](/docs/activity/project-members/view-member-details) | project_members, users, user_skills |
+| UC31 | Add Member to Project | pm, mem | Project Members | [Project settings members](/docs/ui-specification#project-settings-members) | [sequence diagram](/docs/sequence/project-members/add-member-to-project) | [activity diagram](/docs/activity/project-members/add-member-to-project) | project_members |
+| UC32 | Update Member Role | pm | Project Members | [Project settings members](/docs/ui-specification#project-settings-members) | [sequence diagram](/docs/sequence/project-members/update-member-role) | [activity diagram](/docs/activity/project-members/update-member-role) | project_members |
+| UC33 | Remove Member from Project | pm, mem | Project Members | [Project settings members](/docs/ui-specification#project-settings-members) | [sequence diagram](/docs/sequence/project-members/remove-member-from-project) | [activity diagram](/docs/activity/project-members/remove-member-from-project) | project_members |
+| UC34 | View Sprint List | pm, mem | Sprint Management | [Sprint backlog](/docs/ui-specification#sprint-backlog) | [sequence diagram](/docs/sequence/sprint-management/view-sprint-list) | [activity diagram](/docs/activity/sprint-management/view-sprint-list) | sprints |
+| UC35 | View Sprint Details | pm, mem | Sprint Management | [Sprint backlog](/docs/ui-specification#sprint-backlog) | [sequence diagram](/docs/sequence/sprint-management/view-sprint-details) | [activity diagram](/docs/activity/sprint-management/view-sprint-details) | sprints |
+| UC36 | Create New Sprint | pm, mem | Sprint Management | [Sprint backlog](/docs/ui-specification#sprint-backlog) | [sequence diagram](/docs/sequence/sprint-management/create-new-sprint) | [activity diagram](/docs/activity/sprint-management/create-new-sprint) | sprints |
+| UC37 | Update Sprint Information | pm, mem | Sprint Management | [Sprint backlog](/docs/ui-specification#sprint-backlog) | [sequence diagram](/docs/sequence/sprint-management/update-sprint-information) | [activity diagram](/docs/activity/sprint-management/update-sprint-information) | sprints |
+| UC38 | Start / Complete Sprint | pm, mem | Sprint Management | [Sprint backlog](/docs/ui-specification#sprint-backlog) | [sequence diagram](/docs/sequence/sprint-management/start-complete-sprint) | [activity diagram](/docs/activity/sprint-management/start-complete-sprint) | sprints |
+| UC39 | Delete Sprint | pm, mem | Sprint Management | [Sprint backlog](/docs/ui-specification#sprint-backlog) | [sequence diagram](/docs/sequence/sprint-management/delete-sprint) | [activity diagram](/docs/activity/sprint-management/delete-sprint) | sprints, tasks |
+| UC40 | View Kanban Board | pm, mem | Task Management | [Kanban board](/docs/ui-specification#kanban-board) | [sequence diagram](/docs/sequence/task-management/view-kanban-board) | [activity diagram](/docs/activity/task-management/view-kanban-board) | tasks |
+| UC41 | View Backlog | pm, mem | Task Management | [Sprint backlog](/docs/ui-specification#sprint-backlog) | [sequence diagram](/docs/sequence/task-management/view-backlog) | [activity diagram](/docs/activity/task-management/view-backlog) | tasks, sprints |
+| UC42 | View Workload | pm, mem | Task Management | [Project settings members](/docs/ui-specification#project-settings-members)<br>[Task detail](/docs/ui-specification#task-detail) | [sequence diagram](/docs/sequence/task-management/view-workload) | [activity diagram](/docs/activity/task-management/view-workload) | tasks, users |
+| UC43 | View Task Details | pm, mem | Task Management | [Task detail](/docs/ui-specification#task-detail) | [sequence diagram](/docs/sequence/task-management/view-task-details) | [activity diagram](/docs/activity/task-management/view-task-details) | tasks, task_required_skills, task_labels |
+| UC44 | Create Task or Sub-task | pm, mem | Task Management | [Kanban board](/docs/ui-specification#kanban-board)<br>[Task detail](/docs/ui-specification#task-detail) | [sequence diagram](/docs/sequence/task-management/create-new-task) | [activity diagram](/docs/activity/task-management/create-new-task) | tasks, task_required_skills, task_labels |
+| UC45 | Update Task Information | pm, mem | Task Management | [Task detail](/docs/ui-specification#task-detail) | [sequence diagram](/docs/sequence/task-management/update-task-information) | [activity diagram](/docs/activity/task-management/update-task-information) | tasks, task_required_skills, task_labels |
+| UC46 | Update Task Status / Drag and Drop on Kanban | pm, mem | Task Management | [Kanban board](/docs/ui-specification#kanban-board) | [sequence diagram](/docs/sequence/task-management/update-task-status) | [activity diagram](/docs/activity/task-management/update-task-status) | tasks |
+| UC47 | Assign Assignee and Reporter | pm, mem | Task Management | [Task detail](/docs/ui-specification#task-detail) | [sequence diagram](/docs/sequence/task-management/assign-assignee-reporter) | [activity diagram](/docs/activity/task-management/assign-assignee-reporter) | tasks, users, user_skills, project_members |
+| UC48 | Delete Task | pm, mem | Task Management | [Kanban board](/docs/ui-specification#kanban-board)<br>[Task detail](/docs/ui-specification#task-detail) | [sequence diagram](/docs/sequence/task-management/delete-task) | [activity diagram](/docs/activity/task-management/delete-task) | tasks |
+| UC49 | View Comments | pm, mem | Interaction & Communication | [Comment](/docs/ui-specification#comment) | [sequence diagram](/docs/sequence/interaction-communication/view-comments) | [activity diagram](/docs/activity/interaction-communication/view-comments) | comments |
+| UC50 | Write Comment | pm, mem | Interaction & Communication | [Comment](/docs/ui-specification#comment) | [sequence diagram](/docs/sequence/interaction-communication/write-comment) | [activity diagram](/docs/activity/interaction-communication/write-comment) | comments, comment_mentions, notifications |
+| UC51 | Edit Comment | pm, mem | Interaction & Communication | [Comment](/docs/ui-specification#comment) | [sequence diagram](/docs/sequence/interaction-communication/edit-comment) | [activity diagram](/docs/activity/interaction-communication/edit-comment) | comments, comment_mentions |
+| UC52 | Delete Comment | pm, mem | Interaction & Communication | [Comment](/docs/ui-specification#comment) | [sequence diagram](/docs/sequence/interaction-communication/delete-comment) | [activity diagram](/docs/activity/interaction-communication/delete-comment) | comments |
+| UC53 | Receive Notification | ad, pm, mem | Notification Management | [Notification panel](/docs/ui-specification#notification-panel) | [sequence diagram](/docs/sequence/notification-management/receive-notification) | [activity diagram](/docs/activity/notification-management/receive-notification) | notifications |
+| UC54 | Mark Notification as Read | ad, pm, mem | Notification Management | [Notification panel](/docs/ui-specification#notification-panel) | [sequence diagram](/docs/sequence/notification-management/mark-notification-as-read) | [activity diagram](/docs/activity/notification-management/mark-notification-as-read) | notifications |
+| UC55 | Create New AI Chat Session | pm, mem | AI Assistant | [AI chat](/docs/ui-specification#ai-chat) | [sequence diagram](/docs/sequence/ai-assistant/create-new-ai-chat-session) | [activity diagram](/docs/activity/ai-assistant/create-new-ai-chat-session) | chat_sessions |
+| UC56 | Chat with AI | pm, mem | AI Assistant | [AI chat](/docs/ui-specification#ai-chat)<br>[Pending action confirmation](/docs/ui-specification#pending-action-confirmation) | [sequence diagram](/docs/sequence/ai-assistant/chat-with-ai) | [activity diagram](/docs/activity/ai-assistant/chat-with-ai) | chat_sessions, chat_messages, ai_logs |
+| UC57 | View AI Chat History | pm, mem | AI Assistant | [AI chat](/docs/ui-specification#ai-chat) | [sequence diagram](/docs/sequence/ai-assistant/view-ai-chat-history) | [activity diagram](/docs/activity/ai-assistant/view-ai-chat-history) | chat_sessions, chat_messages |
+| UC58 | View AI Activity Logs | ad, pm, mem | AI Assistant | [AI chat](/docs/ui-specification#ai-chat) | [sequence diagram](/docs/sequence/ai-assistant/view-ai-activity-logs) | [activity diagram](/docs/activity/ai-assistant/view-ai-activity-logs) | ai_logs |
+| UC59 | Request AI Task Assignment Recommendation | pm | AI Assistant | [AI assignment recommendation](/docs/ui-specification#ai-assignment-recommendation)<br>[Pending action confirmation](/docs/ui-specification#pending-action-confirmation) | [sequence diagram](/docs/sequence/ai-assistant/request-ai-auto-assignment) | [activity diagram](/docs/activity/ai-assistant/request-ai-auto-assignment) | tasks, users, user_skills, project_members, system_settings, ai_logs |
+
+## Representative use cases
+
+The following six use cases are completed from the current report and existing PlantUML sequence/activity diagrams: UC01, UC23, UC44, UC46, UC47 and UC59.
+
+### UC01 — Sign In
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary SignInView as SIV
+boundary HomeView as HV
+control AuthController as AC
+entity USER as US
+
+activate U
+U -> SIV: Access sign in page
+activate SIV
+SIV -> SIV: Display sign in form
+activate SIV
+deactivate SIV
+
+U -> SIV: Enter username/email and password
+U -> SIV: Click "Sign In"
+deactivate U
+SIV -> SIV: Validate data format
+activate SIV
+deactivate SIV
+
+break Invalid data format
+  SIV -> SIV: Display error notification
+  activate SIV
+  deactivate SIV
+end
+
+SIV -> AC: Send login request
+activate AC
+AC -> US: Query user by username or email
+activate US
+US -> US: Find user and get password hash
+activate US
+deactivate US
+
+break User not found
+  AC <-- US: Error notification
+  SIV <-- AC: Error notification
+  SIV -> SIV: Display "Username/Email or password incorrect" error
+  activate SIV
+  deactivate SIV
+end
+
+AC <-- US: User found
+deactivate US
+
+AC -> AC: Verify password hash
+activate AC
+deactivate AC
+
+break Password incorrect
+  SIV <-- AC: Error notification
+  deactivate AC
+  SIV -> SIV: Display "Username/Email or password incorrect" error
+  activate SIV
+  deactivate SIV
+end
+
+AC -> US: Check account lock status
+activate US
+activate AC
+US -> US: Query is_lock field
+activate US
+deactivate US
+
+break Account locked
+  AC <-- US: Account locked
+  SIV <-- AC: Error notification
+  SIV -> SIV: Display "Account locked. Please contact support" error
+  activate SIV
+  deactivate SIV
+end
+
+AC <-- US: Account active
+deactivate US
+AC -> AC: Generate JWT token
+activate AC
+deactivate AC
+
+SIV <-- AC: Success with JWT token
+deactivate AC
+deactivate AC
+SIV -> HV: Redirect to home page
+deactivate SIV
+activate HV
+HV -> HV: Display home view
+activate HV
+deactivate HV
+deactivate HV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-auth-login" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Access login page;
+
+|S|
+:(2) Display login form;
+
+repeat
+  |U|
+  :(3) Enter username/email and password;
+  :(4) Click "Sign In";
+
+  |S|
+  :(5) Validate data format;
+  backward: (5.1) Display format error;
+repeat while (Data format valid?) is (No) not (Yes)
+
+:(6) Query user by username or email;
+
+if (User found?) then (No)
+  :(6.1) Display "Invalid credentials" error;
+  |U|
+  :(6.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(7) Verify password hash;
+
+if (Password correct?) then (No)
+  :(7.1) Display "Invalid credentials" error;
+  |U|
+  :(7.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(8) Check account lock status;
+
+if (Account locked?) then (Yes)
+  :(8.1) Display "Account locked. Please contact support" error;
+  |U|
+  :(8.2) Confirm end;
+  stop
+else (No)
+endif
+
+:(9) Generate JWT token;
+:(10) Redirect to home page;
+
+|U|
+:(11) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-auth-login" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC01 |
+| Name | Sign In |
+| Actor(s) | ad, pm, mem |
+| Priority | High |
+| Trigger | Access login page |
+| Pre-condition(s) | An active account exists and the authentication service is operational. |
+| Post-condition(s) | Generate JWT token Redirect to home page |
+| Basic Flow | 1. Access login page<br>2. Display login form<br>3. Enter username/email and password<br>4. Click "Sign In"<br>5. Validate data format<br>6. Query user by username or email<br>7. Verify password hash<br>8. Check account lock status<br>9. Generate JWT token<br>10. Redirect to home page |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display format error<br>2. Display "Invalid credentials" error<br>3. Display "Account locked. Please contact support" error |
+| Related UI screen(s) | [Login screen](/docs/ui-specification#login-screen) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/auth/login) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/auth/login) |
+| Related database table(s) | users |
+
+### UC23 — Create New Project
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor "Project Manager" as PM
+boundary ProjectListView as PLV
+boundary CreateProjectView as CPV
+control ProjectController as PC
+entity PROJECTS as P
+entity PROJECT_MEMBERS as PME
+
+PM -> PLV: Click "Create Project"
+activate PM
+activate PLV
+PLV -> CPV: Navigate to create form
+deactivate PLV
+activate CPV
+CPV -> CPV: Display create project form\n(name, description, start/end date,\nheuristic_mode)
+activate CPV
+deactivate CPV
+
+PM -> CPV: Enter project information
+PM -> CPV: Click "Create"
+deactivate PM
+CPV -> CPV: Validate data
+activate CPV
+deactivate CPV
+
+break Invalid data
+  CPV -> CPV: Display validation errors
+  activate CPV
+  deactivate CPV
+end
+
+CPV -> PC: Send create request
+activate PC
+PC -> P: Insert new project
+activate P
+P -> P: Insert record (status = ACTIVE)
+activate P
+deactivate P
+PC <-- P: Project created with id
+deactivate P
+
+PC -> PME: Add creator as project member
+activate PME
+PME -> PME: Insert record (role = MANAGER)
+activate PME
+deactivate PME
+PC <-- PME: Member added
+deactivate PME
+
+CPV <-- PC: Success notification
+deactivate PC
+CPV -> CPV: Display success message
+activate CPV
+deactivate CPV
+CPV -> PLV: Redirect to project list
+deactivate CPV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-project-management-create-new-project" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+
+|U|User
+|S|System
+
+|U|
+start
+:(1) Access Projects page;
+
+|S|
+:(2) Display project list with "Create Project" button;
+
+|U|
+:(3) Click "Create Project";
+
+|S|
+:(4) Display form \n (name, description, start/end date, heuristic_mode);
+
+repeat
+  |U|
+  :(5) Enter project information;
+  :(6) Click "Create";
+
+  |S|
+  :(7) Validate name not empty \n and start date before end date;
+  backward: (7.1) Display validation error;
+repeat while (Data valid?) is (No) not (Yes)
+
+:(8) Insert project (status=ACTIVE);
+:(8.1) Initialize empty sprint backlog;
+:(9) Add creator as MANAGER in project_members;
+:(10) Generate default invite code for project;
+:(11) Notify success and redirect to new project page;
+
+|U|
+:(12) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-project-management-create-new-project" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC23 |
+| Name | Create New Project |
+| Actor(s) | pm |
+| Priority | High |
+| Trigger | Access Projects page |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Generate default invite code for project Notify success and redirect to new project page |
+| Basic Flow | 1. Access Projects page<br>2. Display project list with "Create Project" button<br>3. Click "Create Project"<br>4. Display form (name, description, start/end date, heuristic_mode)<br>5. Enter project information<br>6. Click "Create"<br>7. Validate name not empty and start date before end date<br>8. Insert project (status=ACTIVE)<br>9. Initialize empty sprint backlog<br>10. Add creator as MANAGER in project_members<br>11. Generate default invite code for project<br>12. Notify success and redirect to new project page |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass. |
+| Exception Flow | 1. Display validation error |
+| Related UI screen(s) | [Create project screen](/docs/ui-specification#create-project-screen) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/project-management/create-new-project) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/project-management/create-new-project) |
+| Related database table(s) | projects, project_members |
+
+### UC44 — Create Task or Sub-task
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary CreateTaskView as CTV
+control TaskController as TC
+entity PROJECT_MEMBERS as PM
+entity TASKS as T
+
+U -> CTV: Click "Create Task"
+activate U
+activate CTV
+
+CTV -> TC: Initialize create (project_id, parent_id?)
+activate TC
+CTV <-- TC: Form ready ( kèm list members, tags...)
+deactivate TC
+
+CTV -> CTV: Display create task form\n(title, description, priority,\nsprint, tags, difficulty_level,\nrequired_skills, assignee, reporter,\nstart/due date)
+activate CTV
+deactivate CTV
+
+U -> CTV: Enter task information
+U -> CTV: Click "Create"
+deactivate U
+
+CTV -> CTV: Validate data (Frontend format check)
+activate CTV
+deactivate CTV
+
+break Invalid data
+    CTV -> CTV: Display validation errors
+    activate CTV
+    deactivate CTV
+end
+
+CTV -> TC: Send create request (task_data, current_user)
+activate TC
+
+' Bắt đầu validate Business Logic ở Backend
+TC -> PM: Check Assignee & Reporter
+activate PM
+PM -> PM: Validate if users exist\nin project_id
+activate PM
+deactivate PM
+TC <-- PM: Validation result
+deactivate PM
+
+break Users not in project
+    CTV <-- TC: 400 Bad Request / Invalid Assignee
+    CTV -> CTV: Display error message
+    activate CTV
+    deactivate CTV
+end
+
+' Nếu là tạo Sub-task thì check thêm Parent
+alt parent_id is provided
+    TC -> T: Check parent task exists
+    activate T
+    TC <-- T: Parent task data
+    deactivate T
+    
+    break Parent task not found
+        CTV <-- TC: 404 Parent Not Found
+        CTV -> CTV: Display error message
+        activate CTV
+        deactivate CTV
+    end
+end
+
+' Mọi thứ pass hết mới cho Insert
+TC -> T: Insert new task
+activate T
+T -> T: Insert record (status = TODO, project_id)
+activate T
+deactivate T
+TC <-- T: Task created
+deactivate T
+
+CTV <-- TC: Success notification (201 Created)
+deactivate TC
+
+CTV -> CTV: Display success and redirect
+activate CTV
+deactivate CTV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-task-management-create-new-task" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+
+|U|User
+|S|System
+
+|U|
+start
+:(1) Access project task board or backlog;
+
+|S|
+:(2) Display task list with "Create Task" button;
+
+|U|
+:(3) Click "Create Task";
+
+|S|
+:(4) Display form \n (title, description, status, priority, \n assignee, sprint, required_skills, \n parent_task for sub-task);
+
+repeat
+  |U|
+  :(5) Enter task information;
+  :(6) Click "Create";
+
+  |S|
+  :(7) Validate title not empty;
+  backward: (7.1) Display validation error;
+repeat while (Data valid?) is (No) not (Yes)
+
+:(8) Insert task record;
+:(8.1) Set initial task history entry;
+:(9) If assignee selected: update assignee's \n current_workload (+1);
+:(10) Send notification to assignee if assigned;
+:(11) Notify success and display task \n in Kanban/Backlog;
+
+|U|
+:(12) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-task-management-create-new-task" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC44 |
+| Name | Create Task or Sub-task |
+| Actor(s) | pm, mem |
+| Priority | High |
+| Trigger | Access project task board or backlog |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Send notification to assignee if assigned Notify success and display task in Kanban/Backlog |
+| Basic Flow | 1. Access project task board or backlog<br>2. Display task list with "Create Task" button<br>3. Click "Create Task"<br>4. Display form (title, description, status, priority, assignee, sprint, required_skills, parent_task for sub-task)<br>5. Enter task information<br>6. Click "Create"<br>7. Validate title not empty<br>8. Insert task record<br>9. Set initial task history entry<br>10. If assignee selected: update assignee's current_workload (+1)<br>11. Send notification to assignee if assigned<br>12. Notify success and display task in Kanban/Backlog |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass. |
+| Exception Flow | 1. Display validation error |
+| Related UI screen(s) | [Kanban board](/docs/ui-specification#kanban-board)<br>[Task detail](/docs/ui-specification#task-detail) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/task-management/create-new-task) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/task-management/create-new-task) |
+| Related database table(s) | tasks, task_required_skills, task_labels |
+
+### UC46 — Update Task Status / Drag and Drop on Kanban
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary KanbanView as KV
+control TaskController as TC
+entity PROJECT_MEMBERS as PM
+entity TASKS as T
+
+U -> KV: Drag task card to new column
+activate U
+activate KV
+
+KV -> TC: Send status update (project_id, task_id, new_status)
+activate TC
+
+TC -> T: Update task status and position
+activate T
+T -> T: Update status, position, updated_at
+activate T
+deactivate T
+TC <-- T: Update successful
+deactivate T
+
+KV <-- TC: Success notification
+
+KV -> KV: Confirm card in new column
+activate KV
+deactivate KV
+
+deactivate TC
+deactivate KV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-task-management-update-task-status" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Drag task card to new column \n or click status button;
+
+|S|
+:(2) Query current task status;
+:(3) Verify new status is a valid transition \n (e.g. TODO → IN_PROGRESS → REVIEW → DONE);
+
+if (Transition valid?) then (No)
+  :(3.1) Display "Invalid status transition" error;
+  |U|
+  :(3.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+|S|
+:(4) Update task status \n (TODO / IN_PROGRESS / REVIEW / DONE) \n and position in column;
+
+if (Status changed to DONE?) then (Yes)
+  :(5a) Decrement assignee's current_workload;
+elseif (Status changed away from DONE?) then (Yes)
+  :(5b) Re-increment assignee's current_workload;
+else (No change)
+endif
+
+:(6) Display updated kanban card in new column;
+
+|U|
+:(7) View updated board;
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-task-management-update-task-status" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC46 |
+| Name | Update Task Status / Drag and Drop on Kanban |
+| Actor(s) | pm, mem |
+| Priority | High |
+| Trigger | Drag task card to new column or click status button |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Display updated kanban card in new column View updated board |
+| Basic Flow | 1. Drag task card to new column or click status button<br>2. Query current task status<br>3. Verify new status is a valid transition (e.g. TODO → IN_PROGRESS → REVIEW → DONE)<br>4. Update task status (TODO / IN_PROGRESS / REVIEW / DONE) and position in column<br>5. Display updated kanban card in new column<br>6. View updated board |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences.<br>2. Status can be updated either by drag and drop on Kanban or from task detail controls. |
+| Exception Flow | 1. Display "Invalid status transition" error<br>2. Decrement assignee's current_workload<br>3. Re-increment assignee's current_workload |
+| Related UI screen(s) | [Kanban board](/docs/ui-specification#kanban-board) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/task-management/update-task-status) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/task-management/update-task-status) |
+| Related database table(s) | tasks |
+
+### UC47 — Assign Assignee and Reporter
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary TaskDetailView as TDV
+control TaskController as TC
+entity PROJECT_MEMBERS as PM
+entity TASKS as T
+entity USERS as US
+
+U -> TDV: Click "Assign" on task
+activate U
+activate TDV
+
+TDV -> TC: Request assignable members (project_id, task_id)
+activate TC
+
+TC -> PM: Query project members
+activate PM
+PM -> PM: Query by project_id (join users)
+activate PM
+deactivate PM
+TC <-- PM: Members list
+deactivate PM
+
+TDV <-- TC: Assignable members
+
+TDV -> TDV: Display assignment form\n(assignee dropdown, reporter dropdown)
+activate TDV
+deactivate TDV
+
+U -> TDV: Select assignee and/or reporter
+U -> TDV: Click "Save"
+deactivate U
+
+TDV -> TC: Send assign request
+
+TC -> T: Update assignee_id and/or reporter_id
+activate T
+T -> T: Update record, set updated_at = NOW()
+activate T
+deactivate T
+TC <-- T: Update successful
+deactivate T
+
+TC -> US: Update assignee current_workload
+activate US
+US -> US: Recalculate workload
+activate US
+deactivate US
+TC <-- US: Workload updated
+deactivate US
+
+TDV <-- TC: Success notification
+
+TDV -> TDV: Display updated assignment
+activate TDV
+deactivate TDV
+
+deactivate TC
+deactivate TDV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-task-management-assign-assignee-reporter" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Assign" on a task;
+
+|S|
+:(2) Query project members list \n (join users, user_skills);
+:(3) Display assignment form \n (assignee dropdown showing workload, \n reporter dropdown);
+
+|U|
+:(4) Select assignee and/or reporter;
+
+|S|
+:(5) Check if selected assignee is overloaded \n (current_workload > threshold);
+
+if (Assignee overloaded?) then (Yes)
+  :(5.1) Display warning \n "This member is overloaded (workload: N)";
+else (No)
+endif
+
+|U|
+:(6) Click "Save";
+
+|S|
+:(7) Update task assignee_id and reporter_id;
+:(8) Update assignee's current_workload \n (+1 if assigning, -1 if unassigning);
+:(9) Notify success;
+
+|U|
+:(10) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-task-management-assign-assignee-reporter" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC47 |
+| Name | Assign Assignee and Reporter |
+| Actor(s) | pm, mem |
+| Priority | High |
+| Trigger | Click "Assign" on a task |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Update assignee's current_workload (+1 if assigning, -1 if unassigning) Notify success |
+| Basic Flow | 1. Click "Assign" on a task<br>2. Query project members list (join users, user_skills)<br>3. Display assignment form (assignee dropdown showing workload, reporter dropdown)<br>4. Select assignee and/or reporter<br>5. Check if selected assignee is overloaded (current_workload > threshold)<br>6. Display warning "This member is overloaded (workload: N)"<br>7. Click "Save"<br>8. Update task assignee_id and reporter_id<br>9. Update assignee's current_workload (+1 if assigning, -1 if unassigning)<br>10. Notify success |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences.<br>2. The user may update only assignee, only reporter, or both fields. |
+| Exception Flow | 1. Check if selected assignee is overloaded (current_workload > threshold)<br>2. Display warning "This member is overloaded (workload: N)" |
+| Related UI screen(s) | [Task detail](/docs/ui-specification#task-detail) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/task-management/assign-assignee-reporter) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/task-management/assign-assignee-reporter) |
+| Related database table(s) | tasks, users, user_skills, project_members |
+
+### UC59 — Request AI Task Assignment Recommendation
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor "Project Manager" as PM
+boundary TaskDetailView as TDV
+control AIChatController as ACC
+entity PROJECT_MEMBERS as PME
+entity TASKS as T
+entity USER_SKILLS as USK
+entity USERS as US
+entity SYSTEM_SETTINGS as SS
+entity AI_LOGS as AL
+
+PM -> TDV: Click "AI Auto-Assign" on task
+activate PM
+activate TDV
+
+TDV -> ACC: Request AI assignment (project_id, task_id)
+activate ACC
+
+ACC -> T: Query task details (required_skills, difficulty)
+activate T
+T -> T: Query by task_id
+activate T
+deactivate T
+ACC <-- T: Task data
+deactivate T
+
+ACC -> SS: Query heuristic weights
+activate SS
+SS -> SS: Query AI configuration
+activate SS
+deactivate SS
+ACC <-- SS: Weights & config
+deactivate SS
+
+ACC -> PME: Query project members
+activate PME
+PME -> PME: Query by project_id (join users)
+activate PME
+deactivate PME
+ACC <-- PME: Members data
+deactivate PME
+
+ACC -> USK: Query member skills
+activate USK
+USK -> USK: Query skills for each member
+activate USK
+deactivate USK
+ACC <-- USK: Skills data
+deactivate USK
+
+ACC -> US: Query member workloads
+activate US
+US -> US: Query current_workload
+activate US
+deactivate US
+ACC <-- US: Workloads data
+deactivate US
+
+ACC -> ACC: AI Algorithm: Calculate\nmatching score per member\n(skills fit × availability × heuristic weights)
+activate ACC
+deactivate ACC
+
+ACC -> AL: Log AI reasoning
+activate AL
+AL -> AL: Insert log\n(reasoning, action_taken, tool_output)
+activate AL
+deactivate AL
+ACC <-- AL: Log saved
+deactivate AL
+
+TDV <-- ACC: AI recommendation\n(ranked member list with scores)
+
+TDV -> TDV: Display AI suggestion\n(recommended member, score,\nreasoning explanation)
+activate TDV
+deactivate TDV
+
+PM -> TDV: Accept or reject suggestion
+deactivate PM
+
+alt Accept
+    TDV -> ACC: Confirm assignment
+
+    ACC -> T: Update assignee_id
+    activate T
+    T -> T: Update record
+    activate T
+    deactivate T
+    ACC <-- T: Updated
+    deactivate T
+
+    ACC -> US: Update assignee workload
+    activate US
+    US -> US: Recalculate workload
+    activate US
+    deactivate US
+    ACC <-- US: Updated
+    deactivate US
+
+    TDV <-- ACC: Assignment confirmed
+    TDV -> TDV: Display success
+    activate TDV
+    deactivate TDV
+else Reject
+    TDV -> TDV: Close suggestion panel
+    activate TDV
+    deactivate TDV
+end
+
+deactivate ACC
+deactivate TDV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-ai-assistant-request-ai-auto-assignment" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "AI Auto-Assign" on a project;
+
+|S|
+:(2) Verify user has MANAGER role;
+
+if (Is Manager?) then (No)
+  :(2.1) Display "Access denied" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Query member skills and workloads;
+:(4) Send to AI API for assignment suggestions;
+:(5) Display suggested assignments;
+
+repeat
+  |U|
+  :(6) Review suggestion;
+  :(7) Click "Confirm" or "Reject";
+
+  |S|
+  :(8) Record user decision;
+repeat while (More suggestions?) is (Yes) not (No)
+
+:(9) Apply accepted assignments;
+:(10) Notify members of assignments;
+
+|U|
+:(11) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-ai-assistant-request-ai-auto-assignment" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC59 |
+| Name | Request AI Task Assignment Recommendation |
+| Actor(s) | pm |
+| Priority | High |
+| Trigger | Click "AI Auto-Assign" on a project |
+| Pre-condition(s) | User is authenticated and has an available AI chat/session or project context as required by the action. |
+| Post-condition(s) | Apply accepted assignments Notify members of assignments |
+| Basic Flow | 1. Click "AI Auto-Assign" on a project<br>2. Verify user has MANAGER role<br>3. Query member skills and workloads<br>4. Send to AI API for assignment suggestions<br>5. Display suggested assignments<br>6. Review suggestion<br>7. Click "Confirm" or "Reject"<br>8. Record user decision<br>9. Apply accepted assignments<br>10. Notify members of assignments |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences.<br>3. The Project Manager may reject the recommendation, leaving task assignment unchanged. |
+| Exception Flow | 1. Display "Access denied" error |
+| Related UI screen(s) | [AI assignment recommendation](/docs/ui-specification#ai-assignment-recommendation)<br>[Pending action confirmation](/docs/ui-specification#pending-action-confirmation) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/ai-assistant/request-ai-auto-assignment) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/ai-assistant/request-ai-auto-assignment) |
+| Related database table(s) | tasks, users, user_skills, project_members, system_settings, ai_logs |
+
+
+## Full use case specifications
+
+The remaining use cases retain the required SRS fields. Textual flows are derived from the existing PlantUML activity diagrams where those diagrams exist, so the SRS stays traceable to the current diagram source.
+
+### UC02 — Register / Sign Up
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary SignUpView as SUV
+boundary HomeView as HV
+control AuthController as AC
+entity USER as US
+
+activate U
+U -> SUV: Access sign up page
+activate SUV
+SUV -> SUV: Display sign up form
+activate SUV
+deactivate SUV
+
+U -> SUV: Enter registration data (username, email, password, full name)
+U -> SUV: Click "Sign Up"
+deactivate U
+SUV -> SUV: Validate data format
+activate SUV
+deactivate SUV
+
+break Invalid data format
+  SUV -> SUV: Display error notification
+  activate SUV
+  deactivate SUV
+end
+
+SUV -> AC: Send registration request
+activate AC
+AC -> US: Check username and email uniqueness
+activate US
+US -> US: Query existing username and email
+activate US
+deactivate US
+
+break Username or email already exists
+  AC <-- US: Error notification
+  SUV <-- AC: Error notification
+  SUV -> SUV: Display error notification
+  activate SUV
+  deactivate SUV
+end
+
+AC <-- US: Username and email available
+deactivate US
+
+AC -> AC: Hash password
+activate AC
+deactivate AC
+AC -> US: Create new user record
+activate US
+US -> US: Insert user record
+activate US
+deactivate US
+AC <-- US: User created
+deactivate US
+
+AC -> AC: Generate JWT token
+activate AC
+deactivate AC
+
+SUV <-- AC: Success with JWT token
+deactivate AC
+SUV -> HV: Redirect to home page
+deactivate SUV
+activate HV
+HV -> HV: Display home view
+activate HV
+deactivate HV
+deactivate HV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-auth-register" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Access sign up page;
+
+|S|
+:(2) Display registration form;
+
+repeat
+  |U|
+  :(3) Enter username, email, password \n and confirm password;
+  :(4) Click "Sign Up";
+
+  |S|
+  :(5) Validate input format \n (username, email, password strength, \n passwords match);
+  backward: (5.1) Display validation error;
+repeat while (Format valid?) is (No) not (Yes)
+
+:(5.2) Check email and username uniqueness;
+
+if (Already registered?) then (Yes)
+  :(5.3) Display "Email or username already in use" error;
+  |U|
+  :(5.4) Confirm end;
+  stop
+else (No)
+endif
+
+:(6) Create user record;
+:(7) Hash password before storing;
+:(8) Set initial status = AVAILABLE, workload = 0;
+:(9) Generate JWT token and send welcome email;
+:(10) Redirect to home page;
+
+|U|
+:(11) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-auth-register" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC02 |
+| Name | Register / Sign Up |
+| Actor(s) | ad, pm, mem |
+| Priority | Medium |
+| Trigger | Access sign up page |
+| Pre-condition(s) | User is not required to be authenticated and the authentication service is operational. |
+| Post-condition(s) | Generate JWT token and send welcome email Redirect to home page |
+| Basic Flow | 1. Access sign up page<br>2. Display registration form<br>3. Enter username, email, password and confirm password<br>4. Click "Sign Up"<br>5. Validate input format (username, email, password strength, passwords match)<br>6. Check email and username uniqueness<br>7. Create user record<br>8. Hash password before storing<br>9. Set initial status = AVAILABLE, workload = 0<br>10. Generate JWT token and send welcome email<br>11. Redirect to home page |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display validation error<br>2. Display "Email or username already in use" error |
+| Related UI screen(s) | [Register screen](/docs/ui-specification#register-screen) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/auth/register) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/auth/register) |
+| Related database table(s) | users |
+
+### UC03 — Forgot Password
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary ForgotPasswordView as FPV
+boundary ResetPasswordView as RPV
+control AuthController as AC
+entity USER as US
+
+activate U
+U -> FPV: Access forgot password page
+activate FPV
+FPV -> FPV: Display email input form
+activate FPV
+deactivate FPV
+
+U -> FPV: Enter email
+U -> FPV: Click "Send Reset Link"
+FPV -> FPV: Validate email format
+activate FPV
+deactivate FPV
+
+break Invalid email format
+  FPV -> FPV: Display error notification
+  activate FPV
+  deactivate FPV
+end
+
+FPV -> AC: Send password reset request
+activate AC
+AC -> US: Check user exists by email
+activate US
+US -> US: Query user and check is_lock
+activate US
+deactivate US
+
+break User not found or locked
+  AC <-- US: Not found/locked
+  AC -> AC: Log warning
+  activate AC
+  deactivate AC
+end
+
+AC <-- US: User found
+deactivate US
+
+AC -> AC: Generate reset token
+activate AC
+deactivate AC
+AC -> US: Save reset token with 24h expiry
+activate US
+US -> US: Update reset_token and expiry
+activate US
+deactivate US
+AC <-- US: Token saved
+deactivate US
+
+FPV <-- AC: Success notification
+deactivate AC
+deactivate AC
+FPV -> FPV: Display generic success message
+activate FPV
+deactivate FPV
+deactivate FPV
+
+U -> RPV: Click reset link from email
+activate RPV
+RPV -> AC: Validate reset token
+activate AC
+AC -> US: Check token validity and expiry
+activate US
+US -> US: Query by token
+activate US
+deactivate US
+
+break Token invalid or expired
+  AC <-- US: Token invalid
+  RPV <-- AC: Error notification
+  RPV -> RPV: Display error message
+  activate RPV
+  deactivate RPV
+end
+
+AC <-- US: Token valid
+deactivate US
+
+RPV <-- AC: Show reset form
+deactivate AC
+RPV -> RPV: Display password reset form
+activate RPV
+deactivate RPV
+
+U -> RPV: Enter new password
+U -> RPV: Click "Reset Password"
+deactivate U
+RPV -> RPV: Validate password
+activate RPV
+deactivate RPV
+
+break Invalid password
+  RPV -> RPV: Display validation error
+  activate RPV
+  deactivate RPV
+end
+
+RPV -> AC: Submit new password
+activate AC
+AC -> AC: Hash new password
+activate AC
+deactivate AC
+AC -> US: Update password and clear token
+activate US
+US -> US: Update password, set reset_token = NULL
+activate US
+deactivate US
+AC <-- US: Password updated
+deactivate US
+
+RPV <-- AC: Success notification
+deactivate AC
+deactivate AC
+
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-auth-forgot-password" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+
+:(1) Access forgot password page;
+
+|S|
+:(2) Display email input form;
+
+repeat
+  |U|
+  :(3) Enter email;
+  :(4) Click "Send Reset Link";
+
+  |S|
+  :(5) Validate email format;
+repeat while (Check email format valid?) is (No) not (Yes)
+
+:(6) Check user exists and not locked;
+
+if (Check user exists and active?) then (No)
+  :(6.1) Log warning but show success;
+  :(7) Display generic success message;
+  |U|
+  :(8) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(9) Generate reset token with 24h expiry;
+:(10) Save token to database;
+:(11) Send reset email to user;
+:(12) Display generic success message;
+
+|U|
+:(13) Receive email;
+:(14) Click reset link;
+
+|S|
+:(15) Validate reset token and expiry;
+
+if (Check token valid?) then (No)
+  :(15.1) Display "Invalid or expired token" error;
+  |U|
+  :(15.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(16) Display password reset form;
+
+repeat
+  |U|
+  :(17) Enter new password;
+  :(18) Click "Reset Password";
+
+  |S|
+  :(19) Validate password format;
+repeat while (Check password valid?) is (No) not (Yes)
+
+:(20) Hash new password;
+:(21) Update password and clear reset token;
+:(22) Display success message;
+
+|U|
+:(23) Confirm end;
+
+stop
+
+@enduml
+```
+
+<!-- diagram id="srs-activity-auth-forgot-password" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC03 |
+| Name | Forgot Password |
+| Actor(s) | ad, pm, mem |
+| Priority | High |
+| Trigger | Access forgot password page |
+| Pre-condition(s) | A registered account and password reset flow are available. |
+| Post-condition(s) | Update password and clear reset token Display success message |
+| Basic Flow | 1. Access forgot password page<br>2. Display email input form<br>3. Enter email<br>4. Click "Send Reset Link"<br>5. Validate email format<br>6. Check user exists and not locked<br>7. Log warning but show success<br>8. Display generic success message<br>9. Generate reset token with 24h expiry<br>10. Save token to database<br>11. Send reset email to user<br>12. Display generic success message<br>13. Receive email<br>14. Click reset link<br>15. Validate reset token and expiry<br>16. Display password reset form<br>17. Enter new password<br>18. Click "Reset Password"<br>19. Validate password format<br>20. Hash new password<br>21. Update password and clear reset token<br>22. Display success message |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Check user exists and not locked<br>2. Display "Invalid or expired token" error |
+| Related UI screen(s) | [Forgot password screen](/docs/ui-specification#forgot-password-screen) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/auth/forgot-password) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/auth/forgot-password) |
+| Related database table(s) | users, password_reset_tokens |
+
+### UC04 — Reset Password
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary ResetPasswordView as RPV
+boundary SignInView as SIV
+control AuthController as AC
+entity USER as US
+
+U -> RPV: Click reset link from email
+activate U
+activate RPV
+RPV -> AC: Validate reset token
+activate AC
+AC -> US: Check token validity and expiry
+activate US
+US -> US: Query by reset_token
+activate US
+deactivate US
+
+break Token invalid or expired
+  AC <-- US: Token invalid
+  RPV <-- AC: Error notification
+  RPV -> RPV: Display "Reset link is invalid or expired" error
+  activate RPV
+  deactivate RPV
+end
+
+AC <-- US: Token valid
+deactivate US
+
+RPV <-- AC: Show reset form
+deactivate AC
+RPV -> RPV: Display password reset form
+activate RPV
+deactivate RPV
+
+U -> RPV: Enter new password and confirm password
+U -> RPV: Click "Reset Password"
+deactivate U
+RPV -> RPV: Validate password strength and confirmation match
+activate RPV
+deactivate RPV
+
+break Invalid password
+  RPV -> RPV: Display validation error
+  activate RPV
+  deactivate RPV
+end
+
+RPV -> AC: Submit new password with token
+activate AC
+AC -> AC: Hash new password
+activate AC
+deactivate AC
+AC -> US: Update password and clear reset token
+activate US
+US -> US: Update password, set reset_token = NULL
+activate US
+deactivate US
+AC <-- US: Password updated
+deactivate US
+
+RPV <-- AC: Success notification
+deactivate AC
+RPV -> RPV: Display "Password reset successful"
+activate RPV
+deactivate RPV
+RPV -> SIV: Redirect to sign in page
+deactivate RPV
+activate SIV
+SIV -> SIV: Display sign in form with success message
+activate SIV
+deactivate SIV
+deactivate SIV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-auth-reset-password" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click reset password link from email;
+
+|S|
+:(2) Validate reset token;
+
+if (Token valid?) then (No)
+  :(2.1) Display "Invalid or expired token" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display reset password form;
+
+repeat
+  |U|
+  :(4) Enter new password;
+  :(5) Click "Reset Password";
+
+  |S|
+  :(6) Validate password strength;
+  backward: (6.1) Display strength error;
+repeat while (Password valid?) is (No) not (Yes)
+
+:(7) Update password hash and clear token;
+:(8) Redirect to sign in page with success message;
+
+|U|
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-auth-reset-password" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC04 |
+| Name | Reset Password |
+| Actor(s) | ad, pm, mem |
+| Priority | High |
+| Trigger | Click reset password link from email |
+| Pre-condition(s) | A registered account and password reset flow are available. |
+| Post-condition(s) | Update password hash and clear token Redirect to sign in page with success message |
+| Basic Flow | 1. Click reset password link from email<br>2. Validate reset token<br>3. Display reset password form<br>4. Enter new password<br>5. Click "Reset Password"<br>6. Validate password strength<br>7. Update password hash and clear token<br>8. Redirect to sign in page with success message |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Invalid or expired token" error<br>2. Display strength error |
+| Related UI screen(s) | [Forgot password screen](/docs/ui-specification#forgot-password-screen) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/auth/reset-password) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/auth/reset-password) |
+| Related database table(s) | users, password_reset_tokens |
+
+### UC05 — Update Personal Information
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary ProfileView as PV
+control UserController as UC
+entity USERS as US
+
+U -> PV: Click "Edit Profile"
+activate U
+activate PV
+
+PV -> PV: Enable edit mode on profile form
+activate PV
+deactivate PV
+
+U -> PV: Modify personal information\n(full_name, email, avatar_url)
+U -> PV: Click "Save"
+deactivate U
+
+PV -> PV: Validate data format
+activate PV
+deactivate PV
+
+break Invalid data format
+  PV -> PV: Display validation errors
+  activate PV
+  deactivate PV
+end
+
+PV -> UC: Send update request
+activate UC
+
+UC -> US: Check email uniqueness
+activate US
+US -> US: Query existing email
+activate US
+deactivate US
+
+break Email already exists
+  UC <-- US: Duplicate email
+  PV <-- UC: Error notification
+  PV -> PV: Display "Email already in use" error
+  activate PV
+  deactivate PV
+end
+
+UC <-- US: Email available
+deactivate US
+
+UC -> US: Update user information
+activate US
+US -> US: Update full_name, email, avatar_url
+activate US
+deactivate US
+UC <-- US: Update successful
+deactivate US
+
+PV <-- UC: Success notification
+deactivate UC
+
+PV -> PV: Display success message\nand updated profile
+activate PV
+deactivate PV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-user-profile-update-personal-information" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Select Edit Profile;
+
+|S|
+:(2) Query current user profile;
+
+if (User found?) then (No)
+  :(2.1) Display "Profile not found" error;
+  |U|
+  stop
+else (Yes)
+endif
+
+:(3) Display edit form \n (full_name, email, avatar_url pre-filled);
+
+repeat
+  |U|
+  :(4) Modify information;
+  :(5) Click "Save";
+
+  |S|
+  :(6) Validate format and check email uniqueness;
+  backward: (6.1) Display validation error;
+repeat while (Data valid?) is (No) not (Yes)
+
+:(7) Update user record;
+:(7.1) Update session token with new profile data;
+:(8) Notify success;
+
+|U|
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-user-profile-update-personal-information" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC05 |
+| Name | Update Personal Information |
+| Actor(s) | ad, pm, mem |
+| Priority | Medium |
+| Trigger | Select Edit Profile |
+| Pre-condition(s) | User is authenticated and the required subsystem data exists. |
+| Post-condition(s) | Update session token with new profile data Notify success |
+| Basic Flow | 1. Select Edit Profile<br>2. Query current user profile<br>3. Display edit form (full_name, email, avatar_url pre-filled)<br>4. Modify information<br>5. Click "Save"<br>6. Validate format and check email uniqueness<br>7. Update user record<br>8. Update session token with new profile data<br>9. Notify success |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Profile not found" error<br>2. Display validation error |
+| Related UI screen(s) | [Profile screen](/docs/ui-specification#profile-screen) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/user-profile/update-personal-information) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/user-profile/update-personal-information) |
+| Related database table(s) | users |
+
+### UC06 — View User Profile
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary ProfileView as PV
+control UserController as UC
+entity USERS as US
+
+U -> PV: Access profile page
+activate U
+activate PV
+
+PV -> UC: Request user profile data
+activate UC
+
+UC -> US: Query user information
+activate US
+US -> US: Query by user_id
+activate US
+deactivate US
+
+break Error or Not Found / Invalid
+  UC <-- US: Error notification
+  PV <-- UC: Error notification
+  PV -> PV: Display error message
+  activate PV
+  deactivate PV
+end
+
+UC <-- US: User data
+deactivate US
+
+PV <-- UC: User profile data
+deactivate UC
+
+PV -> PV: Display profile information\n(name, email, avatar, status, workload)
+activate PV
+deactivate PV
+
+deactivate PV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-user-profile-view-user-profile" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Select "My Profile" from menu;
+
+|S|
+:(2) Query user info by user_id \n (full_name, email, avatar_url, \n role, status, current_workload);
+
+if (User found?) then (No)
+  :(2.1) Display "User not found" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Query user's skill list \n (join user_skills + skills table, \n ordered by level DESC);
+:(4) Query user's active project memberships \n (projects where user is member and \n project status != ARCHIVED);
+:(5) Display profile page \n (full_name, email, avatar, role, status, \n current_workload, skills list, \n active projects list, \n edit profile / delete account buttons);
+
+|U|
+:(6) View profile details;
+:(7) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-user-profile-view-user-profile" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC06 |
+| Name | View User Profile |
+| Actor(s) | ad, pm, mem |
+| Priority | Medium |
+| Trigger | Select "My Profile" from menu |
+| Pre-condition(s) | User is authenticated and the required subsystem data exists. |
+| Post-condition(s) | Display profile page (full_name, email, avatar, role, status, current_workload, skills list, active projects list, edit profile / delete account buttons) |
+| Basic Flow | 1. Select "My Profile" from menu<br>2. Query user info by user_id (full_name, email, avatar_url, role, status, current_workload)<br>3. Query user's skill list (join user_skills + skills table, ordered by level DESC)<br>4. Query user's active project memberships (projects where user is member and project status != ARCHIVED)<br>5. Display profile page (full_name, email, avatar, role, status, current_workload, skills list, active projects list, edit profile / delete account buttons)<br>6. View profile details |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "User not found" error |
+| Related UI screen(s) | [Profile screen](/docs/ui-specification#profile-screen) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/user-profile/view-user-profile) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/user-profile/view-user-profile) |
+| Related database table(s) | users |
+
+### UC07 — Delete Personal Account
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary ProfileView as PV
+control UserController as UC
+entity USERS as US
+
+U -> PV: Click "Delete Account"
+activate U
+activate PV
+
+PV -> PV: Display confirmation dialog\n"Are you sure? This action cannot be undone."
+activate PV
+deactivate PV
+
+U -> PV: Enter current password for confirmation
+U -> PV: Click "Confirm Delete"
+deactivate U
+
+PV -> UC: Send delete account request
+activate UC
+
+break Password incorrect
+  UC <-- US: Error
+  PV <-- UC: Error notification
+  PV -> PV: Display "Password incorrect" error
+  activate PV
+  deactivate PV
+end
+
+UC <-- US: Password verified
+deactivate US
+
+UC -> US: Delete user account and related data
+activate US
+US -> US: Delete user record (CASCADE)
+activate US
+deactivate US
+UC <-- US: Account deleted
+deactivate US
+
+PV <-- UC: Success notification
+deactivate UC
+
+PV -> PV: Clear session
+activate PV
+deactivate PV
+
+PV -> PV: Redirect to landing page\nwith "Account deleted" message
+activate PV
+deactivate PV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-user-profile-delete-personal-account" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Delete Account";
+
+|S|
+:(2) Display confirmation dialog;
+
+|U|
+:(3) Enter current password;
+:(4) Click "Confirm Delete";
+
+|S|
+:(5) Verify current password;
+
+if (Password correct?) then (No)
+  :(5.1) Display "Incorrect password" error;
+  |U|
+  :(5.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(6) Delete user and cascade data;
+:(7) Clear session;
+:(8) Redirect to landing page;
+
+|U|
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-user-profile-delete-personal-account" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC07 |
+| Name | Delete Personal Account |
+| Actor(s) | ad, pm, mem |
+| Priority | Medium-High |
+| Trigger | Click "Delete Account" |
+| Pre-condition(s) | User is authenticated and the required subsystem data exists. |
+| Post-condition(s) | Delete user and cascade data Redirect to landing page |
+| Basic Flow | 1. Click "Delete Account"<br>2. Display confirmation dialog<br>3. Enter current password<br>4. Click "Confirm Delete"<br>5. Verify current password<br>6. Delete user and cascade data<br>7. Clear session<br>8. Redirect to landing page |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Incorrect password" error |
+| Related UI screen(s) | [Profile screen](/docs/ui-specification#profile-screen) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/user-profile/delete-personal-account) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/user-profile/delete-personal-account) |
+| Related database table(s) | users |
+
+### UC08 — View Personal Skill List
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary SkillListView as SLV
+control UserSkillController as USC
+entity USER_SKILLS as USK
+
+U -> SLV: Access personal skills page
+activate U
+activate SLV
+
+SLV -> USC: Request user skill list
+activate USC
+
+USC -> USK: Query user skills with skill names
+activate USK
+USK -> USK: Query by user_id (join skills)
+activate USK
+deactivate USK
+USC <-- USK: Skill list data
+deactivate USK
+
+SLV <-- USC: User skill list
+deactivate USC
+
+SLV -> SLV: Display skill list\n(name, level for each skill)
+activate SLV
+deactivate SLV
+
+deactivate SLV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-user-skills-view-personal-skill-list" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Access Skills page;
+
+|S|
+:(2) Query user skills \n (join user_skills with skills tables);
+
+if (Check has skills?) then (No)
+  :(2.1) Display "No skills added yet" notification \n with add skill button;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display skill list \n (skill name, level 1-5);
+
+|U|
+:(4) Enter filter criteria \n (keyword: skill name, level: 1-5);
+:(5) Click "Filter";
+
+|S|
+:(6) Apply filter criteria to query;
+
+if (Has results?) then (No)
+  :(6.1) Display "No results found" notification;
+  |U|
+else (Yes)
+  |S|
+  :(7) Display filtered skill list \n (skill name, level 1-5);
+  |U|
+endif
+
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-user-skills-view-personal-skill-list" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC08 |
+| Name | View Personal Skill List |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Access Skills page |
+| Pre-condition(s) | User is authenticated and the required subsystem data exists. |
+| Post-condition(s) | Display "No results found" notification Display filtered skill list (skill name, level 1-5) |
+| Basic Flow | 1. Access Skills page<br>2. Query user skills (join user_skills with skills tables)<br>3. Display "No skills added yet" notification with add skill button<br>4. Display skill list (skill name, level 1-5)<br>5. Enter filter criteria (keyword: skill name, level: 1-5)<br>6. Click "Filter"<br>7. Apply filter criteria to query<br>8. Display "No results found" notification<br>9. Display filtered skill list (skill name, level 1-5) |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Unauthorized or insufficient permission rejects the request.<br>2. Invalid input or missing target resource returns an error and leaves data unchanged. |
+| Related UI screen(s) | [Profile screen](/docs/ui-specification#profile-screen) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/user-skills/view-personal-skill-list) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/user-skills/view-personal-skill-list) |
+| Related database table(s) | user_skills, skills |
+
+### UC09 — View Personal Skill Details
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary SkillDetailView as SDV
+control UserSkillController as USC
+entity USER_SKILLS as USK
+
+U -> SDV: Click on a skill from skill list
+activate U
+activate SDV
+
+SDV -> USC: Request skill details (skill_id)
+activate USC
+
+USC -> USK: Query skill detail
+activate USK
+USK -> USK: Query by user_id and skill_id
+activate USK
+deactivate USK
+
+break Error or Not Found / Invalid
+  USC <-- USK: Not found
+  SDV <-- USC: Error notification
+  SDV -> SDV: Display "Skill not found" error
+  activate SDV
+  deactivate SDV
+end
+
+USC <-- USK: Skill detail data
+deactivate USK
+
+SDV <-- USC: Skill details
+deactivate USC
+
+SDV -> SDV: Display skill details\n(skill name, level 1-5)
+activate SDV
+deactivate SDV
+
+deactivate SDV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-user-skills-view-personal-skill-details" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click on a skill from personal skill list;
+
+|S|
+:(2) Query user skill record \n (level, date added) \n by user_id + skill_id;
+
+if (Skill found in profile?) then (No)
+  :(2.1) Display "Skill not found" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Query system skill info by skill_id \n (name, description if available);
+:(4) Display skill details \n (skill name, level 1–5, skill description, \n date added to profile, edit / delete buttons);
+
+|U|
+:(5) View skill details;
+:(6) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-user-skills-view-personal-skill-details" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC09 |
+| Name | View Personal Skill Details |
+| Actor(s) | pm, mem |
+| Priority | Medium-High |
+| Trigger | Click on a skill from personal skill list |
+| Pre-condition(s) | User is authenticated and the required subsystem data exists. |
+| Post-condition(s) | Query user skill record (level, date added) by user_id + skill_id Display skill details (skill name, level 1–5, skill description, date added to profile, edit / delete buttons) |
+| Basic Flow | 1. Click on a skill from personal skill list<br>2. Query user skill record (level, date added) by user_id + skill_id<br>3. Query system skill info by skill_id (name, description if available)<br>4. Display skill details (skill name, level 1–5, skill description, date added to profile, edit / delete buttons)<br>5. View skill details |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Skill not found" error |
+| Related UI screen(s) | [Profile screen](/docs/ui-specification#profile-screen) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/user-skills/view-personal-skill-details) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/user-skills/view-personal-skill-details) |
+| Related database table(s) | user_skills, skills |
+
+### UC10 — Add Personal Skill
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary SkillListView as SLV
+boundary AddSkillView as ASV
+control UserSkillController as USC
+entity SKILLS as SK
+entity USER_SKILLS as USK
+
+U -> SLV: Click "Add Skill"
+activate U
+activate SLV
+
+SLV -> ASV: Navigate to add skill form
+deactivate SLV
+activate ASV
+
+ASV -> USC: Request available skills
+activate USC
+
+USC -> SK: Query all system skills
+activate SK
+SK -> SK: Query skill list
+activate SK
+deactivate SK
+USC <-- SK: Skills list
+deactivate SK
+
+ASV <-- USC: Available skills dropdown
+deactivate USC
+
+ASV -> ASV: Display add skill form\n(skill dropdown, level 1-5)
+activate ASV
+deactivate ASV
+
+U -> ASV: Select skill and set level
+U -> ASV: Click "Save"
+deactivate U
+
+ASV -> ASV: Validate data
+activate ASV
+deactivate ASV
+
+break Invalid data
+  ASV -> ASV: Display error notification
+  activate ASV
+  deactivate ASV
+end
+
+ASV -> USC: Send add skill request
+activate USC
+
+USC -> USK: Check if skill already exists
+activate USK
+USK -> USK: Query by user_id and skill_id
+activate USK
+deactivate USK
+
+break Skill already added
+  USC <-- USK: Duplicate
+  ASV <-- USC: Error notification
+  ASV -> ASV: Display "Skill already exists" error
+  activate ASV
+  deactivate ASV
+end
+
+USC <-- USK: Not exists
+deactivate USK
+
+USC -> USK: Insert new user skill
+activate USK
+USK -> USK: Insert record
+activate USK
+deactivate USK
+USC <-- USK: Success
+deactivate USK
+
+ASV <-- USC: Success notification
+deactivate USC
+
+ASV -> ASV: Display success message
+activate ASV
+deactivate ASV
+ASV -> SLV: Redirect to skill list
+deactivate ASV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-user-skills-add-personal-skill" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Add Skill";
+
+|S|
+:(2) Query available system skills \n not yet added by user;
+
+if (Has available skills?) then (No)
+  :(2.1) Display "You have added all available skills" notification;
+  |U|
+  stop
+else (Yes)
+endif
+
+:(3) Display form (skill dropdown, level 1-5);
+
+repeat
+  |U|
+  :(4) Select skill and level;
+  :(5) Click "Save";
+
+  |S|
+  :(6) Validate and check for duplicate skill;
+  backward: (6.1) Display validation error;
+repeat while (Data valid?) is (No) not (Yes)
+
+:(7) Insert new user_skill record;
+:(7.1) Update user's skill profile summary;
+:(8) Notify success;
+
+|U|
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-user-skills-add-personal-skill" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC10 |
+| Name | Add Personal Skill |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Click "Add Skill" |
+| Pre-condition(s) | User is authenticated and the required subsystem data exists. |
+| Post-condition(s) | Update user's skill profile summary Notify success |
+| Basic Flow | 1. Click "Add Skill"<br>2. Query available system skills not yet added by user<br>3. Display "You have added all available skills" notification<br>4. Display form (skill dropdown, level 1-5)<br>5. Select skill and level<br>6. Click "Save"<br>7. Validate and check for duplicate skill<br>8. Insert new user_skill record<br>9. Update user's skill profile summary<br>10. Notify success |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display validation error |
+| Related UI screen(s) | [Profile screen](/docs/ui-specification#profile-screen) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/user-skills/add-personal-skill) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/user-skills/add-personal-skill) |
+| Related database table(s) | user_skills, skills |
+
+### UC11 — Update Personal Skill
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary SkillDetailView as SDV
+control UserSkillController as USC
+entity USER_SKILLS as USK
+
+U -> SDV: Click "Edit" on a skill
+activate U
+activate SDV
+
+SDV -> SDV: Display edit form\n(current level, skill name read-only)
+activate SDV
+deactivate SDV
+
+U -> SDV: Change skill level (1-5)
+U -> SDV: Click "Save"
+deactivate U
+
+SDV -> SDV: Validate level (1-5)
+activate SDV
+deactivate SDV
+
+break Invalid level
+  SDV -> SDV: Display error notification
+  activate SDV
+  deactivate SDV
+end
+
+SDV -> USC: Send update request
+activate USC
+
+USC -> USK: Update skill level
+activate USK
+USK -> USK: Update level by user_id and skill_id
+activate USK
+deactivate USK
+
+break Error or Not Found / Invalid
+  USC <-- USK: Not found
+  SDV <-- USC: Error notification
+  SDV -> SDV: Display "Skill not found" error
+  activate SDV
+  deactivate SDV
+end
+
+USC <-- USK: Update successful
+deactivate USK
+
+SDV <-- USC: Success notification
+deactivate USC
+
+SDV -> SDV: Display success message\nand updated skill level
+activate SDV
+deactivate SDV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-user-skills-update-personal-skill" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Edit" on a skill in personal skill list;
+
+|S|
+:(2) Query skill details by user_id + skill_id \n (name, current level, date added);
+
+if (Skill found in profile?) then (No)
+  :(2.1) Display "Skill not found" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display edit form \n (skill name read-only, level 1–5 editable, \n current level pre-filled);
+
+repeat
+  |U|
+  :(4) Adjust skill level using slider or input;
+  :(5) Click "Save";
+
+  |S|
+  :(6) Validate level range (1–5 integer);
+  backward: (6.1) Display "Level must be between 1 and 5" error;
+repeat while (Level valid?) is (No) not (Yes)
+
+:(7) Update user_skill record \n (set level, update updated_at = NOW());
+:(8) Notify success and reload skill details;
+
+|U|
+:(9) View updated skill level;
+:(10) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-user-skills-update-personal-skill" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC11 |
+| Name | Update Personal Skill |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Click "Edit" on a skill in personal skill list |
+| Pre-condition(s) | User is authenticated and the required subsystem data exists. |
+| Post-condition(s) | Notify success and reload skill details View updated skill level |
+| Basic Flow | 1. Click "Edit" on a skill in personal skill list<br>2. Query skill details by user_id + skill_id (name, current level, date added)<br>3. Display edit form (skill name read-only, level 1–5 editable, current level pre-filled)<br>4. Adjust skill level using slider or input<br>5. Click "Save"<br>6. Validate level range (1–5 integer)<br>7. Update user_skill record (set level, update updated_at = NOW())<br>8. Notify success and reload skill details<br>9. View updated skill level |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Skill not found" error<br>2. Display "Level must be between 1 and 5" error |
+| Related UI screen(s) | [Profile screen](/docs/ui-specification#profile-screen) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/user-skills/update-personal-skill) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/user-skills/update-personal-skill) |
+| Related database table(s) | user_skills, skills |
+
+### UC12 — Delete Personal Skill
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary SkillListView as SLV
+control UserSkillController as USC
+entity USER_SKILLS as USK
+
+U -> SLV: Click "Delete" on a skill
+activate U
+activate SLV
+
+SLV -> SLV: Display confirmation dialog\n"Remove this skill from your profile?"
+activate SLV
+deactivate SLV
+
+U -> SLV: Click "Confirm"
+deactivate U
+
+SLV -> USC: Send delete request (skill_id)
+activate USC
+
+USC -> USK: Delete user skill
+activate USK
+USK -> USK: Delete by user_id and skill_id
+activate USK
+deactivate USK
+
+break Error or Not Found / Invalid
+  USC <-- USK: Not found
+  SLV <-- USC: Error notification
+  SLV -> SLV: Display "Skill not found" error
+  activate SLV
+  deactivate SLV
+end
+
+USC <-- USK: Delete successful
+deactivate USK
+
+SLV <-- USC: Success notification
+deactivate USC
+
+SLV -> SLV: Remove skill from list\nand display success message
+activate SLV
+deactivate SLV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-user-skills-delete-personal-skill" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Delete" on a skill;
+
+|S|
+:(2) Verify skill exists in user's profile \n (lookup user_skill by user_id + skill_id);
+
+if (Skill found?) then (No)
+  :(2.1) Display "Skill not found" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+|S|
+:(3) Display confirmation dialog \n "Remove this skill from your profile?";
+
+|U|
+:(4) Click "Confirm";
+
+|S|
+:(5) Delete user_skill record;
+:(6) Update skill list display;
+:(7) Notify success;
+
+|U|
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-user-skills-delete-personal-skill" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC12 |
+| Name | Delete Personal Skill |
+| Actor(s) | pm, mem |
+| Priority | Medium-High |
+| Trigger | Click "Delete" on a skill |
+| Pre-condition(s) | User is authenticated and the required subsystem data exists. |
+| Post-condition(s) | Update skill list display Notify success |
+| Basic Flow | 1. Click "Delete" on a skill<br>2. Verify skill exists in user's profile (lookup user_skill by user_id + skill_id)<br>3. Display confirmation dialog "Remove this skill from your profile?"<br>4. Click "Confirm"<br>5. Delete user_skill record<br>6. Update skill list display<br>7. Notify success |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Skill not found" error |
+| Related UI screen(s) | [Profile screen](/docs/ui-specification#profile-screen) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/user-skills/delete-personal-skill) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/user-skills/delete-personal-skill) |
+| Related database table(s) | user_skills, skills |
+
+### UC13 — Configure System Parameters
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor Admin as A
+boundary SystemSettingsView as SSV
+control AdminController as AC
+entity SYSTEM_SETTINGS as SS
+
+A -> SSV: Access system settings page
+activate A
+activate SSV
+
+SSV -> AC: Request current settings
+activate AC
+
+AC -> SS: Query all system settings
+activate SS
+SS -> SS: Query settings list
+activate SS
+deactivate SS
+AC <-- SS: Settings data
+deactivate SS
+
+SSV <-- AC: Current settings (AI weights, etc.)
+deactivate AC
+
+SSV -> SSV: Display settings form\n(heuristic weights, config params)
+activate SSV
+deactivate SSV
+
+A -> SSV: Modify parameters (AI weights)
+A -> SSV: Click "Save"
+deactivate A
+
+SSV -> SSV: Validate parameter values
+activate SSV
+deactivate SSV
+
+break Invalid values
+  SSV -> SSV: Display validation errors
+  activate SSV
+  deactivate SSV
+end
+
+SSV -> AC: Send update request
+activate AC
+
+AC -> SS: Update system settings
+activate SS
+SS -> SS: Upsert setting records
+activate SS
+deactivate SS
+AC <-- SS: Update successful
+deactivate SS
+
+SSV <-- AC: Success notification
+deactivate AC
+
+SSV -> SSV: Display success message
+activate SSV
+deactivate SSV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-admin-configure-system-parameters" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|A|Admin
+|S|System
+
+|A|
+start
+:(1) Access System Settings;
+
+|S|
+:(2) Verify admin privileges;
+
+if (Is Admin?) then (No)
+  :(2.1) Display "Access denied" error;
+  |A|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Query all settings;
+:(4) Display config form \n (key_name, value_json, description, \n e.g. max_workload, ai_model, \n sprint_duration_days);
+
+repeat
+  |A|
+  :(4) Modify setting value;
+  :(5) Click "Save";
+
+  |S|
+  :(5) Validate JSON format;
+  backward: (5.1) Display format error;
+repeat while (JSON valid?) is (No) not (Yes)
+
+:(6) Upsert settings record;
+:(7) Reload active settings in memory \n (cache invalidation);
+:(8) Notify success and display updated values;
+
+|A|
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-admin-configure-system-parameters" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC13 |
+| Name | Configure System Parameters |
+| Actor(s) | ad |
+| Priority | Medium-High |
+| Trigger | Access System Settings |
+| Pre-condition(s) | User is authenticated as System Administrator. |
+| Post-condition(s) | Upsert settings record Notify success and display updated values |
+| Basic Flow | 1. Access System Settings<br>2. Verify admin privileges<br>3. Query all settings<br>4. Display config form (key_name, value_json, description, e.g. max_workload, ai_model, sprint_duration_days)<br>5. Modify setting value<br>6. Click "Save"<br>7. Validate JSON format<br>8. Upsert settings record<br>9. Reload active settings in memory (cache invalidation)<br>10. Notify success and display updated values |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Access denied" error<br>2. Display format error<br>3. Reload active settings in memory (cache invalidation) |
+| Related UI screen(s) | [Admin system configuration](/docs/ui-specification#admin-system-configuration) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/admin/configure-system-parameters) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/admin/configure-system-parameters) |
+| Related database table(s) | system_settings |
+
+### UC14 — View System Skill Directory
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor Admin as A
+boundary SkillDirectoryView as SDV
+control AdminController as AC
+entity SKILLS as SK
+
+A -> SDV: Access system skill directory
+activate A
+activate SDV
+SDV -> AC: Request skill list
+activate AC
+AC -> SK: Query all system skills
+activate SK
+SK -> SK: Query skill records
+activate SK
+deactivate SK
+AC <-- SK: Skills data
+deactivate SK
+SDV <-- AC: System skill list
+deactivate AC
+SDV -> SDV: Display skill directory\n(id, name for each skill)
+activate SDV
+deactivate SDV
+deactivate SDV
+deactivate A
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-admin-view-system-skill-directory" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|A|Admin
+|S|System
+
+|A|
+start
+:(1) Access Skill Directory;
+
+|S|
+:(2) Query all system skills;
+
+if (Check has skills?) then (No)
+  :(2.1) Display "No skills defined yet" notification \n with add skill button;
+  |A|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display skill list \n (id, name);
+
+|A|
+:(4) Enter filter criteria \n (keyword: skill name);
+:(5) Click "Filter";
+
+|S|
+:(6) Apply filter criteria to query;
+
+if (Has results?) then (No)
+  :(6.1) Display "No results found" notification;
+  |A|
+else (Yes)
+  |S|
+  :(7) Display filtered skill list \n (id, name);
+  |A|
+endif
+
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-admin-view-system-skill-directory" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC14 |
+| Name | View System Skill Directory |
+| Actor(s) | ad |
+| Priority | Medium-High |
+| Trigger | Access Skill Directory |
+| Pre-condition(s) | User is authenticated as System Administrator. |
+| Post-condition(s) | Display "No results found" notification Display filtered skill list (id, name) |
+| Basic Flow | 1. Access Skill Directory<br>2. Query all system skills<br>3. Display "No skills defined yet" notification with add skill button<br>4. Display skill list (id, name)<br>5. Enter filter criteria (keyword: skill name)<br>6. Click "Filter"<br>7. Apply filter criteria to query<br>8. Display "No results found" notification<br>9. Display filtered skill list (id, name) |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Unauthorized or insufficient permission rejects the request.<br>2. Invalid input or missing target resource returns an error and leaves data unchanged. |
+| Related UI screen(s) | [Admin skill directory](/docs/ui-specification#admin-skill-directory) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/admin/view-system-skill-directory) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/admin/view-system-skill-directory) |
+| Related database table(s) | skills |
+
+### UC15 — Add System Skill
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor Admin as A
+boundary SkillDirectoryView as SDV
+boundary AddSkillView as ASV
+control AdminController as AC
+entity SKILLS as SK
+
+A -> SDV: Click "Add Skill"
+activate A
+activate SDV
+
+SDV -> ASV: Navigate to add skill form
+deactivate SDV
+activate ASV
+
+ASV -> ASV: Display add skill form (name)
+activate ASV
+deactivate ASV
+
+A -> ASV: Enter skill name
+A -> ASV: Click "Save"
+deactivate A
+
+ASV -> ASV: Validate data
+activate ASV
+deactivate ASV
+
+break Invalid data
+  ASV -> ASV: Display error notification
+  activate ASV
+  deactivate ASV
+end
+
+ASV -> AC: Send add skill request
+activate AC
+
+AC -> SK: Check if skill name already exists
+activate SK
+SK -> SK: Query by name
+activate SK
+deactivate SK
+
+break Skill name exists
+  AC <-- SK: Duplicate
+  ASV <-- AC: Error notification
+  ASV -> ASV: Display "Skill name already exists" error
+  activate ASV
+  deactivate ASV
+end
+
+AC <-- SK: Not exists
+deactivate SK
+
+AC -> SK: Insert new skill
+activate SK
+SK -> SK: Insert record
+activate SK
+deactivate SK
+AC <-- SK: Success
+deactivate SK
+
+ASV <-- AC: Success notification
+deactivate AC
+
+ASV -> ASV: Display success message
+activate ASV
+deactivate ASV
+ASV -> SDV: Redirect to skill directory
+deactivate ASV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-admin-add-system-skill" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+
+|A|Admin
+|S|System
+
+|A|
+start
+:(1) Select function Skill Directory;
+
+|S|
+:(2) Display skill directory with "Add Skill" button;
+
+|A|
+:(3) Click "Add Skill";
+
+|S|
+:(4) Display form (skill_name field, required);
+
+repeat
+  |A|
+  :(5) Enter skill name;
+  :(6) Click "Save";
+
+  |S|
+  :(7) Validate name not empty;
+  :(7.2) Check skill name uniqueness;
+  backward: (7.1) Display validation error;
+repeat while (All valid?) is (No) not (Yes)
+
+:(8) Insert skill record;
+:(8.1) Index skill for search and assignment;
+:(9) Notify success;
+:(9.1) Refresh skill list in directory;
+
+|A|
+:(10) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-admin-add-system-skill" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC15 |
+| Name | Add System Skill |
+| Actor(s) | ad |
+| Priority | Medium-High |
+| Trigger | Select function Skill Directory |
+| Pre-condition(s) | User is authenticated as System Administrator. |
+| Post-condition(s) | Insert skill record Notify success |
+| Basic Flow | 1. Select function Skill Directory<br>2. Display skill directory with "Add Skill" button<br>3. Click "Add Skill"<br>4. Display form (skill_name field, required)<br>5. Enter skill name<br>6. Click "Save"<br>7. Validate name not empty<br>8. Check skill name uniqueness<br>9. Insert skill record<br>10. Index skill for search and assignment<br>11. Notify success<br>12. Refresh skill list in directory |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass. |
+| Exception Flow | 1. Display validation error |
+| Related UI screen(s) | [Admin skill directory](/docs/ui-specification#admin-skill-directory) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/admin/add-system-skill) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/admin/add-system-skill) |
+| Related database table(s) | skills |
+
+### UC16 — Edit System Skill
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor Admin as A
+boundary SkillDetailView as SDV
+control AdminController as AC
+entity SKILLS as SK
+
+A -> SDV: Click "Edit" on a skill
+activate A
+activate SDV
+SDV -> SDV: Display edit form (current name)
+activate SDV
+deactivate SDV
+
+A -> SDV: Modify skill name
+A -> SDV: Click "Save"
+deactivate A
+SDV -> SDV: Validate data
+activate SDV
+deactivate SDV
+
+break Invalid data
+  SDV -> SDV: Display error notification
+  activate SDV
+  deactivate SDV
+end
+
+SDV -> AC: Send update request
+activate AC
+AC -> SK: Check new name uniqueness
+activate SK
+SK -> SK: Query by name (exclude current id)
+activate SK
+deactivate SK
+
+break Name already exists
+  AC <-- SK: Duplicate
+  SDV <-- AC: Error notification
+  SDV -> SDV: Display "Skill name already exists" error
+  activate SDV
+  deactivate SDV
+end
+
+AC <-- SK: Name available
+deactivate SK
+
+AC -> SK: Update skill name
+activate SK
+SK -> SK: Update record
+activate SK
+deactivate SK
+AC <-- SK: Update successful
+deactivate SK
+
+SDV <-- AC: Success notification
+deactivate AC
+SDV -> SDV: Display success message
+activate SDV
+deactivate SDV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-admin-edit-system-skill" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|A|Admin
+|S|System
+
+|A|
+start
+:(1) Click "Edit" on a skill;
+
+|S|
+:(2) Query skill details by skill_id;
+
+if (Skill found?) then (No)
+  :(2.1) Display "Skill not found" error;
+  |A|
+  stop
+else (Yes)
+endif
+
+:(3) Display edit form with current name;
+
+repeat
+  |A|
+  :(4) Modify skill name;
+  :(5) Click "Save";
+
+  |S|
+  :(6) Validate not empty and check uniqueness;
+  backward: (6.1) Display validation error;
+repeat while (Data valid?) is (No) not (Yes)
+
+:(7) Update skill record;
+:(7.1) Propagate name update to task skill references;
+:(8) Notify success and refresh skill list;
+
+|A|
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-admin-edit-system-skill" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC16 |
+| Name | Edit System Skill |
+| Actor(s) | ad |
+| Priority | Medium-High |
+| Trigger | Click "Edit" on a skill |
+| Pre-condition(s) | User is authenticated as System Administrator. |
+| Post-condition(s) | Propagate name update to task skill references Notify success and refresh skill list |
+| Basic Flow | 1. Click "Edit" on a skill<br>2. Query skill details by skill_id<br>3. Display edit form with current name<br>4. Modify skill name<br>5. Click "Save"<br>6. Validate not empty and check uniqueness<br>7. Update skill record<br>8. Propagate name update to task skill references<br>9. Notify success and refresh skill list |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Skill not found" error<br>2. Display validation error |
+| Related UI screen(s) | [Admin skill directory](/docs/ui-specification#admin-skill-directory) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/admin/edit-system-skill) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/admin/edit-system-skill) |
+| Related database table(s) | skills |
+
+### UC17 — Delete System Skill
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor Admin as A
+boundary SkillDirectoryView as SDV
+control AdminController as AC
+entity SKILLS as SK
+entity USER_SKILLS as USK
+
+A -> SDV: Click "Delete" on a skill
+activate A
+activate SDV
+SDV -> SDV: Display confirmation dialog\n"Delete this skill? Users with this skill\nwill lose it from their profile."
+activate SDV
+deactivate SDV
+
+A -> SDV: Click "Confirm"
+deactivate A
+
+SDV -> AC: Send delete request (skill_id)
+activate AC
+AC -> USK: Check referenced user_skills
+activate USK
+USK -> USK: Query by skill_id
+activate USK
+deactivate USK
+AC <-- USK: Reference count
+deactivate USK
+
+AC -> SK: Delete skill
+activate SK
+SK -> SK: Delete record (CASCADE to user_skills)
+activate SK
+deactivate SK
+
+break Delete failed
+  AC <-- SK: Error
+  SDV <-- AC: Error notification
+  SDV -> SDV: Display error message
+  activate SDV
+  deactivate SDV
+end
+
+AC <-- SK: Delete successful
+deactivate SK
+
+SDV <-- AC: Success notification
+deactivate AC
+SDV -> SDV: Remove skill from list\nand display success message
+activate SDV
+deactivate SDV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-admin-delete-system-skill" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|A|Admin
+|S|System
+
+|A|
+start
+
+:(1) Select function Skill Directory;
+
+|S|
+:(2) Display skill list;
+
+|A|
+:(3) Click "Delete" on a skill;
+
+|S|
+:(4) Query skill details by skill_id;
+
+if (Skill found?) then (No)
+  :(4.1) Display "Skill not found" notification;
+  |A|
+  :(4.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(5) Query count of users who have this skill \n in their profile (user_skills table);
+:(6) Display confirmation dialog \n "Delete [skill name]? \n This will remove it from [N] user profiles. \n This action cannot be undone.";
+
+|A|
+if (Confirm or Cancel?) then (Cancel)
+  |S|
+  :(6.1) Close confirmation dialog;
+  |A|
+  :(6.2) Confirm end;
+  stop
+else (Confirm)
+endif
+
+|S|
+:(7) Delete skill record \n (CASCADE to user_skills records);
+:(8) Notify success and reload skill list;
+
+|A|
+:(9) View updated skill directory;
+:(10) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-admin-delete-system-skill" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC17 |
+| Name | Delete System Skill |
+| Actor(s) | ad |
+| Priority | Medium-High |
+| Trigger | Select function Skill Directory |
+| Pre-condition(s) | User is authenticated as System Administrator. |
+| Post-condition(s) | Notify success and reload skill list View updated skill directory |
+| Basic Flow | 1. Select function Skill Directory<br>2. Display skill list<br>3. Click "Delete" on a skill<br>4. Query skill details by skill_id<br>5. Display "Skill not found" notification<br>6. Query count of users who have this skill in their profile (user_skills table)<br>7. Display confirmation dialog "Delete [skill name]? This will remove it from [N] user profiles. This action cannot be undone."<br>8. Close confirmation dialog<br>9. Delete skill record (CASCADE to user_skills records)<br>10. Notify success and reload skill list<br>11. View updated skill directory |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Skill not found" notification |
+| Related UI screen(s) | [Admin skill directory](/docs/ui-specification#admin-skill-directory) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/admin/delete-system-skill) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/admin/delete-system-skill) |
+| Related database table(s) | skills |
+
+### UC18 — View Global User List
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor Admin as A
+boundary UserListView as ULV
+control AdminController as AC
+entity USERS as US
+
+A -> ULV: Access user management page
+activate A
+activate ULV
+ULV -> AC: Request user list
+activate AC
+AC -> US: Query all users
+activate US
+US -> US: Query user records
+activate US
+deactivate US
+AC <-- US: Users data
+deactivate US
+ULV <-- AC: User list
+deactivate AC
+ULV -> ULV: Display user list\n(name, email, role, status)
+activate ULV
+deactivate ULV
+deactivate ULV
+deactivate A
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-admin-view-global-user-list" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|A|Admin
+|S|System
+
+|A|
+start
+:(1) Access User Management;
+
+|S|
+:(2) Query all users \n (with role, status, workload);
+
+if (Check has users?) then (No)
+  :(2.1) Display "No users found" notification \n with invite action;
+  |A|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display user list \n (name, email, role, status, workload);
+
+|A|
+:(4) Enter filter criteria \n (keyword: name/email, role: ADMIN/MANAGER/MEMBER, \n status: AVAILABLE/BUSY/OFFLINE);
+:(5) Click "Filter";
+
+|S|
+:(6) Apply filter criteria to query;
+
+if (Has results?) then (No)
+  :(6.1) Display "No results found" notification;
+  |A|
+else (Yes)
+  |S|
+  :(7) Display filtered user list \n (name, email, role, status, workload);
+  |A|
+endif
+
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-admin-view-global-user-list" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC18 |
+| Name | View Global User List |
+| Actor(s) | ad |
+| Priority | Medium |
+| Trigger | Access User Management |
+| Pre-condition(s) | User is authenticated as System Administrator. |
+| Post-condition(s) | Display "No results found" notification Display filtered user list (name, email, role, status, workload) |
+| Basic Flow | 1. Access User Management<br>2. Query all users (with role, status, workload)<br>3. Display "No users found" notification with invite action<br>4. Display user list (name, email, role, status, workload)<br>5. Enter filter criteria (keyword: name/email, role: ADMIN/MANAGER/MEMBER, status: AVAILABLE/BUSY/OFFLINE)<br>6. Click "Filter"<br>7. Apply filter criteria to query<br>8. Display "No results found" notification<br>9. Display filtered user list (name, email, role, status, workload) |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Unauthorized or insufficient permission rejects the request.<br>2. Invalid input or missing target resource returns an error and leaves data unchanged. |
+| Related UI screen(s) | [Admin user management](/docs/ui-specification#admin-user-management) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/admin/view-global-user-list) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/admin/view-global-user-list) |
+| Related database table(s) | users |
+
+### UC19 — Add System User
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor Admin as A
+boundary UserListView as ULV
+boundary AddUserView as AUV
+control AdminController as AC
+entity USERS as US
+
+A -> ULV: Click "Add User"
+activate A
+activate ULV
+ULV -> AUV: Navigate to add user form
+deactivate ULV
+activate AUV
+AUV -> AUV: Display add user form\n(email, full_name, password, role)
+activate AUV
+deactivate AUV
+
+A -> AUV: Enter user information
+A -> AUV: Click "Save"
+deactivate A
+AUV -> AUV: Validate data format
+activate AUV
+deactivate AUV
+
+break Invalid data
+  AUV -> AUV: Display validation errors
+  activate AUV
+  deactivate AUV
+end
+
+AUV -> AC: Send add user request
+activate AC
+AC -> US: Check email uniqueness
+activate US
+US -> US: Query by email
+activate US
+deactivate US
+
+break Email already exists
+  AC <-- US: Duplicate
+  AUV <-- AC: Error notification
+  AUV -> AUV: Display "Email already exists" error
+  activate AUV
+  deactivate AUV
+end
+
+AC <-- US: Email available
+deactivate US
+
+AC -> AC: Hash password
+activate AC
+deactivate AC
+
+AC -> US: Insert new user record
+activate US
+US -> US: Insert record
+activate US
+deactivate US
+AC <-- US: User created
+deactivate US
+
+AUV <-- AC: Success notification
+deactivate AC
+AUV -> AUV: Display success message
+activate AUV
+deactivate AUV
+AUV -> ULV: Redirect to user list
+deactivate AUV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-admin-add-system-user" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+
+|A|Admin
+|S|System
+
+|A|
+start
+:(1) Access User Management;
+
+|S|
+:(2) Display user list with "Add User" button;
+
+|A|
+:(3) Click "Add User";
+
+|S|
+:(4) Display form (email, full name, password, role);
+
+repeat
+  |A|
+  :(5) Enter user information;
+  :(6) Click "Save";
+
+  |S|
+  :(7) Validate format and check email uniqueness;
+  backward: (7.1) Display validation error;
+repeat while (Data valid?) is (No) not (Yes)
+
+:(8) Hash password;
+:(8.1) Verify password hash integrity;
+:(9) Insert user (status=AVAILABLE, workload=0);
+:(10) Send welcome email with credentials;
+:(11) Notify success and display new user in list;
+
+|A|
+:(12) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-admin-add-system-user" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC19 |
+| Name | Add System User |
+| Actor(s) | ad |
+| Priority | Medium-High |
+| Trigger | Access User Management |
+| Pre-condition(s) | User is authenticated as System Administrator. |
+| Post-condition(s) | Send welcome email with credentials Notify success and display new user in list |
+| Basic Flow | 1. Access User Management<br>2. Display user list with "Add User" button<br>3. Click "Add User"<br>4. Display form (email, full name, password, role)<br>5. Enter user information<br>6. Click "Save"<br>7. Validate format and check email uniqueness<br>8. Hash password<br>9. Verify password hash integrity<br>10. Insert user (status=AVAILABLE, workload=0)<br>11. Send welcome email with credentials<br>12. Notify success and display new user in list |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass. |
+| Exception Flow | 1. Display validation error |
+| Related UI screen(s) | [Admin user management](/docs/ui-specification#admin-user-management) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/admin/add-system-user) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/admin/add-system-user) |
+| Related database table(s) | users |
+
+### UC20 — Edit System User
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor Admin as A
+boundary UserDetailView as UDV
+control AdminController as AC
+entity USERS as US
+
+A -> UDV: Click "Edit" on a user
+activate A
+activate UDV
+UDV -> AC: Request user details
+activate AC
+AC -> US: Query user by id
+activate US
+US -> US: Query user record
+activate US
+deactivate US
+AC <-- US: User data
+deactivate US
+UDV <-- AC: User details
+deactivate AC
+UDV -> UDV: Display edit form\n(full_name, email, role, status)
+activate UDV
+deactivate UDV
+
+A -> UDV: Modify user information
+A -> UDV: Click "Save"
+deactivate A
+UDV -> UDV: Validate data format
+activate UDV
+deactivate UDV
+
+break Invalid data
+  UDV -> UDV: Display validation errors
+  activate UDV
+  deactivate UDV
+end
+
+UDV -> AC: Send update request
+activate AC
+AC -> US: Check email uniqueness (if changed)
+activate US
+US -> US: Query by email (exclude current id)
+activate US
+deactivate US
+
+break Email already exists
+  AC <-- US: Duplicate
+  UDV <-- AC: Error notification
+  UDV -> UDV: Display "Email already in use" error
+  activate UDV
+  deactivate UDV
+end
+
+AC <-- US: Available
+deactivate US
+
+AC -> US: Update user information
+activate US
+US -> US: Update record
+activate US
+deactivate US
+AC <-- US: Update successful
+deactivate US
+
+UDV <-- AC: Success notification
+deactivate AC
+UDV -> UDV: Display success message
+activate UDV
+deactivate UDV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-admin-edit-system-user" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|A|Admin
+|S|System
+
+|A|
+start
+:(1) Click "Edit" on a user;
+
+|S|
+:(2) Query user info by user_id;
+
+if (User found?) then (No)
+  :(2.1) Display "User not found" error;
+  |A|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display edit form \n (full_name, email, role, status);
+
+repeat
+  |A|
+  :(4) Modify user information;
+  :(5) Click "Save";
+
+  |S|
+  :(6) Validate and check email uniqueness;
+  backward: (6.1) Display validation error;
+repeat while (Data valid?) is (No) not (Yes)
+
+:(7) Update user record;
+:(8) If email changed: send notification \n to user's new email;
+:(9) Notify success and reload user details;
+
+|A|
+:(10) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-admin-edit-system-user" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC20 |
+| Name | Edit System User |
+| Actor(s) | ad |
+| Priority | Medium-High |
+| Trigger | Click "Edit" on a user |
+| Pre-condition(s) | User is authenticated as System Administrator. |
+| Post-condition(s) | If email changed: send notification to user's new email Notify success and reload user details |
+| Basic Flow | 1. Click "Edit" on a user<br>2. Query user info by user_id<br>3. Display edit form (full_name, email, role, status)<br>4. Modify user information<br>5. Click "Save"<br>6. Validate and check email uniqueness<br>7. Update user record<br>8. If email changed: send notification to user's new email<br>9. Notify success and reload user details |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "User not found" error<br>2. Display validation error |
+| Related UI screen(s) | [Admin user management](/docs/ui-specification#admin-user-management) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/admin/edit-system-user) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/admin/edit-system-user) |
+| Related database table(s) | users |
+
+### UC21 — Delete System User
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor Admin as A
+boundary UserListView as ULV
+control AdminController as AC
+entity USERS as US
+
+A -> ULV: Click "Delete" on a user
+activate A
+activate ULV
+ULV -> ULV: Display confirmation dialog\n"Delete this user? All related data\nwill be permanently removed."
+activate ULV
+deactivate ULV
+
+A -> ULV: Click "Confirm"
+deactivate A
+
+ULV -> AC: Send delete request (user_id)
+activate AC
+
+AC -> AC: Check not deleting self
+activate AC
+deactivate AC
+
+break Deleting own account
+  ULV <-- AC: Error notification
+  ULV -> ULV: Display "Cannot delete your own account" error
+  activate ULV
+  deactivate ULV
+end
+
+AC -> US: Delete user
+activate US
+US -> US: Delete record (CASCADE)
+activate US
+deactivate US
+
+break Delete failed
+  AC <-- US: Error
+  ULV <-- AC: Error notification
+  ULV -> ULV: Display error message
+  activate ULV
+  deactivate ULV
+end
+
+AC <-- US: Delete successful
+deactivate US
+
+ULV <-- AC: Success notification
+deactivate AC
+ULV -> ULV: Remove user from list\nand display success message
+activate ULV
+deactivate ULV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-admin-delete-system-user" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|A|Admin
+|S|System
+
+|A|
+start
+:(1) Click "Delete" on a user;
+
+|S|
+:(2) Check if target is current logged-in admin;
+
+if (Deleting own account?) then (Yes)
+  :(2.1) Display "Cannot delete own account" error;
+  |A|
+  :(2.2) Confirm end;
+  stop
+else (No)
+endif
+
+:(3) Display confirmation dialog;
+
+|A|
+:(4) Click "Confirm";
+
+|S|
+:(5) Delete user (CASCADE);
+:(6) Notify success;
+
+|A|
+:(7) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-admin-delete-system-user" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC21 |
+| Name | Delete System User |
+| Actor(s) | ad |
+| Priority | Medium-High |
+| Trigger | Click "Delete" on a user |
+| Pre-condition(s) | User is authenticated as System Administrator. |
+| Post-condition(s) | Delete user (CASCADE) Notify success |
+| Basic Flow | 1. Click "Delete" on a user<br>2. Check if target is current logged-in admin<br>3. Display confirmation dialog<br>4. Click "Confirm"<br>5. Delete user (CASCADE)<br>6. Notify success |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Cannot delete own account" error |
+| Related UI screen(s) | [Admin user management](/docs/ui-specification#admin-user-management) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/admin/delete-system-user) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/admin/delete-system-user) |
+| Related database table(s) | users |
+
+### UC22 — View Joined Projects
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary ProjectListView as PLV
+control ProjectController as PC
+entity PROJECT_MEMBERS as PM
+
+U -> PLV: Access projects page
+activate U
+activate PLV
+PLV -> PC: Request joined projects
+activate PC
+PC -> PM: Query projects where user is member
+activate PM
+PM -> PM: Query by user_id (join projects)
+activate PM
+deactivate PM
+PC <-- PM: Project list data
+deactivate PM
+PLV <-- PC: Joined projects list
+deactivate PC
+PLV -> PLV: Display project list\n(name, status, role, start/end date)
+activate PLV
+deactivate PLV
+deactivate PLV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-project-management-view-joined-projects" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Access Projects page;
+
+|S|
+:(2) Query projects user is member of \n (with role, member count, dates);
+
+if (Check has projects?) then (No)
+  :(2.1) Display "You have not joined any projects yet" \n notification with browse action;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display project list \n (name, status, role, start/end date, member count);
+
+|U|
+:(4) Enter filter criteria \n (keyword: project name, \n status: ACTIVE/COMPLETED/ARCHIVED);
+:(5) Click "Filter";
+
+|S|
+:(6) Apply filter criteria to query;
+
+if (Has results?) then (No)
+  :(6.1) Display "No results found" notification;
+  |U|
+else (Yes)
+  |S|
+  :(7) Display filtered project list \n (name, status, role, start/end date, member count);
+  |U|
+endif
+
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-project-management-view-joined-projects" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC22 |
+| Name | View Joined Projects |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Access Projects page |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Display "No results found" notification Display filtered project list (name, status, role, start/end date, member count) |
+| Basic Flow | 1. Access Projects page<br>2. Query projects user is member of (with role, member count, dates)<br>3. Display "You have not joined any projects yet" notification with browse action<br>4. Display project list (name, status, role, start/end date, member count)<br>5. Enter filter criteria (keyword: project name, status: ACTIVE/COMPLETED/ARCHIVED)<br>6. Click "Filter"<br>7. Apply filter criteria to query<br>8. Display "No results found" notification<br>9. Display filtered project list (name, status, role, start/end date, member count) |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Unauthorized or insufficient permission rejects the request.<br>2. Invalid input or missing target resource returns an error and leaves data unchanged. |
+| Related UI screen(s) | [Project dashboard / project list](/docs/ui-specification#project-dashboard--project-list) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/project-management/view-joined-projects) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/project-management/view-joined-projects) |
+| Related database table(s) | projects, project_members |
+
+### UC24 — View Project Details / Summary
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary ProjectDetailView as PDV
+control ProjectController as PC
+entity PROJECTS as P
+entity PROJECT_MEMBERS as PM
+
+U -> PDV: Click on a project
+activate U
+activate PDV
+PDV -> PC: Request project details (project_id)
+activate PC
+
+PC -> PM: Check user is member of project
+activate PM
+PM -> PM: Query by project_id and user_id
+activate PM
+deactivate PM
+
+break Not a member
+  PC <-- PM: Not found
+  PDV <-- PC: Access denied
+  PDV -> PDV: Display "You are not a member" error
+  activate PDV
+  deactivate PDV
+end
+
+PC <-- PM: Member confirmed
+deactivate PM
+
+PC -> P: Query project information
+activate P
+P -> P: Query by project_id
+activate P
+deactivate P
+PC <-- P: Project data
+deactivate P
+
+PDV <-- PC: Project details
+deactivate PC
+PDV -> PDV: Display project summary\n(name, description, status,\nheuristic_mode, dates, member count)
+activate PDV
+deactivate PDV
+deactivate PDV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-project-management-view-project-details" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click on project name from project list;
+
+|S|
+:(2) Check user is member of project;
+
+if (User is member?) then (No)
+  :(2.1) Display "You are not a member of this project" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Query project info \n (name, description, status, \n heuristic_mode, start_date, end_date, \n invite_code);
+:(4) Query member count and user's role in project;
+:(5) Query active sprint info \n (current sprint name, status, \n task completion %, start/end date);
+:(6) Display project overview \n (name, description, status, heuristic_mode, \n dates, member count, user role, \n active sprint summary, invite code);
+
+|U|
+:(7) View project details;
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-project-management-view-project-details" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC24 |
+| Name | View Project Details / Summary |
+| Actor(s) | pm, mem |
+| Priority | Medium-High |
+| Trigger | Click on project name from project list |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Display project overview (name, description, status, heuristic_mode, dates, member count, user role, active sprint summary, invite code) |
+| Basic Flow | 1. Click on project name from project list<br>2. Check user is member of project<br>3. Query project info (name, description, status, heuristic_mode, start_date, end_date, invite_code)<br>4. Query member count and user's role in project<br>5. Query active sprint info (current sprint name, status, task completion %, start/end date)<br>6. Display project overview (name, description, status, heuristic_mode, dates, member count, user role, active sprint summary, invite code)<br>7. View project details |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "You are not a member of this project" error |
+| Related UI screen(s) | [Project workspace](/docs/ui-specification#project-workspace)<br>[Project overview](/docs/ui-specification#project-overview)<br>[Timeline](/docs/ui-specification#timeline) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/project-management/view-project-details) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/project-management/view-project-details) |
+| Related database table(s) | projects |
+
+### UC25 — Update Project Information
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor "Project Manager" as PM
+boundary ProjectDetailView as PDV
+control ProjectController as PC
+entity PROJECTS as P
+
+PM -> PDV: Click "Edit Project"
+activate PM
+activate PDV
+PDV -> PDV: Enable edit mode\n(name, description, dates, heuristic_mode)
+activate PDV
+deactivate PDV
+
+PM -> PDV: Modify project information
+PM -> PDV: Click "Save"
+deactivate PM
+PDV -> PDV: Validate data
+activate PDV
+deactivate PDV
+
+break Invalid data
+  PDV -> PDV: Display validation errors
+  activate PDV
+  deactivate PDV
+end
+
+PDV -> PC: Send update request
+activate PC
+
+PC -> P: Update project information
+activate P
+P -> P: Update record
+activate P
+deactivate P
+PC <-- P: Update successful
+deactivate P
+
+PDV <-- PC: Success notification
+deactivate PC
+PDV -> PDV: Display success message\nand updated project details
+activate PDV
+deactivate PDV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-project-management-update-project-information" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Edit Project";
+
+|S|
+:(2) Verify user has MANAGER role;
+
+if (Is Manager?) then (No)
+  :(2.1) Display "Access denied" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display edit form \n (name, description, dates, heuristic_mode);
+
+repeat
+  |U|
+  :(4) Modify project information;
+  :(5) Click "Save";
+
+  |S|
+  :(6) Validate project data;
+  backward: (6.1) Display validation error;
+repeat while (Data valid?) is (No) not (Yes)
+
+:(7) Update project record;
+:(8) Notify success;
+
+|U|
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-project-management-update-project-information" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC25 |
+| Name | Update Project Information |
+| Actor(s) | pm |
+| Priority | Medium |
+| Trigger | Click "Edit Project" |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Update project record Notify success |
+| Basic Flow | 1. Click "Edit Project"<br>2. Verify user has MANAGER role<br>3. Display edit form (name, description, dates, heuristic_mode)<br>4. Modify project information<br>5. Click "Save"<br>6. Validate project data<br>7. Update project record<br>8. Notify success |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Access denied" error<br>2. Display validation error |
+| Related UI screen(s) | [Project settings general](/docs/ui-specification#project-settings-general) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/project-management/update-project-information) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/project-management/update-project-information) |
+| Related database table(s) | projects |
+
+### UC26 — Join Project
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary JoinProjectView as JPV
+control ProjectController as PC
+entity PROJECT_MEMBERS as PM
+entity PROJECTS as P
+
+U -> JPV: Access join project page
+activate U
+activate JPV
+JPV -> JPV: Display form\n(enter invite link or project code)
+activate JPV
+deactivate JPV
+
+U -> JPV: Enter invite link/code
+U -> JPV: Click "Join"
+deactivate U
+JPV -> JPV: Validate input
+activate JPV
+deactivate JPV
+
+break Invalid input
+  JPV -> JPV: Display error notification
+  activate JPV
+  deactivate JPV
+end
+
+JPV -> PC: Send join request
+activate PC
+PC -> P: Validate project code/link
+activate P
+P -> P: Query by invite code
+activate P
+deactivate P
+
+break Invalid code
+  PC <-- P: Not found
+  JPV <-- PC: Error notification
+  JPV -> JPV: Display "Invalid project code" error
+  activate JPV
+  deactivate JPV
+end
+
+PC <-- P: Project found
+deactivate P
+
+break Already a member
+  PC <-- PM: Already exists
+  JPV <-- PC: Error notification
+  JPV -> JPV: Display "Already a member" error
+  activate JPV
+  deactivate JPV
+end
+
+PC <-- PM: Not a member
+deactivate PM
+
+PC -> PM: Add user as member
+activate PM
+PM -> PM: Insert record (role = MEMBER)
+activate PM
+deactivate PM
+PC <-- PM: Success
+deactivate PM
+
+JPV <-- PC: Success notification
+deactivate PC
+JPV -> JPV: Display success and\nredirect to project page
+activate JPV
+deactivate JPV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-project-management-join-project" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Access Projects page;
+
+|S|
+:(2) Display "Join Project" option;
+
+|U|
+:(3) Select Join Project;
+
+|S|
+:(4) Display form (invite link/code);
+
+repeat
+  |U|
+  :(5) Enter invite code;
+  :(6) Click "Join";
+
+  |S|
+  :(6.1) Validate invite code format;
+  :(6.2) Query project by invite code;
+  :(6.3) Check user is not already a member;
+  backward: (6a) Display specific error \n (invalid format / project not found / \n already a member);
+repeat while (All checks passed?) is (No) not (Yes)
+
+:(7) Insert user into project_members (role=MEMBER);
+:(7.1) Update user's project membership count;
+:(8) Send project join notification to project manager;
+:(9) Notify success and redirect to project page;
+
+|U|
+:(10) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-project-management-join-project" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC26 |
+| Name | Join Project |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Access Projects page |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Send project join notification to project manager Notify success and redirect to project page |
+| Basic Flow | 1. Access Projects page<br>2. Display "Join Project" option<br>3. Select Join Project<br>4. Display form (invite link/code)<br>5. Enter invite code<br>6. Click "Join"<br>7. Validate invite code format<br>8. Query project by invite code<br>9. Check user is not already a member<br>10. Insert user into project_members (role=MEMBER)<br>11. Update user's project membership count<br>12. Send project join notification to project manager<br>13. Notify success and redirect to project page |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass. |
+| Exception Flow | 1. Display specific error (invalid format / project not found / already a member) |
+| Related UI screen(s) | [Project dashboard / project list](/docs/ui-specification#project-dashboard--project-list) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/project-management/join-project) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/project-management/join-project) |
+| Related database table(s) | project_members |
+
+### UC27 — Leave Project
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary ProjectDetailView as PDV
+control ProjectController as PC
+entity PROJECT_MEMBERS as PM
+
+U -> PDV: Click "Leave Project"
+activate U
+activate PDV
+PDV -> PDV: Display confirmation dialog\n"Are you sure you want to leave?"
+activate PDV
+deactivate PDV
+
+U -> PDV: Click "Confirm"
+deactivate U
+
+PDV -> PC: Send leave request
+activate PC
+
+PC -> PM: Check user role in project
+activate PM
+PM -> PM: Query by project_id and user_id
+activate PM
+deactivate PM
+
+break User is the only MANAGER
+  PC <-- PM: Only manager
+  PDV <-- PC: Error notification
+  PDV -> PDV: Display "Cannot leave: you are the\nonly manager. Transfer role first."
+  activate PDV
+  deactivate PDV
+end
+
+PC <-- PM: Can leave
+deactivate PM
+
+PC -> PM: Remove member from project
+activate PM
+PM -> PM: Delete record
+activate PM
+deactivate PM
+PC <-- PM: Delete successful
+deactivate PM
+
+PDV <-- PC: Success notification
+deactivate PC
+PDV -> PDV: Redirect to project list\nwith "You have left the project" message
+activate PDV
+deactivate PDV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-project-management-leave-project" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Leave Project";
+
+|S|
+:(2) Display confirmation dialog;
+
+|U|
+:(3) Click "Confirm";
+
+|S|
+:(4) Check if user is the only MANAGER;
+
+if (Only Manager?) then (Yes)
+  :(4.1) Display "Must transfer role first" error;
+  |U|
+  :(4.2) Confirm end;
+  stop
+else (No)
+endif
+
+:(5) Delete project_member record;
+:(6) Redirect to project list;
+
+|U|
+:(7) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-project-management-leave-project" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC27 |
+| Name | Leave Project |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Click "Leave Project" |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Delete project_member record Redirect to project list |
+| Basic Flow | 1. Click "Leave Project"<br>2. Display confirmation dialog<br>3. Click "Confirm"<br>4. Check if user is the only MANAGER<br>5. Delete project_member record<br>6. Redirect to project list |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Must transfer role first" error |
+| Related UI screen(s) | [Project workspace](/docs/ui-specification#project-workspace) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/project-management/leave-project) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/project-management/leave-project) |
+| Related database table(s) | project_members |
+
+### UC28 — Close / Archive Project
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor "Project Manager" as PM
+boundary ProjectDetailView as PDV
+control ProjectController as PC
+entity PROJECTS as P
+
+PM -> PDV: Click "Close Project" or "Archive Project"
+activate PM
+activate PDV
+PDV -> PDV: Display confirmation dialog\n"Close/Archive this project?\nMembers will no longer be able\nto create tasks or sprints."
+activate PDV
+deactivate PDV
+
+PM -> PDV: Click "Confirm"
+deactivate PM
+
+PDV -> PC: Send close/archive request
+activate PC
+
+PC -> P: Update project status
+activate P
+P -> P: Update status to COMPLETED or ARCHIVED
+activate P
+deactivate P
+PC <-- P: Update successful
+deactivate P
+
+PDV <-- PC: Success notification
+deactivate PC
+PDV -> PDV: Display success message\nand updated status badge
+activate PDV
+deactivate PDV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-project-management-close-archive-project" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Close" or "Archive";
+
+|S|
+:(2) Verify user has MANAGER role;
+
+if (Is Manager?) then (No)
+  :(2.1) Display "Access denied" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display confirmation dialog;
+
+|U|
+:(4) Click "Confirm";
+
+|S|
+:(5) Update project status \n (COMPLETED or ARCHIVED);
+:(6) Notify success;
+
+|U|
+:(7) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-project-management-close-archive-project" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC28 |
+| Name | Close / Archive Project |
+| Actor(s) | pm |
+| Priority | Medium-High |
+| Trigger | Click "Close" or "Archive" |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Update project status (COMPLETED or ARCHIVED) Notify success |
+| Basic Flow | 1. Click "Close" or "Archive"<br>2. Verify user has MANAGER role<br>3. Display confirmation dialog<br>4. Click "Confirm"<br>5. Update project status (COMPLETED or ARCHIVED)<br>6. Notify success |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Access denied" error |
+| Related UI screen(s) | [Project settings general](/docs/ui-specification#project-settings-general) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/project-management/close-archive-project) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/project-management/close-archive-project) |
+| Related database table(s) | projects |
+
+### UC29 — View Project Member List
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary MemberListView as MLV
+control ProjectMemberController as PMC
+entity PROJECT_MEMBERS as PM
+
+U -> MLV: Access project members page
+activate U
+activate MLV
+
+MLV -> PMC: Request member list (project_id)
+activate PMC
+
+PMC -> PM: Query all members of project
+activate PM
+PM -> PM: Query by project_id (join users)
+activate PM
+deactivate PM
+PMC <-- PM: Members data
+deactivate PM
+
+MLV <-- PMC: Member list
+
+MLV -> MLV: Display member list\n(name, email, role, performance_score)
+activate MLV
+deactivate MLV
+
+deactivate PMC
+deactivate MLV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-project-members-view-project-member-list" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Select Members section;
+
+|S|
+:(2) Query project members \n (join project_members with users);
+
+if (Check has members?) then (No)
+  :(2.1) Display "No members in this project yet" \n notification with invite action;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display member list \n (name, email, role, performance_score, workload);
+
+|U|
+:(4) Enter filter criteria \n (keyword: name/email, \n role: MANAGER/MEMBER);
+:(5) Click "Filter";
+
+|S|
+:(6) Apply filter criteria to query;
+
+if (Has results?) then (No)
+  :(6.1) Display "No results found" notification;
+  |U|
+else (Yes)
+  |S|
+  :(7) Display filtered member list \n (name, email, role, performance_score, workload);
+  |U|
+endif
+
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-project-members-view-project-member-list" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC29 |
+| Name | View Project Member List |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Select Members section |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Display "No results found" notification Display filtered member list (name, email, role, performance_score, workload) |
+| Basic Flow | 1. Select Members section<br>2. Query project members (join project_members with users)<br>3. Display "No members in this project yet" notification with invite action<br>4. Display member list (name, email, role, performance_score, workload)<br>5. Enter filter criteria (keyword: name/email, role: MANAGER/MEMBER)<br>6. Click "Filter"<br>7. Apply filter criteria to query<br>8. Display "No results found" notification<br>9. Display filtered member list (name, email, role, performance_score, workload) |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Unauthorized or insufficient permission rejects the request.<br>2. Invalid input or missing target resource returns an error and leaves data unchanged. |
+| Related UI screen(s) | [Project settings members](/docs/ui-specification#project-settings-members) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/project-members/view-project-member-list) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/project-members/view-project-member-list) |
+| Related database table(s) | project_members, users |
+
+### UC30 — View Member Details
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary MemberDetailView as MDV
+control ProjectMemberController as PMC
+entity PROJECT_MEMBERS as PM
+
+U -> MDV: Click on a member
+activate U
+activate MDV
+
+MDV -> PMC: Request member details (project_id, target_user_id)
+activate PMC
+
+PMC -> PM: Query member info
+activate PM
+PM -> PM: Query by project_id and target_user_id\n(join users, user_skills)
+activate PM
+deactivate PM
+
+break Error or Not Found / Invalid
+    PMC <-- PM: 404 Not found
+    MDV <-- PMC: Error notification
+    MDV -> MDV: Display error message
+    activate MDV
+    deactivate MDV
+end
+
+PMC <-- PM: Member data
+deactivate PM
+MDV <-- PMC: Member details
+
+MDV -> MDV: Display member details\n(name, email, role, performance_score,\nskills, joined_at)
+activate MDV
+deactivate MDV
+
+deactivate PMC
+deactivate MDV
+deactivate U
+
+@enduml
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-project-members-view-member-details" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click on a member from member list;
+
+|S|
+:(2) Query member info \n (name, email, role, performance_score, \n current_workload, joined_at) \n by project_id + target_user_id;
+
+if (Member found?) then (No)
+  :(2.1) Display "Member not found" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Query member's skills \n (join user_skills + skills table);
+:(4) Query member's current tasks in project \n (count by status: TODO / IN_PROGRESS / REVIEW / DONE);
+:(5) Display member details \n (name, email, role, performance_score, \n current_workload, skills list, \n task count by status, joined_at, \n update role / remove member buttons if MANAGER);
+
+|U|
+:(6) View member details;
+:(7) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-project-members-view-member-details" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC30 |
+| Name | View Member Details |
+| Actor(s) | pm, mem |
+| Priority | Medium-High |
+| Trigger | Click on a member from member list |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Display member details (name, email, role, performance_score, current_workload, skills list, task count by status, joined_at, update role / remove member buttons if MANAGER) |
+| Basic Flow | 1. Click on a member from member list<br>2. Query member info (name, email, role, performance_score, current_workload, joined_at) by project_id + target_user_id<br>3. Query member's skills (join user_skills + skills table)<br>4. Query member's current tasks in project (count by status: TODO / IN_PROGRESS / REVIEW / DONE)<br>5. Display member details (name, email, role, performance_score, current_workload, skills list, task count by status, joined_at, update role / remove member buttons if MANAGER)<br>6. View member details |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Member not found" error |
+| Related UI screen(s) | [Project settings members](/docs/ui-specification#project-settings-members) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/project-members/view-member-details) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/project-members/view-member-details) |
+| Related database table(s) | project_members, users, user_skills |
+
+### UC31 — Add Member to Project
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary MemberListView as MLV
+boundary AddMemberView as AMV
+control ProjectMemberController as PMC
+entity USERS as US
+entity PROJECT_MEMBERS as PM
+
+U -> MLV: Click "Add Member"
+activate U
+activate MLV
+MLV -> AMV: Navigate to add member form
+deactivate MLV
+activate AMV
+AMV -> AMV: Display form\n(search user by email)
+activate AMV
+deactivate AMV
+
+U -> AMV: Enter user email
+U -> AMV: Click "Add"
+deactivate U
+AMV -> AMV: Validate email format
+activate AMV
+deactivate AMV
+
+break Invalid email
+  AMV -> AMV: Display validation error
+  activate AMV
+  deactivate AMV
+end
+
+AMV -> PMC: Send add member request
+activate PMC
+PMC -> US: Find user by email
+activate US
+US -> US: Query by email
+activate US
+deactivate US
+
+break Error or Not Found / Invalid
+  PMC <-- US: Not found
+  AMV <-- PMC: Error notification
+  AMV -> AMV: Display "User not found" error
+  activate AMV
+  deactivate AMV
+end
+
+PMC <-- US: User found
+deactivate US
+
+break Already a member
+  PMC <-- PM: Already exists
+  AMV <-- PMC: Error notification
+  AMV -> AMV: Display "Already a member" error
+  activate AMV
+  deactivate AMV
+end
+
+PMC <-- PM: Not a member
+deactivate PM
+
+PMC -> PM: Insert new member
+activate PM
+PM -> PM: Insert record (role = MEMBER)
+activate PM
+deactivate PM
+PMC <-- PM: Success
+deactivate PM
+
+AMV <-- PMC: Success notification
+deactivate PMC
+AMV -> AMV: Display success message
+activate AMV
+deactivate AMV
+AMV -> MLV: Redirect to member list
+deactivate AMV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-project-members-add-member-to-project" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Access Project Members page;
+
+|S|
+:(2) Display member list with "Add Member" button;
+
+|U|
+:(3) Click "Add Member";
+
+|S|
+:(4) Display form (user email, role selection);
+
+repeat
+  |U|
+  :(5) Enter user email;
+  :(6) Click "Add";
+
+  |S|
+  :(6.1) Check email format valid;
+  :(6.2) Query user by email;
+  :(6.3) Check user not already in project;
+  backward: (6a) Display specific error \n (invalid format / user not found / \n already a member);
+repeat while (All checks passed?) is (No) not (Yes)
+
+:(7) Insert project_member record (role=MEMBER);
+:(7.1) Update project member count;
+:(8) Send project invitation notification to user;
+:(9) Notify success and refresh member list;
+
+|U|
+:(10) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-project-members-add-member-to-project" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC31 |
+| Name | Add Member to Project |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Access Project Members page |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Send project invitation notification to user Notify success and refresh member list |
+| Basic Flow | 1. Access Project Members page<br>2. Display member list with "Add Member" button<br>3. Click "Add Member"<br>4. Display form (user email, role selection)<br>5. Enter user email<br>6. Click "Add"<br>7. Check email format valid<br>8. Query user by email<br>9. Check user not already in project<br>10. Insert project_member record (role=MEMBER)<br>11. Update project member count<br>12. Send project invitation notification to user<br>13. Notify success and refresh member list |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass. |
+| Exception Flow | 1. Display specific error (invalid format / user not found / already a member) |
+| Related UI screen(s) | [Project settings members](/docs/ui-specification#project-settings-members) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/project-members/add-member-to-project) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/project-members/add-member-to-project) |
+| Related database table(s) | project_members |
+
+### UC32 — Update Member Role
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor "Project Manager" as PMR
+boundary MemberDetailView as MDV
+control ProjectMemberController as PMC
+entity PROJECT_MEMBERS as PM
+
+PMR -> MDV: Click "Change Role" on a member
+activate PMR
+activate MDV
+MDV -> MDV: Display role selection\n(MANAGER / MEMBER)
+activate MDV
+deactivate MDV
+
+PMR -> MDV: Select new role and click "Save"
+deactivate PMR
+
+MDV -> PMC: Send update role request
+activate PMC
+
+PMC -> PM: Update member role
+activate PM
+PM -> PM: Update role field
+activate PM
+deactivate PM
+
+break Update failed
+  PMC <-- PM: Error
+  MDV <-- PMC: Error notification
+  MDV -> MDV: Display error message
+  activate MDV
+  deactivate MDV
+end
+
+PMC <-- PM: Update successful
+deactivate PM
+
+MDV <-- PMC: Success notification
+deactivate PMC
+MDV -> MDV: Display success message\nwith updated role
+activate MDV
+deactivate MDV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-project-members-update-member-role" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Select new role for a member;
+
+|S|
+:(2) Verify user has MANAGER role;
+
+if (Is Manager?) then (No)
+  :(2.1) Display "Access denied" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display confirmation dialog;
+
+|U|
+:(4) Click "Confirm";
+
+|S|
+:(5) Update member role in project_members;
+:(6) Notify success;
+
+|U|
+:(7) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-project-members-update-member-role" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC32 |
+| Name | Update Member Role |
+| Actor(s) | pm |
+| Priority | Medium |
+| Trigger | Select new role for a member |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Update member role in project_members Notify success |
+| Basic Flow | 1. Select new role for a member<br>2. Verify user has MANAGER role<br>3. Display confirmation dialog<br>4. Click "Confirm"<br>5. Update member role in project_members<br>6. Notify success |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Access denied" error |
+| Related UI screen(s) | [Project settings members](/docs/ui-specification#project-settings-members) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/project-members/update-member-role) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/project-members/update-member-role) |
+| Related database table(s) | project_members |
+
+### UC33 — Remove Member from Project
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary MemberListView as MLV
+control ProjectMemberController as PMC
+entity PROJECT_MEMBERS as PM
+
+U -> MLV: Click "Remove" on a member
+activate U
+activate MLV
+MLV -> MLV: Display confirmation dialog\n"Remove this member from the project?"
+activate MLV
+deactivate MLV
+
+U -> MLV: Click "Confirm"
+deactivate U
+
+MLV -> PMC: Send remove request
+activate PMC
+
+break Removing only MANAGER
+  PMC <-- PM: Cannot remove
+  MLV <-- PMC: Error notification
+  MLV -> MLV: Display "Cannot remove the only\nmanager. Transfer role first."
+  activate MLV
+  deactivate MLV
+end
+
+PMC <-- PM: Can remove
+deactivate PM
+
+PMC -> PM: Delete member record
+activate PM
+PM -> PM: Delete record
+activate PM
+deactivate PM
+PMC <-- PM: Delete successful
+deactivate PM
+
+MLV <-- PMC: Success notification
+deactivate PMC
+MLV -> MLV: Remove member from list\nand display success message
+activate MLV
+deactivate MLV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-project-members-remove-member-from-project" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Remove" on a member;
+
+|S|
+:(2) Check if target is the only MANAGER;
+
+if (Only Manager?) then (Yes)
+  :(2.1) Display "Cannot remove only manager" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (No)
+endif
+
+:(3) Display confirmation dialog;
+
+|U|
+:(4) Click "Confirm";
+
+|S|
+:(5) Delete project_member record;
+:(6) Notify success;
+
+|U|
+:(7) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-project-members-remove-member-from-project" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC33 |
+| Name | Remove Member from Project |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Click "Remove" on a member |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Delete project_member record Notify success |
+| Basic Flow | 1. Click "Remove" on a member<br>2. Check if target is the only MANAGER<br>3. Display confirmation dialog<br>4. Click "Confirm"<br>5. Delete project_member record<br>6. Notify success |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Cannot remove only manager" error |
+| Related UI screen(s) | [Project settings members](/docs/ui-specification#project-settings-members) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/project-members/remove-member-from-project) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/project-members/remove-member-from-project) |
+| Related database table(s) | project_members |
+
+### UC34 — View Sprint List
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary SprintListView as SLV
+control SprintController as SC
+entity PROJECT_MEMBERS as PM
+entity SPRINTS as SP
+
+U -> SLV: Access sprint list page
+activate U
+activate SLV
+
+SLV -> SC: Request sprint list (project_id)
+activate SC
+
+SC -> SP: Query sprints by project_id
+activate SP
+SP -> SP: Query sprint records
+activate SP
+deactivate SP
+SC <-- SP: Sprints data
+deactivate SP
+
+SLV <-- SC: Sprint list
+
+SLV -> SLV: Display sprint list\n(name, status, goal, dates)
+activate SLV
+deactivate SLV
+
+deactivate SC
+deactivate SLV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-sprint-management-view-sprint-list" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Select Sprints section;
+
+|S|
+:(2) Query all sprints for the project \n (with task count);
+
+if (Check has sprints?) then (No)
+  :(2.1) Display "No sprints created yet" notification \n with create sprint button;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display sprint list \n (name, status, goal, start/end date, task count);
+
+|U|
+:(4) Enter filter criteria \n (status: PLANNING/IN_PROGRESS/COMPLETED);
+:(5) Click "Filter";
+
+|S|
+:(6) Apply filter criteria to query;
+
+if (Has results?) then (No)
+  :(6.1) Display "No results found" notification;
+  |U|
+else (Yes)
+  |S|
+  :(7) Display filtered sprint list \n (name, status, goal, start/end date, task count);
+  |U|
+endif
+
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-sprint-management-view-sprint-list" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC34 |
+| Name | View Sprint List |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Select Sprints section |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Display "No results found" notification Display filtered sprint list (name, status, goal, start/end date, task count) |
+| Basic Flow | 1. Select Sprints section<br>2. Query all sprints for the project (with task count)<br>3. Display "No sprints created yet" notification with create sprint button<br>4. Display sprint list (name, status, goal, start/end date, task count)<br>5. Enter filter criteria (status: PLANNING/IN_PROGRESS/COMPLETED)<br>6. Click "Filter"<br>7. Apply filter criteria to query<br>8. Display "No results found" notification<br>9. Display filtered sprint list (name, status, goal, start/end date, task count) |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Unauthorized or insufficient permission rejects the request.<br>2. Invalid input or missing target resource returns an error and leaves data unchanged. |
+| Related UI screen(s) | [Sprint backlog](/docs/ui-specification#sprint-backlog) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/sprint-management/view-sprint-list) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/sprint-management/view-sprint-list) |
+| Related database table(s) | sprints |
+
+### UC35 — View Sprint Details
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary SprintDetailView as SDV
+control SprintController as SC
+entity PROJECT_MEMBERS as PM
+entity SPRINTS as SP
+
+U -> SDV: Click on a sprint
+activate U
+activate SDV
+
+SDV -> SC: Request sprint details (project_id, sprint_id)
+activate SC
+
+SC -> SP: Query sprint by sprint_id
+activate SP
+SP -> SP: Query sprint record
+activate SP
+deactivate SP
+
+break Sprint not found
+    SC <-- SP: 404 Not found
+    SDV <-- SC: Error notification
+    SDV -> SDV: Display error message
+    activate SDV
+    deactivate SDV
+end
+
+SC <-- SP: Sprint data
+deactivate SP
+SDV <-- SC: Sprint details
+
+SDV -> SDV: Display sprint details\n(name, goal, status, heuristic_mode,\nstart/end date, task count)
+activate SDV
+deactivate SDV
+
+deactivate SC
+deactivate SDV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-sprint-management-view-sprint-details" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click on a sprint from sprint list;
+
+|S|
+:(2) Query sprint details by sprint_id \n (name, goal, status, heuristic_mode, \n start_date, end_date);
+
+if (Sprint found?) then (No)
+  :(2.1) Display "Sprint not found" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Query sprint's tasks \n (list with title, status, priority, assignee);
+:(4) Count tasks by status \n (TODO / IN_PROGRESS / REVIEW / DONE);
+:(5) Calculate sprint progress \n (% tasks in DONE status);
+:(6) Display sprint details \n (name, goal, status, heuristic_mode, \n start/end date, task list, \n status breakdown, progress %);
+
+|U|
+:(7) View sprint details;
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-sprint-management-view-sprint-details" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC35 |
+| Name | View Sprint Details |
+| Actor(s) | pm, mem |
+| Priority | Medium-High |
+| Trigger | Click on a sprint from sprint list |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Display sprint details (name, goal, status, heuristic_mode, start/end date, task list, status breakdown, progress %) |
+| Basic Flow | 1. Click on a sprint from sprint list<br>2. Query sprint details by sprint_id (name, goal, status, heuristic_mode, start_date, end_date)<br>3. Query sprint's tasks (list with title, status, priority, assignee)<br>4. Count tasks by status (TODO / IN_PROGRESS / REVIEW / DONE)<br>5. Calculate sprint progress (% tasks in DONE status)<br>6. Display sprint details (name, goal, status, heuristic_mode, start/end date, task list, status breakdown, progress %)<br>7. View sprint details |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Sprint not found" error |
+| Related UI screen(s) | [Sprint backlog](/docs/ui-specification#sprint-backlog) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/sprint-management/view-sprint-details) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/sprint-management/view-sprint-details) |
+| Related database table(s) | sprints |
+
+### UC36 — Create New Sprint
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary SprintListView as SLV
+boundary CreateSprintView as CSV
+control SprintController as SC
+entity PROJECT_MEMBERS as PM
+entity SPRINTS as SP
+
+U -> SLV: Click "Create Sprint"
+activate U
+activate SLV
+
+SLV -> CSV: Navigate to create form
+deactivate SLV
+activate CSV
+
+CSV -> SC: Initialize create form (project_id)
+activate SC
+
+CSV <-- SC: Form ready
+
+CSV -> CSV: Display create sprint form\n(name, goal, start/end date,\nheuristic_mode)
+activate CSV
+deactivate CSV
+
+U -> CSV: Enter sprint information
+U -> CSV: Click "Create"
+deactivate U
+
+CSV -> CSV: Validate data
+activate CSV
+deactivate CSV
+
+break Invalid data
+    CSV -> CSV: Display validation errors
+    activate CSV
+    deactivate CSV
+end
+
+CSV -> SC: Send create request
+
+SC -> SP: Insert new sprint
+activate SP
+SP -> SP: Insert record (status = PLANNING)
+activate SP
+deactivate SP
+SC <-- SP: Sprint created
+deactivate SP
+
+CSV <-- SC: Success notification
+
+CSV -> CSV: Display success message
+activate CSV
+deactivate CSV
+CSV -> SLV: Redirect to sprint list
+deactivate CSV
+
+deactivate SC
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-sprint-management-create-new-sprint" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Create Sprint";
+
+|S|
+:(2) Verify user has MANAGER role;
+
+if (Is Manager?) then (No)
+  :(2.1) Display "Access denied" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display form (name, start/end date);
+
+repeat
+  |U|
+  :(4) Enter sprint information;
+  :(5) Click "Create";
+
+  |S|
+  :(6) Validate sprint data;
+  backward: (6.1) Display validation error;
+repeat while (Data valid?) is (No) not (Yes)
+
+:(7) Insert sprint record;
+:(8) Notify success;
+
+|U|
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-sprint-management-create-new-sprint" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC36 |
+| Name | Create New Sprint |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Click "Create Sprint" |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Insert sprint record Notify success |
+| Basic Flow | 1. Click "Create Sprint"<br>2. Verify user has MANAGER role<br>3. Display form (name, start/end date)<br>4. Enter sprint information<br>5. Click "Create"<br>6. Validate sprint data<br>7. Insert sprint record<br>8. Notify success |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Access denied" error<br>2. Display validation error |
+| Related UI screen(s) | [Sprint backlog](/docs/ui-specification#sprint-backlog) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/sprint-management/create-new-sprint) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/sprint-management/create-new-sprint) |
+| Related database table(s) | sprints |
+
+### UC37 — Update Sprint Information
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary SprintDetailView as SDV
+control SprintController as SC
+entity PROJECT_MEMBERS as PM
+entity SPRINTS as SP
+
+U -> SDV: Click "Edit Sprint"
+activate U
+activate SDV
+
+SDV -> SC: Request edit (project_id, sprint_id)
+activate SC
+
+SDV <-- SC: Sprint data
+
+SDV -> SDV: Display edit form\n(name, goal, dates, heuristic_mode)
+activate SDV
+deactivate SDV
+
+U -> SDV: Modify sprint information
+U -> SDV: Click "Save"
+deactivate U
+
+SDV -> SDV: Validate data
+activate SDV
+deactivate SDV
+
+break Invalid data
+    SDV -> SDV: Display validation errors
+    activate SDV
+    deactivate SDV
+end
+
+SDV -> SC: Send update request
+
+SC -> SP: Update sprint record
+activate SP
+SP -> SP: Update record
+activate SP
+deactivate SP
+SC <-- SP: Update successful
+deactivate SP
+
+SDV <-- SC: Success notification
+
+SDV -> SDV: Display success message
+activate SDV
+deactivate SDV
+
+deactivate SC
+deactivate SDV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-sprint-management-update-sprint-information" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Edit" on a sprint;
+
+|S|
+:(2) Verify user has MANAGER role;
+
+if (Is Manager?) then (No)
+  :(2.1) Display "Access denied" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display edit form (name, dates);
+
+repeat
+  |U|
+  :(4) Modify sprint information;
+  :(5) Click "Save";
+
+  |S|
+  :(6) Validate sprint data;
+  backward: (6.1) Display validation error;
+repeat while (Data valid?) is (No) not (Yes)
+
+:(7) Update sprint record;
+:(8) Notify success;
+
+|U|
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-sprint-management-update-sprint-information" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC37 |
+| Name | Update Sprint Information |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Click "Edit" on a sprint |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Update sprint record Notify success |
+| Basic Flow | 1. Click "Edit" on a sprint<br>2. Verify user has MANAGER role<br>3. Display edit form (name, dates)<br>4. Modify sprint information<br>5. Click "Save"<br>6. Validate sprint data<br>7. Update sprint record<br>8. Notify success |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Access denied" error<br>2. Display validation error |
+| Related UI screen(s) | [Sprint backlog](/docs/ui-specification#sprint-backlog) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/sprint-management/update-sprint-information) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/sprint-management/update-sprint-information) |
+| Related database table(s) | sprints |
+
+### UC38 — Start / Complete Sprint
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary SprintDetailView as SDV
+control SprintController as SC
+entity PROJECT_MEMBERS as PM
+entity SPRINTS as SP
+
+U -> SDV: Click "Start Sprint" or "Complete Sprint"
+activate U
+activate SDV
+
+SDV -> SC: Send status change request (project_id, sprint_id)
+activate SC
+
+SC -> SP: Query current sprint status
+activate SP
+SP -> SP: Query by sprint_id
+activate SP
+deactivate SP
+SC <-- SP: Current status
+deactivate SP
+
+break Invalid status transition
+    SDV <-- SC: Error notification
+    SDV -> SDV: Display "Invalid status transition" error
+    activate SDV
+    deactivate SDV
+end
+
+SC -> SP: Update sprint status
+activate SP
+SP -> SP: Update status (PLANNING->ACTIVE or ACTIVE->COMPLETED)
+activate SP
+deactivate SP
+SC <-- SP: Update successful
+deactivate SP
+
+SDV <-- SC: Success notification
+
+SDV -> SDV: Display updated status badge
+activate SDV
+deactivate SDV
+
+deactivate SC
+deactivate SDV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-sprint-management-start-complete-sprint" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Start Sprint" or "Complete Sprint";
+
+|S|
+:(2) Verify user has MANAGER role;
+
+if (Is Manager?) then (No)
+  :(2.1) Display "Access denied" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Query current sprint status;
+:(4) Verify valid status transition \n (PLANNING→IN_PROGRESS, IN_PROGRESS→COMPLETED);
+
+if (Transition valid?) then (No)
+  :(4.1) Display "Invalid status transition" error;
+  |U|
+  :(4.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(5) Display confirmation dialog;
+
+|U|
+:(6) Click "Confirm";
+
+|S|
+:(7) Update sprint status \n (IN_PROGRESS or COMPLETED);
+:(8) Notify success;
+
+|U|
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-sprint-management-start-complete-sprint" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC38 |
+| Name | Start / Complete Sprint |
+| Actor(s) | pm, mem |
+| Priority | Medium-High |
+| Trigger | Click "Start Sprint" or "Complete Sprint" |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Update sprint status (IN_PROGRESS or COMPLETED) Notify success |
+| Basic Flow | 1. Click "Start Sprint" or "Complete Sprint"<br>2. Verify user has MANAGER role<br>3. Query current sprint status<br>4. Verify valid status transition (PLANNING→IN_PROGRESS, IN_PROGRESS→COMPLETED)<br>5. Display confirmation dialog<br>6. Click "Confirm"<br>7. Update sprint status (IN_PROGRESS or COMPLETED)<br>8. Notify success |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Access denied" error<br>2. Display "Invalid status transition" error |
+| Related UI screen(s) | [Sprint backlog](/docs/ui-specification#sprint-backlog) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/sprint-management/start-complete-sprint) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/sprint-management/start-complete-sprint) |
+| Related database table(s) | sprints |
+
+### UC39 — Delete Sprint
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary SprintListView as SLV
+control SprintController as SC
+entity PROJECT_MEMBERS as PM
+entity SPRINTS as SP
+entity TASKS as T
+
+U -> SLV: Click "Delete" on a sprint
+activate U
+activate SLV
+
+SLV -> SC: Send delete request (project_id, sprint_id)
+activate SC
+
+SLV <-- SC: Confirm dialog
+
+SLV -> SLV: Display confirmation\n"Delete this sprint?\nRemaining tasks will be\nmoved to backlog."
+activate SLV
+deactivate SLV
+
+U -> SLV: Click "Confirm"
+deactivate U
+
+SLV -> SC: Confirm delete
+
+SC -> T: Move remaining tasks to backlog
+activate T
+T -> T: Set sprint_id = NULL for related tasks
+activate T
+deactivate T
+SC <-- T: Tasks moved
+deactivate T
+
+SC -> SP: Delete sprint
+activate SP
+SP -> SP: Delete record
+activate SP
+deactivate SP
+SC <-- SP: Delete successful
+deactivate SP
+
+SLV <-- SC: Success notification
+
+SLV -> SLV: Remove sprint from list\nand display success message
+activate SLV
+deactivate SLV
+
+deactivate SC
+deactivate SLV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-sprint-management-delete-sprint" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Delete Sprint";
+
+|S|
+:(1.1) Query sprint details by sprint_id;
+
+if (Sprint found?) then (No)
+  :(1.2) Display "Sprint not found" error;
+  |U|
+  :(1.3) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(2) Verify user has MANAGER role;
+
+if (Is Manager?) then (No)
+  :(2.1) Display "Access denied" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display confirmation dialog \n "Delete [sprint name]? All tasks in this \n sprint will be moved to backlog.";
+
+|U|
+:(4) Click "Confirm";
+
+|S|
+:(5.1) Move remaining tasks to backlog \n (set sprint_id = NULL);
+:(5.2) Delete sprint record;
+:(6) Notify success;
+
+|U|
+:(7) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-sprint-management-delete-sprint" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC39 |
+| Name | Delete Sprint |
+| Actor(s) | pm, mem |
+| Priority | Medium-High |
+| Trigger | Click "Delete Sprint" |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Delete sprint record Notify success |
+| Basic Flow | 1. Click "Delete Sprint"<br>2. Query sprint details by sprint_id<br>3. Verify user has MANAGER role<br>4. Display confirmation dialog "Delete [sprint name]? All tasks in this sprint will be moved to backlog."<br>5. Click "Confirm"<br>6. Move remaining tasks to backlog (set sprint_id = NULL)<br>7. Delete sprint record<br>8. Notify success |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Sprint not found" error<br>2. Display "Access denied" error |
+| Related UI screen(s) | [Sprint backlog](/docs/ui-specification#sprint-backlog) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/sprint-management/delete-sprint) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/sprint-management/delete-sprint) |
+| Related database table(s) | sprints, tasks |
+
+### UC40 — View Kanban Board
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary KanbanView as KV
+control TaskController as TC
+entity PROJECT_MEMBERS as PM
+entity TASKS as T
+
+U -> KV: Access Kanban board (project_id)
+activate U
+activate KV
+
+KV -> TC: Request Kanban data (project_id, sprint_id)
+activate TC
+
+TC -> T: Query tasks grouped by status
+activate T
+T -> T: Query by project_id and sprint_id
+activate T
+deactivate T
+TC <-- T: Tasks data
+deactivate T
+
+KV <-- TC: Kanban data
+
+KV -> KV: Display Kanban columns\n(TODO, IN_PROGRESS, REVIEW, DONE)\nwith task cards
+activate KV
+deactivate KV
+
+deactivate TC
+deactivate KV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-task-management-view-kanban-board" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Select Kanban Board;
+
+|S|
+:(2) Query active sprints for the project;
+
+if (Has active sprint?) then (No)
+  :(2.1) Fall back to backlog items \n (tasks where sprint_id = NULL);
+else (Yes)
+endif
+
+:(3) Display sprint selector \n (list of sprints to choose from);
+
+|U|
+:(4) Select sprint to view \n (or keep default active sprint);
+
+|S|
+:(5) Query tasks for selected sprint \n grouped by status;
+
+if (Check has tasks?) then (No)
+  :(5.1) Display empty board \n with "No tasks in this sprint" notification \n and create task button;
+  |U|
+  :(5.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(6) Display kanban board columns \n (TODO / IN_PROGRESS / REVIEW / DONE) \n with task cards;
+
+:(7) Check each column for emptiness;
+
+if (Column is empty?) then (Yes)
+  :(7.1) Display "No tasks" placeholder \n in empty column;
+  |U|
+else (No)
+  |U|
+endif
+
+:(8) View kanban board;
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-task-management-view-kanban-board" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC40 |
+| Name | View Kanban Board |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Select Kanban Board |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Display kanban board columns (TODO / IN_PROGRESS / REVIEW / DONE) with task cards Display "No tasks" placeholder in empty column |
+| Basic Flow | 1. Select Kanban Board<br>2. Query active sprints for the project<br>3. Fall back to backlog items (tasks where sprint_id = NULL)<br>4. Display sprint selector (list of sprints to choose from)<br>5. Select sprint to view (or keep default active sprint)<br>6. Query tasks for selected sprint grouped by status<br>7. Display empty board with "No tasks in this sprint" notification and create task button<br>8. Display kanban board columns (TODO / IN_PROGRESS / REVIEW / DONE) with task cards<br>9. Check each column for emptiness<br>10. Display "No tasks" placeholder in empty column<br>11. View kanban board |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Unauthorized or insufficient permission rejects the request.<br>2. Invalid input or missing target resource returns an error and leaves data unchanged. |
+| Related UI screen(s) | [Kanban board](/docs/ui-specification#kanban-board) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/task-management/view-kanban-board) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/task-management/view-kanban-board) |
+| Related database table(s) | tasks |
+
+### UC41 — View Backlog
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary BacklogView as BV
+control TaskController as TC
+entity PROJECT_MEMBERS as PM
+entity TASKS as T
+
+U -> BV: Access Backlog page (project_id)
+activate U
+activate BV
+
+BV -> TC: Request backlog data (project_id)
+activate TC
+
+TC -> T: Query tasks with sprint_id = NULL
+activate T
+T -> T: Query unassigned tasks
+activate T
+deactivate T
+TC <-- T: Backlog tasks data
+deactivate T
+
+BV <-- TC: Backlog data
+
+BV -> BV: Display backlog list\n(title, priority, assignee, tags)
+activate BV
+deactivate BV
+
+deactivate TC
+deactivate BV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-task-management-view-backlog" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Select Backlog;
+
+|S|
+:(2) Query tasks where sprint_id = NULL \n (with assignee info, tags);
+
+if (Check has backlog items?) then (No)
+  :(2.1) Display "Backlog is empty" notification \n with create task button;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display backlog list \n (title, priority, assignee, tags, difficulty_level);
+
+|U|
+:(4) Enter filter criteria \n (keyword: task title, \n priority: LOW/MEDIUM/HIGH/CRITICAL, \n assignee);
+:(5) Click "Filter";
+
+|S|
+:(6) Apply filter criteria to query;
+
+if (Has results?) then (No)
+  :(6.1) Display "No results found" notification;
+  |U|
+else (Yes)
+  |S|
+  :(7) Display filtered backlog list \n (title, priority, assignee, tags, difficulty_level);
+  |U|
+endif
+
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-task-management-view-backlog" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC41 |
+| Name | View Backlog |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Select Backlog |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Display "No results found" notification Display filtered backlog list (title, priority, assignee, tags, difficulty_level) |
+| Basic Flow | 1. Select Backlog<br>2. Query tasks where sprint_id = NULL (with assignee info, tags)<br>3. Display "Backlog is empty" notification with create task button<br>4. Display backlog list (title, priority, assignee, tags, difficulty_level)<br>5. Enter filter criteria (keyword: task title, priority: LOW/MEDIUM/HIGH/CRITICAL, assignee)<br>6. Click "Filter"<br>7. Apply filter criteria to query<br>8. Display "No results found" notification<br>9. Display filtered backlog list (title, priority, assignee, tags, difficulty_level) |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Unauthorized or insufficient permission rejects the request.<br>2. Invalid input or missing target resource returns an error and leaves data unchanged. |
+| Related UI screen(s) | [Sprint backlog](/docs/ui-specification#sprint-backlog) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/task-management/view-backlog) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/task-management/view-backlog) |
+| Related database table(s) | tasks, sprints |
+
+### UC42 — View Workload
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary WorkloadView as WV
+control TaskController as TC
+entity PROJECT_MEMBERS as PM
+entity TASKS as T
+
+U -> WV: Access Workload page (project_id)
+activate U
+activate WV
+
+WV -> TC: Request workload data (project_id)
+activate TC
+
+TC -> PM: Query all members of project
+activate PM
+PM -> PM: Query by project_id (join users)
+activate PM
+deactivate PM
+TC <-- PM: Members data
+deactivate PM
+
+TC -> T: Query assigned tasks per member
+activate T
+T -> T: Query by project_id, group by assignee_id
+activate T
+deactivate T
+TC <-- T: Task assignments data
+deactivate T
+
+WV <-- TC: Workload data
+
+WV -> WV: Display workload overview\n(member name, current_workload,\nassigned tasks count)
+activate WV
+deactivate WV
+
+deactivate TC
+deactivate WV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-task-management-view-workload" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Select Workload view;
+
+|S|
+:(2) Query project members \n (join project_members with users);
+
+if (Check has members?) then (No)
+  :(2.1) Display "No members in project" notification;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Query assigned tasks per member \n (count tasks grouped by assignee_id);
+
+:(4) Calculate workload per member \n (current_workload = assigned task count, \n flag members exceeding threshold as overloaded);
+
+:(5) Display workload chart \n (member name, current_workload, \n assigned task count, overloaded flag);
+
+|U|
+:(6) View workload chart;
+:(7) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-task-management-view-workload" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC42 |
+| Name | View Workload |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Select Workload view |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Display "No members in project" notification Display workload chart (member name, current_workload, assigned task count, overloaded flag) |
+| Basic Flow | 1. Select Workload view<br>2. Query project members (join project_members with users)<br>3. Display "No members in project" notification<br>4. Query assigned tasks per member (count tasks grouped by assignee_id)<br>5. Calculate workload per member (current_workload = assigned task count, flag members exceeding threshold as overloaded)<br>6. Display workload chart (member name, current_workload, assigned task count, overloaded flag)<br>7. View workload chart |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Calculate workload per member (current_workload = assigned task count, flag members exceeding threshold as overloaded)<br>2. Display workload chart (member name, current_workload, assigned task count, overloaded flag) |
+| Related UI screen(s) | [Project settings members](/docs/ui-specification#project-settings-members)<br>[Task detail](/docs/ui-specification#task-detail) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/task-management/view-workload) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/task-management/view-workload) |
+| Related database table(s) | tasks, users |
+
+### UC43 — View Task Details
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary TaskDetailView as TDV
+control TaskController as TC
+entity PROJECT_MEMBERS as PM
+entity TASKS as T
+
+U -> TDV: Click on a task
+activate U
+activate TDV
+
+TDV -> TC: Request task details (project_id, task_id)
+activate TC
+
+TC -> T: Query task by task_id
+activate T
+T -> T: Query task record (join users for assignee/reporter)
+activate T
+deactivate T
+
+break Task not found
+    TC <-- T: 404 Not found
+    TDV <-- TC: Error notification
+    TDV -> TDV: Display error message
+    activate TDV
+    deactivate TDV
+end
+
+TC <-- T: Task data
+deactivate T
+TDV <-- TC: Task details
+
+TDV -> TDV: Display task details\n(title, description, status, priority,\nassignee, reporter, tags, dates,\ndifficulty_level, sub-tasks)
+activate TDV
+deactivate TDV
+
+deactivate TC
+deactivate TDV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-task-management-view-task-details" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click on a task;
+
+|S|
+:(2) Query task details by task_id \n (title, description, status, priority, \n assignee, reporter, tags, \n difficulty_level, required_skills, \n start_date, end_date);
+
+if (Task found?) then (No)
+  :(2.1) Display "Task not found" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Query sub-tasks \n (tasks where parent_id = task_id, \n ordered by created_at ASC);
+:(4) Query comments for this task \n (join with users for author info, \n ordered by created_at ASC);
+:(5) Display task details \n (title, description, status, priority, \n assignee, reporter, tags, difficulty_level, \n required_skills, dates, \n sub-tasks list, comments list, \n edit / delete / assign buttons);
+
+|U|
+:(6) View task details;
+:(7) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-task-management-view-task-details" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC43 |
+| Name | View Task Details |
+| Actor(s) | pm, mem |
+| Priority | Medium-High |
+| Trigger | Click on a task |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Query comments for this task (join with users for author info, ordered by created_at ASC) Display task details (title, description, status, priority, assignee, reporter, tags, difficulty_level, required_skills, dates, sub-tasks list, comments list, edit / delete / assign buttons) |
+| Basic Flow | 1. Click on a task<br>2. Query task details by task_id (title, description, status, priority, assignee, reporter, tags, difficulty_level, required_skills, start_date, end_date)<br>3. Query sub-tasks (tasks where parent_id = task_id, ordered by created_at ASC)<br>4. Query comments for this task (join with users for author info, ordered by created_at ASC)<br>5. Display task details (title, description, status, priority, assignee, reporter, tags, difficulty_level, required_skills, dates, sub-tasks list, comments list, edit / delete / assign buttons)<br>6. View task details |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Task not found" error |
+| Related UI screen(s) | [Task detail](/docs/ui-specification#task-detail) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/task-management/view-task-details) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/task-management/view-task-details) |
+| Related database table(s) | tasks, task_required_skills, task_labels |
+
+### UC45 — Update Task Information
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary TaskDetailView as TDV
+control TaskController as TC
+entity PROJECT_MEMBERS as PM
+entity TASKS as T
+
+U -> TDV: Click "Edit Task"
+activate U
+activate TDV
+
+TDV -> TC: Request edit (project_id, task_id)
+activate TC
+
+TDV <-- TC: Task data
+
+TDV -> TDV: Display edit form\n(title, description, priority,\ntags, difficulty_level, dates)
+activate TDV
+deactivate TDV
+
+U -> TDV: Modify task information
+U -> TDV: Click "Save"
+deactivate U
+
+TDV -> TC: Send update request
+
+TC -> T: Update task record
+activate T
+T -> T: Update record, set updated_at = NOW()
+activate T
+deactivate T
+TC <-- T: Update successful
+deactivate T
+
+TDV <-- TC: Success notification
+
+TDV -> TDV: Display success message
+activate TDV
+deactivate TDV
+
+deactivate TC
+deactivate TDV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-task-management-update-task-information" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Edit" on a task;
+
+|S|
+:(2) Query current task details;
+
+if (Task found?) then (No)
+  :(2.1) Display "Task not found" error;
+  |U|
+  stop
+else (Yes)
+endif
+
+:(3) Display edit form \n (title, description, priority, sprint, \n tags, difficulty, required_skills) \n with current data pre-filled;
+
+repeat
+  |U|
+  :(4) Modify task information;
+  :(5) Click "Save";
+
+  |S|
+  :(6) Validate task data;
+  backward: (6.1) Display validation error;
+repeat while (Data valid?) is (No) not (Yes)
+
+:(7) Update task record;
+:(7.1) Notify task watchers of changes;
+:(8) Notify success;
+
+|U|
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-task-management-update-task-information" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC45 |
+| Name | Update Task Information |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Click "Edit" on a task |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Notify task watchers of changes Notify success |
+| Basic Flow | 1. Click "Edit" on a task<br>2. Query current task details<br>3. Display edit form (title, description, priority, sprint, tags, difficulty, required_skills) with current data pre-filled<br>4. Modify task information<br>5. Click "Save"<br>6. Validate task data<br>7. Update task record<br>8. Notify task watchers of changes<br>9. Notify success |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Task not found" error<br>2. Display validation error |
+| Related UI screen(s) | [Task detail](/docs/ui-specification#task-detail) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/task-management/update-task-information) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/task-management/update-task-information) |
+| Related database table(s) | tasks, task_required_skills, task_labels |
+
+### UC48 — Delete Task
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary TaskDetailView as TDV
+control TaskController as TC
+entity PROJECT_MEMBERS as PM
+entity TASKS as T
+
+U -> TDV: Click "Delete Task"
+activate U
+activate TDV
+
+TDV -> TC: Send delete request (project_id, task_id)
+activate TC
+
+TDV <-- TC: Confirm dialog
+
+TDV -> TDV: Display confirmation\n"Delete this task?\nSub-tasks will also be deleted."
+activate TDV
+deactivate TDV
+
+U -> TDV: Click "Confirm"
+deactivate U
+
+TDV -> TC: Confirm delete
+
+TC -> T: Delete task (CASCADE sub-tasks)
+activate T
+T -> T: Delete record and sub-tasks
+activate T
+deactivate T
+TC <-- T: Delete successful
+deactivate T
+
+TDV <-- TC: Success notification
+
+TDV -> TDV: Redirect to Kanban/Backlog
+activate TDV
+deactivate TDV
+
+deactivate TC
+deactivate TDV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-task-management-delete-task" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Delete Task";
+
+|S|
+:(2) Verify user is project member \n (MANAGER role, or task reporter/assignee);
+
+if (User authorized?) then (No)
+  :(2.1) Display "Access denied" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+|S|
+:(3) Check if task has sub-tasks;
+:(4) Display confirmation dialog \n "Delete this task? \n Sub-tasks will also be deleted (N sub-tasks).";
+
+|U|
+:(5) Click "Confirm";
+
+|S|
+:(6) Delete task \n (CASCADE sub-tasks and comments);
+:(7) Notify success and redirect \n to Kanban / Backlog view;
+
+|U|
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-task-management-delete-task" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC48 |
+| Name | Delete Task |
+| Actor(s) | pm, mem |
+| Priority | Medium-High |
+| Trigger | Click "Delete Task" |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Delete task (CASCADE sub-tasks and comments) Notify success and redirect to Kanban / Backlog view |
+| Basic Flow | 1. Click "Delete Task"<br>2. Verify user is project member (MANAGER role, or task reporter/assignee)<br>3. Check if task has sub-tasks<br>4. Display confirmation dialog "Delete this task? Sub-tasks will also be deleted (N sub-tasks)."<br>5. Click "Confirm"<br>6. Delete task (CASCADE sub-tasks and comments)<br>7. Notify success and redirect to Kanban / Backlog view |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Access denied" error |
+| Related UI screen(s) | [Kanban board](/docs/ui-specification#kanban-board)<br>[Task detail](/docs/ui-specification#task-detail) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/task-management/delete-task) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/task-management/delete-task) |
+| Related database table(s) | tasks |
+
+### UC49 — View Comments
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary CommentView as CV
+control CommentController as CC
+entity PROJECT_MEMBERS as PM
+entity COMMENTS as C
+
+U -> CV: Open comments section on a task
+activate U
+activate CV
+
+CV -> CC: Request comments (project_id, task_id)
+activate CC
+
+CC -> C: Query comments by task_id
+activate C
+C -> C: Query records (join users)
+activate C
+deactivate C
+CC <-- C: Comments data
+deactivate C
+
+CV <-- CC: Comment list
+
+CV -> CV: Display comments\n(author, content, created_at)
+activate CV
+deactivate CV
+
+deactivate CC
+deactivate CV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-interaction-communication-view-comments" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) View task details page;
+
+|S|
+:(2) Query comments for the task \n (join with users for author info);
+
+if (Check has comments?) then (No)
+  :(2.1) Display "No comments yet" notification \n with add comment prompt;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display comment list \n (author, content, created_at);
+
+:(4) Check if current user owns each comment;
+
+if (Is comment owner?) then (Yes)
+  :(4.1) Show edit and delete buttons \n alongside own comments;
+  |U|
+else (No)
+  |U|
+endif
+
+:(5) View comments;
+:(6) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-interaction-communication-view-comments" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC49 |
+| Name | View Comments |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | View task details page |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Display comment list (author, content, created_at) Show edit and delete buttons alongside own comments |
+| Basic Flow | 1. View task details page<br>2. Query comments for the task (join with users for author info)<br>3. Display "No comments yet" notification with add comment prompt<br>4. Display comment list (author, content, created_at)<br>5. Check if current user owns each comment<br>6. Show edit and delete buttons alongside own comments<br>7. View comments |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Unauthorized or insufficient permission rejects the request.<br>2. Invalid input or missing target resource returns an error and leaves data unchanged. |
+| Related UI screen(s) | [Comment](/docs/ui-specification#comment) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/interaction-communication/view-comments) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/interaction-communication/view-comments) |
+| Related database table(s) | comments |
+
+### UC50 — Write Comment
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary CommentView as CV
+control CommentController as CC
+entity PROJECT_MEMBERS as PM
+entity COMMENTS as C
+
+U -> CV: Click "Add Comment"
+activate U
+activate CV
+
+CV -> CC: Initialize comment (project_id, task_id)
+activate CC
+
+CV <-- CC: Ready
+
+CV -> CV: Display comment input field
+activate CV
+deactivate CV
+
+U -> CV: Type comment content
+U -> CV: Click "Submit"
+deactivate U
+
+CV -> CV: Validate content (not empty)
+activate CV
+deactivate CV
+
+break Empty content
+    CV -> CV: Display validation error
+    activate CV
+    deactivate CV
+end
+
+CV -> CC: Send create comment request
+
+CC -> C: Insert new comment
+activate C
+C -> C: Insert record (user_id, task_id, content)
+activate C
+deactivate C
+CC <-- C: Comment created
+deactivate C
+
+CV <-- CC: Success notification
+
+CV -> CV: Display new comment in list
+activate CV
+deactivate CV
+
+deactivate CC
+deactivate CV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-interaction-communication-write-comment" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Write Comment" on task details page;
+
+|S|
+:(2) Verify user is a project member;
+
+if (Is member?) then (No)
+  :(2.1) Display "Access denied" error;
+  |U|
+  stop
+else (Yes)
+endif
+
+:(3) Display comment input area;
+
+repeat
+  |U|
+  :(4) Enter comment text;
+  :(5) Click "Submit";
+
+  |S|
+  :(6) Validate comment not empty;
+  backward: (6.1) Display validation error;
+repeat while (Content valid?) is (No) not (Yes)
+
+:(7) Insert comment record;
+:(8) Send notification to task assignee/reporter;
+:(9) Notify success and display new comment;
+
+|U|
+:(10) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-interaction-communication-write-comment" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC50 |
+| Name | Write Comment |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Click "Write Comment" on task details page |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Send notification to task assignee/reporter Notify success and display new comment |
+| Basic Flow | 1. Click "Write Comment" on task details page<br>2. Verify user is a project member<br>3. Display comment input area<br>4. Enter comment text<br>5. Click "Submit"<br>6. Validate comment not empty<br>7. Insert comment record<br>8. Send notification to task assignee/reporter<br>9. Notify success and display new comment |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Access denied" error<br>2. Display validation error |
+| Related UI screen(s) | [Comment](/docs/ui-specification#comment) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/interaction-communication/write-comment) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/interaction-communication/write-comment) |
+| Related database table(s) | comments, comment_mentions, notifications |
+
+### UC51 — Edit Comment
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary CommentView as CV
+control CommentController as CC
+entity PROJECT_MEMBERS as PM
+entity COMMENTS as C
+
+U -> CV: Click "Edit" on own comment
+activate U
+activate CV
+
+CV -> CC: Request edit (project_id, comment_id)
+activate CC
+
+CV <-- CC: Comment data
+
+CV -> CV: Display edit field with current content
+activate CV
+deactivate CV
+
+U -> CV: Modify content and click "Save"
+deactivate U
+
+CV -> CC: Send update request
+
+CC -> C: Update comment content
+activate C
+C -> C: Update record
+activate C
+deactivate C
+CC <-- C: Update successful
+deactivate C
+
+CV <-- CC: Success notification
+
+CV -> CV: Display updated comment
+activate CV
+deactivate CV
+
+deactivate CC
+deactivate CV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-interaction-communication-edit-comment" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Edit" on own comment;
+
+|S|
+:(2) Verify user is comment owner;
+
+if (Is owner?) then (No)
+  :(2.1) Display "Access denied" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display edit form with current content;
+
+repeat
+  |U|
+  :(4) Modify comment text;
+  :(5) Click "Save";
+
+  |S|
+  :(6) Validate comment not empty;
+  backward: (6.1) Display validation error;
+repeat while (Content valid?) is (No) not (Yes)
+
+:(7) Update comment record;
+:(8) Notify success;
+
+|U|
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-interaction-communication-edit-comment" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC51 |
+| Name | Edit Comment |
+| Actor(s) | pm, mem |
+| Priority | Medium |
+| Trigger | Click "Edit" on own comment |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Update comment record Notify success |
+| Basic Flow | 1. Click "Edit" on own comment<br>2. Verify user is comment owner<br>3. Display edit form with current content<br>4. Modify comment text<br>5. Click "Save"<br>6. Validate comment not empty<br>7. Update comment record<br>8. Notify success |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Access denied" error<br>2. Display validation error |
+| Related UI screen(s) | [Comment](/docs/ui-specification#comment) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/interaction-communication/edit-comment) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/interaction-communication/edit-comment) |
+| Related database table(s) | comments, comment_mentions |
+
+### UC52 — Delete Comment
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary CommentView as CV
+control CommentController as CC
+entity PROJECT_MEMBERS as PM
+entity COMMENTS as C
+
+U -> CV: Click "Delete" on own comment
+activate U
+activate CV
+
+CV -> CC: Send delete request (project_id, comment_id)
+activate CC
+
+CV <-- CC: Confirm dialog
+
+CV -> CV: Display confirmation\n"Delete this comment?"
+activate CV
+deactivate CV
+
+U -> CV: Click "Confirm"
+deactivate U
+
+CV -> CC: Confirm delete
+
+CC -> C: Delete comment
+activate C
+C -> C: Delete record
+activate C
+deactivate C
+CC <-- C: Delete successful
+deactivate C
+
+CV <-- CC: Success notification
+
+CV -> CV: Remove comment from list
+activate CV
+deactivate CV
+
+deactivate CC
+deactivate CV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-interaction-communication-delete-comment" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click "Delete" on own comment;
+
+|S|
+:(2) Verify user is comment owner;
+
+if (Is owner?) then (No)
+  :(2.1) Display "Access denied" error;
+  |U|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display confirmation dialog;
+
+|U|
+:(4) Click "Confirm";
+
+|S|
+:(5) Delete comment record;
+:(6) Notify success;
+
+|U|
+:(7) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-interaction-communication-delete-comment" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC52 |
+| Name | Delete Comment |
+| Actor(s) | pm, mem |
+| Priority | Medium-High |
+| Trigger | Click "Delete" on own comment |
+| Pre-condition(s) | User is authenticated and has access to the target project/resource. |
+| Post-condition(s) | Delete comment record Notify success |
+| Basic Flow | 1. Click "Delete" on own comment<br>2. Verify user is comment owner<br>3. Display confirmation dialog<br>4. Click "Confirm"<br>5. Delete comment record<br>6. Notify success |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Access denied" error |
+| Related UI screen(s) | [Comment](/docs/ui-specification#comment) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/interaction-communication/delete-comment) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/interaction-communication/delete-comment) |
+| Related database table(s) | comments |
+
+### UC53 — Receive Notification
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary NotificationView as NV
+control NotificationController as NC
+entity NOTIFICATIONS as N
+
+U -> NV: Access notification panel
+activate U
+activate NV
+
+NV -> NC: Request notifications
+activate NC
+
+NC -> N: Query notifications for user
+activate N
+N -> N: Query by user_id, order by created_at DESC
+activate N
+deactivate N
+NC <-- N: Notifications data
+deactivate N
+
+NV <-- NC: Notification list
+deactivate NC
+
+NV -> NV: Display notification list\n(title, message, type, is_read,\nlink_action, created_at)
+activate NV
+deactivate NV
+
+NV -> NV: Highlight unread notifications
+activate NV
+deactivate NV
+
+deactivate NV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-notification-management-receive-notification" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click notification bell \n (badge shows unread count);
+
+|S|
+:(2) Query all notifications for user \n (ordered by created_at DESC);
+:(3) Count unread notifications \n (is_read = false);
+
+if (Has notifications?) then (No)
+  :(3.1) Display "No notifications" message;
+  |U|
+  :(3.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(4) Display notification panel \n (unread items highlighted, read items dimmed, \n badge count updated);
+:(5) Display each notification \n (title, message, type: TASK_ASSIGNED / \n SPRINT_STARTED / etc., \n created_at, is_read status);
+
+if (Has unread?) then (Yes)
+  :(5.1) Show "Mark all as read" button;
+else (No)
+endif
+
+|U|
+:(6) View notifications;
+:(7) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-notification-management-receive-notification" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC53 |
+| Name | Receive Notification |
+| Actor(s) | ad, pm, mem |
+| Priority | Medium-High |
+| Trigger | Click notification bell (badge shows unread count) |
+| Pre-condition(s) | User is authenticated and the required subsystem data exists. |
+| Post-condition(s) | Display each notification (title, message, type: TASK_ASSIGNED / SPRINT_STARTED / etc., created_at, is_read status) Show "Mark all as read" button |
+| Basic Flow | 1. Click notification bell (badge shows unread count)<br>2. Query all notifications for user (ordered by created_at DESC)<br>3. Count unread notifications (is_read = false)<br>4. Display "No notifications" message<br>5. Display notification panel (unread items highlighted, read items dimmed, badge count updated)<br>6. Display each notification (title, message, type: TASK_ASSIGNED / SPRINT_STARTED / etc., created_at, is_read status)<br>7. Show "Mark all as read" button<br>8. View notifications |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Unauthorized or insufficient permission rejects the request.<br>2. Invalid input or missing target resource returns an error and leaves data unchanged. |
+| Related UI screen(s) | [Notification panel](/docs/ui-specification#notification-panel) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/notification-management/receive-notification) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/notification-management/receive-notification) |
+| Related database table(s) | notifications |
+
+### UC54 — Mark Notification as Read
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary NotificationView as NV
+control NotificationController as NC
+entity NOTIFICATIONS as N
+
+U -> NV: Click on a notification
+activate U
+activate NV
+
+NV -> NC: Send mark-as-read (notification_id)
+activate NC
+
+NC -> N: Query notification by id
+activate N
+N -> N: Query record
+activate N
+deactivate N
+NC <-- N: Notification data
+deactivate N
+
+break Notification not owned by user
+    NV <-- NC: 403 Forbidden
+    NV -> NV: Display access denied
+    activate NV
+    deactivate NV
+end
+
+NC -> N: Update is_read = true
+activate N
+N -> N: Update record
+activate N
+deactivate N
+NC <-- N: Update successful
+deactivate N
+
+NV <-- NC: Success
+deactivate NC
+
+NV -> NV: Mark notification as read\nand navigate to link_action
+activate NV
+deactivate NV
+
+deactivate NV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-notification-management-mark-notification-as-read" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Click notification bell;
+
+|S|
+:(2) Display notification list;
+
+|U|
+if (Action?) then (Click specific notification)
+  |S|
+  :(3a) Fetch notification record;
+  :(4a) Verify user owns notification \n (notification.user_id = current user);
+
+  if (User is owner?) then (No)
+    :(4a.1) Display "Access denied" error;
+    |U|
+    :(4a.2) Confirm end;
+    stop
+  else (Yes)
+  endif
+
+  |S|
+  :(5a) Update notification is_read = true;
+  :(6a) Navigate to link_action target;
+else ("Mark all as read")
+  |S|
+  :(3b) Update all user's notifications \n (is_read = true);
+  :(4b) Update notification badge to zero;
+endif
+
+|U|
+:(7) View updated notifications;
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-notification-management-mark-notification-as-read" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC54 |
+| Name | Mark Notification as Read |
+| Actor(s) | ad, pm, mem |
+| Priority | Medium-High |
+| Trigger | Click notification bell |
+| Pre-condition(s) | User is authenticated and the required subsystem data exists. |
+| Post-condition(s) | Display notification list View updated notifications |
+| Basic Flow | 1. Click notification bell<br>2. Display notification list<br>3. View updated notifications |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Fetch notification record<br>2. Verify user owns notification (notification.user_id = current user)<br>3. Display "Access denied" error<br>4. Update notification is_read = true<br>5. Navigate to link_action target<br>6. Update all user's notifications (is_read = true) |
+| Related UI screen(s) | [Notification panel](/docs/ui-specification#notification-panel) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/notification-management/mark-notification-as-read) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/notification-management/mark-notification-as-read) |
+| Related database table(s) | notifications |
+
+### UC55 — Create New AI Chat Session
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary ChatView as CV
+control AIChatController as ACC
+entity CHAT_SESSIONS as CS
+
+U -> CV: Click "New Chat"
+activate U
+activate CV
+
+CV -> ACC: Send create session request
+activate ACC
+
+ACC -> CS: Insert new chat session
+activate CS
+CS -> CS: Insert record (user_id, title, created_at)
+activate CS
+deactivate CS
+ACC <-- CS: Session created with id
+deactivate CS
+
+CV <-- ACC: New session data
+deactivate ACC
+
+CV -> CV: Display empty chat window\nwith session title
+activate CV
+deactivate CV
+
+deactivate CV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-ai-assistant-create-new-ai-chat-session" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Select AI Assistant from menu;
+
+|S|
+:(2) Query existing chat sessions for user \n (ordered by created_at DESC);
+:(3) Display session list \n (session title, date, message count) \n with "New Chat" button;
+
+|U|
+:(4) Click "New Chat";
+
+|S|
+:(5) Query user's active projects \n (for optional project context);
+:(6) Display new session form \n (optional: link to a project for context);
+
+|U|
+:(7) Optionally select a project context;
+:(8) Click "Start";
+
+|S|
+:(9) Create new chat_session record \n (user_id, project_id if selected, \n auto-generated title, created_at);
+:(10) Display new empty chat interface \n (session title editable, project context shown);
+
+|U|
+:(11) View new chat session;
+:(12) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-ai-assistant-create-new-ai-chat-session" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC55 |
+| Name | Create New AI Chat Session |
+| Actor(s) | pm, mem |
+| Priority | Medium-High |
+| Trigger | Select AI Assistant from menu |
+| Pre-condition(s) | User is authenticated and has an available AI chat/session or project context as required by the action. |
+| Post-condition(s) | Create new chat_session record (user_id, project_id if selected, auto-generated title, created_at) Display new empty chat interface (session title editable, project context shown) |
+| Basic Flow | 1. Select AI Assistant from menu<br>2. Query existing chat sessions for user (ordered by created_at DESC)<br>3. Display session list (session title, date, message count) with "New Chat" button<br>4. Click "New Chat"<br>5. Query user's active projects (for optional project context)<br>6. Display new session form (optional: link to a project for context)<br>7. Optionally select a project context<br>8. Click "Start"<br>9. Create new chat_session record (user_id, project_id if selected, auto-generated title, created_at)<br>10. Display new empty chat interface (session title editable, project context shown)<br>11. View new chat session |
+| Alternate Flow | 1. No separate alternate flow is specified beyond the activity diagram path. |
+| Exception Flow | 1. Unauthorized or insufficient permission rejects the request.<br>2. Invalid input or missing target resource returns an error and leaves data unchanged. |
+| Related UI screen(s) | [AI chat](/docs/ui-specification#ai-chat) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/ai-assistant/create-new-ai-chat-session) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/ai-assistant/create-new-ai-chat-session) |
+| Related database table(s) | chat_sessions |
+
+### UC56 — Chat with AI
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary ChatView as CV
+control AIChatController as ACC
+entity CHAT_SESSIONS as CS
+entity CHAT_MESSAGES as CM
+entity AI_LOGS as AL
+
+U -> CV: Type message and click "Send"
+activate U
+activate CV
+
+CV -> ACC: Send chat request (session_id, content)
+activate ACC
+
+ACC <-- CS: Session verified
+deactivate CS
+
+ACC -> CM: Save user message
+activate CM
+CM -> CM: Insert record (sender = USER)
+activate CM
+deactivate CM
+ACC <-- CM: Message saved
+deactivate CM
+
+ACC -> ACC: Process AI request\n(NLU → Intent extraction\n→ Function calling / Response)
+activate ACC
+deactivate ACC
+
+ACC -> CM: Save AI response
+activate CM
+CM -> CM: Insert record (sender = ASSISTANT)
+activate CM
+deactivate CM
+ACC <-- CM: Response saved
+deactivate CM
+
+ACC -> AL: Log AI activity
+activate AL
+AL -> AL: Insert record\n(request, response, reasoning,\naction_taken, tool_output)
+activate AL
+deactivate AL
+ACC <-- AL: Log saved
+deactivate AL
+
+CV <-- ACC: AI response with CoT
+deactivate ACC
+
+CV -> CV: Display AI response\nand chain-of-thought reasoning
+activate CV
+deactivate CV
+
+deactivate CV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-ai-assistant-chat-with-ai" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Open AI Assistant;
+
+|S|
+:(2) Load available chat sessions;
+
+|U|
+if (Create new session?) then (Yes)
+  :(2.1) Click "New Chat";
+  |S|
+  :(2.2) Create new chat session record;
+else (No)
+  :(2.3) Select existing session;
+endif
+
+|S|
+:(3) Load session context \n (previous messages in session);
+:(4) Display chat history and input area;
+
+repeat
+  |U|
+  :(5) Enter message;
+  :(6) Click "Send";
+
+  |S|
+  :(7) Validate message not empty;
+  backward: (7.1) Display "Message cannot be empty" error;
+  :(8) Save user message to chat_messages;
+  :(9) Send to AI API \n (with session context and \n project context if relevant);
+  :(10) Receive AI response and save to \n chat_messages;
+  :(11) Display AI response;
+  |U|
+  :(12) Read AI response;
+repeat while (Continue chatting?) is (Yes) not (No)
+
+|U|
+:(13) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-ai-assistant-chat-with-ai" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC56 |
+| Name | Chat with AI |
+| Actor(s) | pm, mem |
+| Priority | Medium-High |
+| Trigger | Open AI Assistant |
+| Pre-condition(s) | User is authenticated and has an available AI chat/session or project context as required by the action. |
+| Post-condition(s) | Receive AI response and save to chat_messages Display AI response |
+| Basic Flow | 1. Open AI Assistant<br>2. Load available chat sessions<br>3. Click "New Chat"<br>4. Create new chat session record<br>5. Select existing session<br>6. Load session context (previous messages in session)<br>7. Display chat history and input area<br>8. Enter message<br>9. Click "Send"<br>10. Validate message not empty<br>11. Save user message to chat_messages<br>12. Send to AI API (with session context and project context if relevant)<br>13. Receive AI response and save to chat_messages<br>14. Display AI response<br>15. Read AI response |
+| Alternate Flow | 1. User may correct invalid input and resubmit until the validation checks pass.<br>2. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Message cannot be empty" error |
+| Related UI screen(s) | [AI chat](/docs/ui-specification#ai-chat)<br>[Pending action confirmation](/docs/ui-specification#pending-action-confirmation) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/ai-assistant/chat-with-ai) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/ai-assistant/chat-with-ai) |
+| Related database table(s) | chat_sessions, chat_messages, ai_logs |
+
+### UC57 — View AI Chat History
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary ChatHistoryView as CHV
+control AIChatController as ACC
+entity CHAT_SESSIONS as CS
+entity CHAT_MESSAGES as CM
+
+U -> CHV: Access chat history
+activate U
+activate CHV
+
+CHV -> ACC: Request chat sessions
+activate ACC
+
+ACC -> CS: Query user's chat sessions
+activate CS
+CS -> CS: Query by user_id, order by created_at DESC
+activate CS
+deactivate CS
+ACC <-- CS: Sessions data
+deactivate CS
+
+CHV <-- ACC: Session list
+deactivate ACC
+
+CHV -> CHV: Display session list\n(title, created_at)
+activate CHV
+deactivate CHV
+
+U -> CHV: Click on a session
+deactivate U
+
+CHV -> ACC: Request messages (session_id)
+activate ACC
+
+break Not session owner
+    ACC <-- CS: 403 Forbidden
+    CHV <-- ACC: Access denied
+    CHV -> CHV: Display error
+    activate CHV
+    deactivate CHV
+end
+
+ACC <-- CS: Verified
+deactivate CS
+
+ACC -> CM: Query messages by session_id
+activate CM
+CM -> CM: Query records, order by created_at ASC
+activate CM
+deactivate CM
+ACC <-- CM: Messages data
+deactivate CM
+
+CHV <-- ACC: Message history
+deactivate ACC
+
+CHV -> CHV: Display chat messages\n(sender, content, timestamp)
+activate CHV
+deactivate CHV
+
+deactivate CHV
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-ai-assistant-view-ai-chat-history" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|U|User
+|S|System
+
+|U|
+start
+:(1) Select AI Chat History;
+
+|S|
+:(2) Query all chat sessions for the user \n (ordered by created_at DESC);
+:(3) Display session list \n (title, date, message count);
+
+|U|
+:(4) Click on a session;
+
+|S|
+:(5) Verify user owns this session \n (session.user_id = current user);
+
+if (User is owner?) then (No)
+  :(5.1) Display "Access denied" error;
+  |U|
+  :(5.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+|S|
+:(6) Query messages for session \n (ordered by created_at ASC);
+:(7) Display full conversation history \n (user and AI messages);
+
+|U|
+:(8) View conversation history;
+:(9) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-ai-assistant-view-ai-chat-history" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC57 |
+| Name | View AI Chat History |
+| Actor(s) | pm, mem |
+| Priority | Medium-High |
+| Trigger | Select AI Chat History |
+| Pre-condition(s) | User is authenticated and has an available AI chat/session or project context as required by the action. |
+| Post-condition(s) | Query messages for session (ordered by created_at ASC) Display full conversation history (user and AI messages) |
+| Basic Flow | 1. Select AI Chat History<br>2. Query all chat sessions for the user (ordered by created_at DESC)<br>3. Display session list (title, date, message count)<br>4. Click on a session<br>5. Verify user owns this session (session.user_id = current user)<br>6. Query messages for session (ordered by created_at ASC)<br>7. Display full conversation history (user and AI messages)<br>8. View conversation history |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Display "Access denied" error |
+| Related UI screen(s) | [AI chat](/docs/ui-specification#ai-chat) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/ai-assistant/view-ai-chat-history) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/ai-assistant/view-ai-chat-history) |
+| Related database table(s) | chat_sessions, chat_messages |
+
+### UC58 — View AI Activity Logs
+
+#### Sequence diagram
+
+```plantuml
+@startuml
+autonumber
+
+actor User as U
+boundary AILogView as ALV
+control AIChatController as ACC
+entity PROJECT_MEMBERS as PM
+entity AI_LOGS as AL
+
+U -> ALV: Access AI activity logs (project_id)
+activate U
+activate ALV
+
+ALV -> ACC: Request AI logs (project_id)
+activate ACC
+
+ACC -> AL: Query AI logs by project_id
+activate AL
+AL -> AL: Query records (join users, chat_messages),\norder by created_at DESC
+activate AL
+deactivate AL
+ACC <-- AL: Logs data
+deactivate AL
+
+ALV <-- ACC: AI logs list
+
+ALV -> ALV: Display AI activity logs\n(user, request, response, reasoning,\naction_taken, tool_output, timestamp)
+activate ALV
+deactivate ALV
+
+deactivate ACC
+deactivate ALV
+deactivate U
+
+@enduml
+```
+
+<!-- diagram id="srs-sequence-ai-assistant-view-ai-activity-logs" -->
+
+#### Activity diagram
+
+```plantuml
+@startuml
+|A|Admin
+|S|System
+
+|A|
+start
+:(1) Select AI Activity Logs;
+
+|S|
+:(2) Query AI logs \n (auto-assignment events, action_taken, timestamps);
+
+if (Check has logs?) then (No)
+  :(2.1) Display "No AI activity recorded yet" notification;
+  |A|
+  :(2.2) Confirm end;
+  stop
+else (Yes)
+endif
+
+:(3) Display log list \n (user, request summary, action_taken, timestamp);
+
+|A|
+:(4) Enter filter criteria \n (project, date range, action type);
+:(5) Click "Filter";
+
+|S|
+:(6) Apply filter criteria to query;
+
+if (Has results?) then (No)
+  :(6.1) Display "No results found" notification;
+  |A|
+else (Yes)
+  |S|
+  :(7) Display filtered log list \n (user, request summary, action_taken, timestamp);
+  |A|
+endif
+
+:(8) Confirm end;
+
+stop
+@enduml
+```
+
+<!-- diagram id="srs-activity-ai-assistant-view-ai-activity-logs" -->
+
+
+| Field | Value |
+| --- | --- |
+| ID | UC58 |
+| Name | View AI Activity Logs |
+| Actor(s) | ad, pm, mem |
+| Priority | Medium-High |
+| Trigger | Select AI Activity Logs |
+| Pre-condition(s) | User is authenticated and has an available AI chat/session or project context as required by the action. |
+| Post-condition(s) | Display "No results found" notification Display filtered log list (user, request summary, action_taken, timestamp) |
+| Basic Flow | 1. Select AI Activity Logs<br>2. Query AI logs (auto-assignment events, action_taken, timestamps)<br>3. Display "No AI activity recorded yet" notification<br>4. Display log list (user, request summary, action_taken, timestamp)<br>5. Enter filter criteria (project, date range, action type)<br>6. Click "Filter"<br>7. Apply filter criteria to query<br>8. Display "No results found" notification<br>9. Display filtered log list (user, request summary, action_taken, timestamp) |
+| Alternate Flow | 1. Conditional branches in the activity diagram handle allowed business-state differences. |
+| Exception Flow | 1. Unauthorized or insufficient permission rejects the request.<br>2. Invalid input or missing target resource returns an error and leaves data unchanged. |
+| Related UI screen(s) | [AI chat](/docs/ui-specification#ai-chat) |
+| Related sequence diagram(s) | [sequence diagram](/docs/sequence/ai-assistant/view-ai-activity-logs) |
+| Related activity diagram(s) | [activity diagram](/docs/activity/ai-assistant/view-ai-activity-logs) |
+| Related database table(s) | ai_logs |
+
+
+## Pending action confirmation
+
+AI Copilot may propose data-changing actions, but write actions are not executed immediately. The backend creates a pending action that contains the action id, user/session context, summary, arguments, optional preview and an executable operation. The user reviews the action and confirms or cancels it. On confirmation, TaskPilot checks the same user/session ownership and expiry before executing the action through the appropriate domain service. Authorization and business rules remain enforced by the target service. The current implementation stores pending actions in runtime memory with a 10-minute TTL, so this state is not durable across backend restarts.
+
+Related artefacts: [pending action confirmation sequence](/docs/sequence/ai-assistant/pending-action-confirmation), [AI chat UI](/docs/ui-specification#ai-chat), [pending action confirmation UI](/docs/ui-specification#pending-action-confirmation).

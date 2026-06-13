@@ -74,9 +74,13 @@ The system includes **59 use cases** across **11 subsystems**:
 
 Related documentation:
 
+- [SRS / Use Case Specifications](/docs/srs/)
+- [UI Specification](/docs/ui-specification)
+- [API Endpoints](/docs/api-endpoints)
 - [Database Schema](/docs/database/)
-- [Function List](/docs/function-list/)
-- [SRS](/docs/srs/)
+- [Use Case Diagrams](/docs/use-case/system)
+- [Sequence Diagrams](/docs/sequence/auth/login)
+- [Activity Diagrams](/docs/activity/auth/login)
 
 ## Notes
 

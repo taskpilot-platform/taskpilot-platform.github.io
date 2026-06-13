@@ -64,6 +64,18 @@ export default defineConfig({
 						link: "/docs/usecase-list",
 					},
 					{
+						text: "SRS / Use Case Specifications",
+						link: "/docs/srs",
+					},
+					{
+						text: "UI Specification",
+						link: "/docs/ui-specification",
+					},
+					{
+						text: "API Endpoints",
+						link: "/docs/api-endpoints",
+					},
+					{
 						text: "Sequence",
 						collapsed: true,
 						items: [
@@ -406,6 +418,10 @@ export default defineConfig({
 									{
 										text: "Request AI Auto-Assignment",
 										link: "/docs/sequence/ai-assistant/request-ai-auto-assignment",
+									},
+									{
+										text: "Pending Action Confirmation",
+										link: "/docs/sequence/ai-assistant/pending-action-confirmation",
 									},
 									{
 										text: "UCS-AI-Assistant",
